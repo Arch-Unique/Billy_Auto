@@ -1,11 +1,11 @@
 class CStep {
   int id;
   String title;
-  bool isExpanded;
+  bool isChecked;
 
   CStep(
     this.id,
     this.title,
-    [this.isExpanded = false]
+    [this.isChecked = false]
   );
 }

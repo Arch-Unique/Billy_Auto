@@ -20,7 +20,7 @@ class _AuthPageState extends State<AuthPage> {
   Widget build(BuildContext context) {
     
     // final w = GetPlatform.isMobile ? Ui.width(context)-48 : Ui.isSmallScreen(context) ? Ui.width(context)/3 : Ui.width(context)/4;
-    final w = Ui.width(context) < 500 ? Ui.width(context)-48 : Ui.isSmallScreen(context) ? Ui.width(context)/3 : Ui.width(context)/4;
+    final w = Ui.width(context) < 500 ? Ui.width(context)-48 : Ui.isSmallScreen(context) ? Ui.isMediumScreen(context) ? Ui.width(context)/1.5 : Ui.width(context)/2.5 : Ui.width(context)/3.5;
     return Scaffold(
       body: SingleChildScrollView(
         child: Center(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inventory/controllers/app_controller.dart';
 import 'package:inventory/tools/enums.dart';
+import 'package:inventory/views/checklist/order_summary.dart';
 import 'package:inventory/views/shared.dart';
 
 import '../../tools/assets.dart';
@@ -101,7 +102,9 @@ class _CheckListPageState extends State<CheckListPage> {
                               controller.currentChecklistMode.value.index + 1];
                         }
                         if (controller.currentChecklistMode.value.index ==
-                            ChecklistModes.values.length - 1) {}
+                            ChecklistModes.values.length - 1) {
+                              Get.to(OrderSummary());
+                            }
                       },
                       text: controller.currentChecklistMode.value.index ==
                               ChecklistModes.values.length - 1
@@ -222,10 +225,33 @@ class _CheckListPageState extends State<CheckListPage> {
 
   List<Widget> carConditonDetails() {
     return [
-      CustomTextField("Mileage At Reception", controller.tecs[12],
-          prefix: Icons.drive_eta_rounded),
-      CustomTextField("Fuel Level At Reception", controller.tecs[13],
-          prefix: Icons.local_gas_station_rounded),
+      Row(
+        children: [
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+            CustomTextField("Mileage At Reception", controller.tecs[12],
+            prefix: Icons.drive_eta_rounded),
+                  CustomTextField("Fuel Level At Reception", controller.tecs[13],
+            prefix: Icons.local_gas_station_rounded),
+              ],
+            ),
+          ),
+          Builder(
+            builder: (context) {
+              return CurvedContainer(
+                border: Border.all(color: AppColors.grey),
+                width: Ui.width(context)/3,
+                height: 156,
+                padding: EdgeInsets.all(24),
+                margin: EdgeInsets.all(24),
+                child: Center(child: AppIcon(Icons.add_a_photo,size: 48,)));
+            }
+          )
+        ],
+      ),
+      
       CustomTextField("Visible Damage (Body Check)", controller.tecs[14],
           varl: FPL.multi),
       CustomTextField("Additional Observations", controller.tecs[15],
@@ -268,21 +294,26 @@ class _CheckListPageState extends State<CheckListPage> {
                     children: List.generate(
                         controller.totalConditionsItems[index], (jindex) {
                       final cstep = controller.allSteps[
-                          controller.totalConditionsItemsZero[index] + jindex];
+                          controller.totalConditionsItemsZero.sublist(0,index+1).reduce((value, element) => value+element) + jindex];
                       return Row(
                         children: [
                           Expanded(
                               child: Padding(
-                            padding: const EdgeInsets.only(left: 16.0),
+                            padding: const EdgeInsets.only(left: 16.0,top: 8,bottom: 8),
                             child: AppText.thin(cstep.title),
                           )),
-                          Padding(
-                              padding: EdgeInsets.all(8),
-                              child: CustomTextField.dropdown([
-                                "Good",
-                                "Repair",
-                                "Replace"
-                              ], controller.tecs[cstep.id], "", w: 128))
+                          Checkbox(value: cstep.isChecked, onChanged: (b){
+                            cstep.isChecked = (b?? false);
+                            controller.allSteps.refresh();
+                          }),
+                          Ui.boxWidth(24)
+                          // Padding(
+                          //     padding: EdgeInsets.all(8),
+                          //     child: CustomTextField.dropdown([
+                          //       "Good",
+                          //       "Repair",
+                          //       "Replace"
+                          //     ], controller.tecs[cstep.id], "", w: 128))
                         ],
                       );
                     }),

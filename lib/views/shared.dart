@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:inventory/tools/colors.dart';
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
@@ -154,7 +155,7 @@ class AppIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return asset is String
-        ? Image.asset(
+        ? asset.endsWith("svg") ? SvgPicture.asset(asset) : Image.asset(
             asset,
             width: size,
           )
@@ -644,6 +645,10 @@ abstract class Ui {
     return width(context) < 1600;
   }
 
+    static bool isMediumScreen(BuildContext context) {
+    return width(context) < 1000;
+  }
+
   static double height(BuildContext context) {
     return MediaQuery.of(context).size.height;
   }
@@ -1120,16 +1125,18 @@ class CustomTextField extends StatelessWidget {
 class LogoWidget extends StatelessWidget {
   const LogoWidget(
     this.size, {
+      this.isWhite=true,
     super.key,
   });
   final double size;
+  final bool isWhite;
 
   @override
   Widget build(BuildContext context) {
     return Hero(
         tag: Assets.logoWhite,
         child: AppIcon(
-          Assets.logoWhite,
+          isWhite ? Assets.logoWhite : Assets.logoPrimary,
           size: size,
         ));
   }
