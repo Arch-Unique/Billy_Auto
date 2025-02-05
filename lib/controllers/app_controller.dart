@@ -73,11 +73,11 @@ class AppController extends GetxController {
     }
   }
 
-  Future<void> saveFile(document, String name) async {
+  Future<void> saveFile(Uint8List document, String name) async {
     final Directory dir = await getApplicationDocumentsDirectory();
-    final File file = File('${dir.path}/$name.pdf');
+    final File file = File('${dir.path}/$name.png');
 
-    await file.writeAsBytes(await document.save());
+    await file.writeAsBytes(document);
     debugPrint('Saved exported PDF at: ${file.path}');
   }
 }

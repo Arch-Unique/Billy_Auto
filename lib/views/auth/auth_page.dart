@@ -35,7 +35,7 @@ class _AuthPageState extends State<AuthPage> {
                 CustomTextField("Password", TextEditingController(),varl: FPL.password,),
                 Ui.boxWidth(24),
                 AppButton(onPressed: (){
-                  Get.to(CheckListPage());
+                  Get.to(ExplorerPage());
                 },text: "Log In",),
               ],
             ),

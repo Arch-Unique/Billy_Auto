@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:inventory/controllers/app_controller.dart';
 import 'package:inventory/tools/colors.dart';
 import 'package:inventory/views/shared.dart';
+import 'package:widgets_to_image/widgets_to_image.dart';
 
 import '../../tools/assets.dart';
 
@@ -18,20 +19,23 @@ class OrderSummary extends StatefulWidget {
 
 class _OrderSummaryState extends State<OrderSummary> {
   final controller = Get.find<AppController>();
+  final imageController = WidgetsToImageController();
   final frameId = "archpage";
-  ExportDelegate exd = ExportDelegate(
-    ttfFonts: {
-      "Raleway": "assets/fonts/Raleway-Regular.ttf",
-    },
-      options: ExportOptions(
-          textFieldOptions: TextFieldOptions.uniform(
-            interactive: false,
-          ),
-          checkboxOptions: CheckboxOptions.uniform(
-            interactive: false,
-          ),
+  bool isSaving = false;
+  // ExportDelegate exd = ExportDelegate(
+  //   ttfFonts: {
+  //     "Raleway": "assets/fonts/Raleway-Regular.ttf",
+  //   },
+  //     options: ExportOptions(
+  //         textFieldOptions: TextFieldOptions.uniform(
+  //           interactive: false,
+  //         ),
+  //         checkboxOptions: CheckboxOptions.uniform(
+  //           interactive: false,
+  //         ),
           
-          pageFormatOptions: PageFormatOptions.a4()));
+  //         pageFormatOptions: PageFormatOptions.a4()));
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,31 +45,26 @@ class _OrderSummaryState extends State<OrderSummary> {
             padding: const EdgeInsets.only(right: 24.0),
             child: GestureDetector(
                 onTap: () async {
-                  final pdf = await exd.exportToPdfDocument(
-                    frameId,
-                  );
-                  await controller.saveFile(pdf, 'static-example');
+                  setState(() {
+                    isSaving = true;
+                  });
+                  final pdf = await imageController.capture();
+                  await controller.saveFile(pdf!, 'static-example');
+                  setState(() {
+                    isSaving = false;
+                  });
                 },
                 child: AppIcon(Icons.print)),
           )
         ],
       ),
-      body: ExportFrame(
-        frameId: frameId,
-        exportDelegate: exd,
-        child: Stack(
-          children: [
-            Opacity(
-                opacity: 0.16,
-                child: Image.asset(
-                  Assets.backg,
-                  fit: BoxFit.cover,
-                  width: Ui.width(context),
-                  height: Ui.height(context),
-                )),
-            SingleChildScrollView(
-              padding: EdgeInsets.all(24),
-              child: Column(
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(24),
+        child: WidgetsToImage(
+          controller: imageController,
+          child: Builder(
+            builder: (context) {
+              final toreturn = Column(
                 children: [
                   LogoWidget(100),
                   AppText.bold("BILLY'S AUTO SERVICE ORDER",
@@ -171,7 +170,7 @@ class _OrderSummaryState extends State<OrderSummary> {
                         ],
                       ));
                     });
-
+              
                     return Wrap(
                       spacing: 16,
                       runSpacing: 16,
@@ -179,7 +178,7 @@ class _OrderSummaryState extends State<OrderSummary> {
                     );
                   })),
                   serviceItem(
-                      "VEHICLE CONDTION",
+                      "MAINTENANCE",
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,9 +194,23 @@ class _OrderSummaryState extends State<OrderSummary> {
                         ],
                       )),
                 ],
-              ),
-            ),
-          ],
+              );
+            
+            // if(isSaving){
+              return Container(
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  image: DecorationImage(image: AssetImage(Assets.backg),repeat: ImageRepeat.repeat,opacity: 0.16,)
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: toreturn,
+                ),
+              );
+            // }
+            // return toreturn;
+            }
+          ),
         ),
       ),
     );

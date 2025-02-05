@@ -355,17 +355,17 @@ class AppText extends StatelessWidget {
       fontFamily: fontFamily ?? Assets.appFontFamily,
     );
 
-    // if (shdUseATT) {
-    //   return AutoSizeText(
-    //     text,
-    //     maxLines: maxlines ?? 2,
-    //     // softWrap: false,
-    //     wrapWords: false,
+    if (shdUseATT) {
+      return AutoSizeText(
+        text,
+        maxLines: maxlines ?? 2,
+        // softWrap: false,
+        wrapWords: false,
 
-    //     style: ts,
-    //     textAlign: alignment,
-    //   );
-    // }
+        style: ts,
+        textAlign: alignment,
+      );
+    }
 
     final tt = Text(
       text,

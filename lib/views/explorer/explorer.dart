@@ -26,6 +26,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
       Placeholder(),
       Placeholder(),
       Placeholder(),
+      Placeholder(),
     ];
     super.initState();
   }
@@ -85,6 +86,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
                                   : AppColors.primaryColorLight),
                           Ui.boxWidth(8),
                           AppText.bold(DashboardModes.values[i].title,
+                          fontSize:14,
                               color: controller.currentDashboardMode.value ==
                                       DashboardModes.values[i]
                                   ? AppColors.white
