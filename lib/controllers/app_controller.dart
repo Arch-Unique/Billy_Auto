@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:inventory/models/table_repo.dart';
 import 'package:inventory/tools/enums.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -58,6 +59,11 @@ class AppController extends GetxController {
   RxList<bool> allServicesItems = <bool>[].obs;
   Map<String,List<CStep>> inspectionNo = {};
 
+  //EXPLORER
+  RxList<FilterModel> currentFilters = <FilterModel>[].obs;
+  RxList<String> currentHeaders = <String>[].obs;
+  Rx<int> currentType = 0.obs;
+
   initApp() async {
     totalConditionsItemsZero.insert(0, 0);
     totalConditionsExpanded.value = totalConditionsHeaders.map((e) => false).toList();
@@ -80,4 +86,7 @@ class AppController extends GetxController {
     await file.writeAsBytes(document);
     debugPrint('Saved exported PDF at: ${file.path}');
   }
+
+  //EXPLORER
+
 }

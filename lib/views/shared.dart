@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:inventory/tools/colors.dart';
@@ -155,10 +156,12 @@ class AppIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return asset is String
-        ? asset.endsWith("svg") ? SvgPicture.asset(asset) : Image.asset(
-            asset,
-            width: size,
-          )
+        ? asset.endsWith("svg")
+            ? SvgPicture.asset(asset)
+            : Image.asset(
+                asset,
+                width: size,
+              )
         : Icon(
             asset,
             size: size,
@@ -349,7 +352,6 @@ class AppText extends StatelessWidget {
       fontSize: (fontSize ?? 14),
       color: color ?? Colors.black,
       fontWeight: weight,
-      
       overflow: overflow,
       fontStyle: style,
       fontFamily: fontFamily ?? Assets.appFontFamily,
@@ -476,7 +478,7 @@ class AppButton extends StatefulWidget {
       onPressed: onPressed,
       hasBorder: true,
       icon: icon,
-      borderColor: Colors.black,
+      borderColor: AppColors.lightTextColor,
       text: title,
       color: color,
     );
@@ -501,7 +503,9 @@ class AppButton extends StatefulWidget {
       Function? onPressedB) {
     return Row(
       children: [
-        Expanded(child: outline(onPressedB, titleB)),
+        Expanded(
+          child: outline(onPressedB, titleB),
+        ),
         Ui.boxWidth(24),
         Expanded(
           child: AppButton(
@@ -599,9 +603,9 @@ class _AppButtonState extends State<AppButton> {
                                 alignment: TextAlign.center,
                                 color: widget.hasBorder
                                     ? widget.borderColor
-                                    : widget.color == Colors.white
-                                        ? Colors.black
-                                        : Colors.white,
+                                    : widget.color == AppColors.primaryColor
+                                        ? AppColors.white
+                                        : AppColors.lightTextColor,
                               ),
                         ],
                       )
@@ -646,7 +650,7 @@ abstract class Ui {
     return width(context) < 1600;
   }
 
-    static bool isMediumScreen(BuildContext context) {
+  static bool isMediumScreen(BuildContext context) {
     return width(context) < 1000;
   }
 
@@ -953,7 +957,6 @@ class CustomTextField extends StatelessWidget {
                 // }
                 if (customOnChanged != null) customOnChanged!();
               },
-              
               obscureText: varl == FPL.password ? hasTouched : false,
               textAlignVertical:
                   varl == FPL.multi ? TextAlignVertical.top : null,
@@ -962,7 +965,6 @@ class CustomTextField extends StatelessWidget {
               maxLines: varl == FPL.multi ? varl.maxLines : 1,
               maxLength: varl.maxLength,
               onTap: onTap,
-            
               validator: shdValidate
                   ? (value) {
                       // setState(() {
@@ -995,18 +997,21 @@ class CustomTextField extends StatelessWidget {
                 isDense: isDense,
                 prefixIcon: prefix == null
                     ? varl == FPL.phone
-                    ? Padding(
-                        padding: EdgeInsets.only(
-                            left: 16.0, right: 8 ),
-                        child: AppText.thin("+234", color: Color(0xFF667085)),
-                      )
-                    : null
+                        ? Padding(
+                            padding: EdgeInsets.only(left: 16.0, right: 8),
+                            child:
+                                AppText.thin("+234", color: Color(0xFF667085)),
+                          )
+                        : null
                     : SizedBox(
                         width: 48,
                         child: Center(
                           child: Padding(
                             padding: const EdgeInsets.only(left: 0.0, right: 0),
-                            child: AppIcon(prefix,color: AppColors.black,),
+                            child: AppIcon(
+                              prefix,
+                              color: AppColors.black,
+                            ),
                           ),
                         ),
                       ),
@@ -1058,7 +1063,7 @@ class CustomTextField extends StatelessWidget {
 
   static dropdown(
       List<String> options, TextEditingController cont, String label,
-      {Function(String)? onChanged, String? initOption,double? w}) {
+      {Function(String)? onChanged, String? initOption, double? w}) {
     String curOption =
         (initOption == null || initOption.isEmpty) ? options[0] : initOption;
     cont.text = curOption;
@@ -1069,13 +1074,11 @@ class CustomTextField extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if(label.isNotEmpty)
-            AppText.thin(label),
-            
-            if(label.isNotEmpty)
-            const SizedBox(
-              height: 8,
-            ),
+            if (label.isNotEmpty) AppText.thin(label),
+            if (label.isNotEmpty)
+              const SizedBox(
+                height: 8,
+              ),
             CurvedContainer(
               color: AppColors.primaryColorLight,
               padding: EdgeInsets.symmetric(horizontal: 16),
@@ -1091,7 +1094,7 @@ class CustomTextField extends StatelessWidget {
                   //     color: AppColors.white,
                   //   ),
                   // ),
-              
+
                   icon: Icon(
                     Icons.keyboard_arrow_down_rounded,
                     color: AppColors.primaryColor,
@@ -1111,11 +1114,10 @@ class CustomTextField extends StatelessWidget {
                     }
                   }),
             ),
-                
-            if(label.isNotEmpty)
-            const SizedBox(
-              height: 32,
-            )
+            if (label.isNotEmpty)
+              const SizedBox(
+                height: 32,
+              )
           ],
         ),
       );
@@ -1123,10 +1125,120 @@ class CustomTextField extends StatelessWidget {
   }
 }
 
+class MultiSelectDropdown extends StatefulWidget {
+  final List<String> options;
+  final TextEditingController controller;
+  final String label;
+  final Function(List<String>)? onChanged;
+  final List<String>? initialSelectedOptions;
+  final double? width;
+
+  const MultiSelectDropdown(
+    this.options,
+    this.controller,
+    this.label, {
+    super.key,
+    this.onChanged,
+    this.initialSelectedOptions,
+    this.width,
+  });
+
+  @override
+  MultiSelectDropdownState createState() => MultiSelectDropdownState();
+}
+
+class MultiSelectDropdownState extends State<MultiSelectDropdown> {
+  List<String> selectedOptions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialSelectedOptions != null) {
+      selectedOptions = List.from(widget.initialSelectedOptions!);
+    }
+    _updateControllerText();
+  }
+
+  void _updateControllerText() {
+    widget.controller.text = selectedOptions.join(', ');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return SizedBox(
+          width: widget.width ?? MediaQuery.of(context).size.width - 48,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (widget.label.isNotEmpty) AppText.thin(widget.label),
+              if (widget.label.isNotEmpty) const SizedBox(height: 8),
+              CurvedContainer(
+                color: AppColors.primaryColorLight,
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: DropdownButtonFormField<String>(
+                  isExpanded: true,
+                  elevation: 0,
+                  hint: AppText.thin(selectedOptions.isEmpty
+                      ? 'Select options'
+                      : selectedOptions.join(', ')),
+                      selectedItemBuilder: (context){
+                        return [AppText.thin(selectedOptions.isEmpty
+                      ? 'Select options'
+                      : selectedOptions.join(', '))];
+                      },
+                  icon: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: AppColors.primaryColor,
+                  ),
+                  dropdownColor: AppColors.white,
+                  items: widget.options.map((e) {
+                    return DropdownMenuItem<String>(
+                      value: e,
+                      
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: selectedOptions.contains(e),
+                            onChanged: (bool? checked) {
+                              setState(() {
+                                if (checked == true) {
+                                  selectedOptions.add(e);
+                                } else {
+                                  selectedOptions.remove(e);
+                                }
+                                _updateControllerText();
+                              });
+                              if (widget.onChanged != null) {
+                                widget.onChanged!(selectedOptions);
+                              }
+                            },
+                          ),
+                          AppText.thin(e),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    // No-op because the checkbox handles the selection
+                  },
+                ),
+              ),
+              if (widget.label.isNotEmpty) const SizedBox(height: 32),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
 class LogoWidget extends StatelessWidget {
   const LogoWidget(
     this.size, {
-      this.isWhite=true,
+    this.isWhite = true,
     super.key,
   });
   final double size;
@@ -1142,7 +1254,6 @@ class LogoWidget extends StatelessWidget {
         ));
   }
 }
-
 
 class AppDivider extends StatelessWidget {
   const AppDivider({
@@ -1161,9 +1272,10 @@ class AppDivider extends StatelessWidget {
 }
 
 class SignatureView extends StatefulWidget {
-  const SignatureView(this.tec,this.label, {super.key});
+  const SignatureView(this.tec, this.label, {this.size, super.key});
   final Rx<Uint8List> tec;
   final String label;
+  final double? size;
 
   @override
   State<SignatureView> createState() => _SignatureViewState();
@@ -1177,44 +1289,66 @@ class _SignatureViewState extends State<SignatureView> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    final content = Padding(
       padding: const EdgeInsets.only(left: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText.bold(widget.label),
-          
+          AppText.thin(widget.label),
           Ui.boxHeight(8),
-          Container(
-            decoration: BoxDecoration(
-                border: Border.all(color: AppColors.grey, width: 1)),
-            height: 84,
-            clipBehavior: Clip.hardEdge,
-            width: Ui.width(context)-48,
-            child: isCaptured && bytes != null
-                ? Image.memory(bytes!)
-                : SfSignaturePad(
-                    key: signaturePadKey,
-                    backgroundColor: AppColors.white,
-                  ),
-          ),
-          Ui.boxHeight(24),
-          AppButton.row(
-            "Capture",
-            () async {
-              ui.Image image = await signaturePadKey.currentState!.toImage();
-              var data = await image.toByteData(format: ui.ImageByteFormat.png);
-              final dd = data!.buffer.asUint8List();
-      
-              widget.tec.value = dd;
-              Ui.showInfo("Signature captured");
-              setState(() {
-                bytes = dd;
-                isCaptured = true;
-              });
-            },
-            "Clear",
-            () {
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                          color: AppColors.lightTextColor.withOpacity(0.3),
+                          width: 1)),
+                  height: 84,
+                  clipBehavior: Clip.hardEdge,
+                  width: Ui.width(context) - 48,
+                  child: isCaptured && bytes != null
+                      ? Image.memory(bytes!)
+                      : SfSignaturePad(
+                          key: signaturePadKey,
+                          backgroundColor: AppColors.white,
+                        ),
+                ),
+              ),
+              Ui.boxWidth(8),
+              Column(
+                children: [
+                  CurvedContainer(
+                      height: 32,
+                      width: 32,
+                      color: AppColors.primaryColor,
+                      
+                      onPressed: () async {
+                        ui.Image image =
+                            await signaturePadKey.currentState!.toImage();
+                        var data = await image.toByteData(
+                            format: ui.ImageByteFormat.png);
+                        final dd = data!.buffer.asUint8List();
+
+                        widget.tec.value = dd;
+                        Ui.showInfo("Signature captured");
+                        setState(() {
+                          bytes = dd;
+                          isCaptured = true;
+                        });
+                      },
+                      child: Center(
+                          child: AppIcon(
+                        Icons.camera_rounded,
+                        color: AppColors.white,
+                      ))),
+                      Ui.boxHeight(20),
+                      CurvedContainer(
+                      height: 32,
+                      width: 32,
+                      color: AppColors.white,
+                      border: Border.all(color: AppColors.lightTextColor),
+                      onPressed: () {
               if (isCaptured) {
                 setState(() {
                   isCaptured = false;
@@ -1224,10 +1358,52 @@ class _SignatureViewState extends State<SignatureView> {
                 signaturePadKey.currentState!.clear();
               }
             },
+                      child: Center(
+                          child: AppIcon(
+                        Icons.close,
+                        color: AppColors.lightTextColor,
+                      )))
+                ],
+              )
+            ],
           ),
-          Ui.boxHeight(24),
+          // Ui.boxHeight(24),
+          // AppButton.row(
+          //   "Capture",
+          //   () async {
+          //     ui.Image image = await signaturePadKey.currentState!.toImage();
+          //     var data = await image.toByteData(format: ui.ImageByteFormat.png);
+          //     final dd = data!.buffer.asUint8List();
+
+          //     widget.tec.value = dd;
+          //     Ui.showInfo("Signature captured");
+          //     setState(() {
+          //       bytes = dd;
+          //       isCaptured = true;
+          //     });
+          //   },
+          //   "Clear",
+          //   () {
+          //     if (isCaptured) {
+          //       setState(() {
+          //         isCaptured = false;
+          //         bytes = null;
+          //       });
+          //     } else {
+          //       signaturePadKey.currentState!.clear();
+          //     }
+          //   },
+          // ),
+          // Ui.boxHeight(24),
         ],
       ),
+    );
+    if (widget.size == null) {
+      return content;
+    }
+    return SizedBox(
+      width: widget.size!,
+      child: content,
     );
   }
 }

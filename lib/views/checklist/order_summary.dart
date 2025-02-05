@@ -66,9 +66,9 @@ class _OrderSummaryState extends State<OrderSummary> {
             builder: (context) {
               final toreturn = Column(
                 children: [
-                  LogoWidget(100),
-                  AppText.bold("BILLY'S AUTO SERVICE ORDER",
-                      fontSize: 32, att: true, alignment: TextAlign.center),
+                  LogoWidget(144),
+                  AppText.medium("Service Order Summary",
+                      fontSize: 32, alignment: TextAlign.center,fontFamily: Assets.appFontFamily2),
                   Ui.boxHeight(16),
                   serviceItem(
                       "CUSTOMER",

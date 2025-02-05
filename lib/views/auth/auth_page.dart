@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:inventory/tools/assets.dart';
 import 'package:inventory/tools/enums.dart';
+import 'package:inventory/views/checklist/checklist2.dart';
 import 'package:inventory/views/explorer/explorer.dart';
 import 'package:inventory/views/shared.dart';
 

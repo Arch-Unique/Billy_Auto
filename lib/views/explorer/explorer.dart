@@ -3,9 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:inventory/controllers/app_controller.dart';
+import 'package:inventory/models/table_repo.dart';
 import 'package:inventory/tools/colors.dart';
 import 'package:inventory/tools/enums.dart';
+import 'package:inventory/views/explorer/admin_page.dart';
 import 'package:inventory/views/shared.dart';
+
+import '../../tools/assets.dart';
 
 class ExplorerPage extends StatefulWidget {
   const ExplorerPage({super.key});
@@ -21,8 +25,15 @@ class _ExplorerPageState extends State<ExplorerPage> {
   @override
   void initState() {
     // TODO: implement initState
+    controller.currentHeaders.value = ["id","name","age","gender","free"];
+    controller.currentFilters.value = [
+      FilterModel("Full Name", 0,options: ["Ikenna","John"],tec: TextEditingController()),
+      FilterModel("Age", 0,options: ["10","11"],tec: TextEditingController()),
+      FilterModel("Gender", 0,options: ["Male","Female"],tec: TextEditingController()),
+      FilterModel("Date", 1,dtr: DateTimeRange(start: DateTime(2000), end: DateTime(2010)),tec: TextEditingController()),
+    ];
     screens = [
-      Placeholder(),
+      CustomTablePage(),
       Placeholder(),
       Placeholder(),
       Placeholder(),
@@ -34,16 +45,24 @@ class _ExplorerPageState extends State<ExplorerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.primaryColor,
-        toolbarHeight: 0,
-      ),
-      body: Column(
+      body: Stack(
         children: [
-          header(),
-          Expanded(child: Obx(() {
-            return screens[controller.currentDashboardMode.value.index];
-          }))
+          Opacity(
+                opacity: 0.5,
+                child: Image.asset(
+                  Assets.backge,
+                  fit: BoxFit.cover,
+                  width: Ui.width(context),
+                  height: Ui.height(context),
+                )),
+          Column(
+            children: [
+              header(),
+              Expanded(child: Obx(() {
+                return screens[controller.currentDashboardMode.value.index];
+              }))
+            ],
+          ),
         ],
       ),
     );
