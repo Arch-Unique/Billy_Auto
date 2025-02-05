@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_to_pdf/flutter_to_pdf.dart';
 import 'package:get/get.dart';
 import 'package:inventory/controllers/app_controller.dart';
 import 'package:inventory/tools/colors.dart';
@@ -16,139 +18,187 @@ class OrderSummary extends StatefulWidget {
 
 class _OrderSummaryState extends State<OrderSummary> {
   final controller = Get.find<AppController>();
+  final frameId = "archpage";
+  ExportDelegate exd = ExportDelegate(
+    ttfFonts: {
+      "Raleway": "assets/fonts/Raleway-Regular.ttf",
+    },
+      options: ExportOptions(
+          textFieldOptions: TextFieldOptions.uniform(
+            interactive: false,
+          ),
+          checkboxOptions: CheckboxOptions.uniform(
+            interactive: false,
+          ),
+          
+          pageFormatOptions: PageFormatOptions.a4()));
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: Stack(
-        children: [
-          Opacity(
-              opacity: 0.16,
-              child: Image.asset(
-                Assets.backg,
-                fit: BoxFit.cover,
-                width: Ui.width(context),
-                height: Ui.height(context),
-              )),
-          SingleChildScrollView(
-            padding: EdgeInsets.all(24),
-            child: Column(
-              children: [
-                LogoWidget(100),
-                AppText.bold("BILLY'S AUTO SERVICE ORDER",
-                    fontSize: 32, att: true, alignment: TextAlign.center),
-                Ui.boxHeight(16),
-                serviceItem(
-                    "CUSTOMER",
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        titleValueText("Full Name", controller.tecs[0].text),
-                        titleValueText("Email", controller.tecs[1].text),
-                        titleValueText("Phone Number", controller.tecs[2].text),
-                        titleValueText(
-                            "Customer Type", controller.tecs[3].text),
-                      ],
-                    )),
-                serviceItem(
-                    "VEHICLE",
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        titleValueText("Make", controller.tecs[6].text),
-                        titleValueText("Mode", controller.tecs[7].text),
-                        titleValueText("Year", controller.tecs[8].text),
-                        titleValueText(
-                            "License Plate No", controller.tecs[9].text),
-                      ],
-                    )),
-                serviceItem(
-                    "CONCERNS",
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [AppText.thin(controller.tecs[11].text)],
-                    )),
-                serviceItem(
-                    "VEHICLE CONDTION",
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        titleValueText(
-                            "Mileage At Reception", controller.tecs[12].text),
-                        titleValueText("Fuel Level At Reception",
-                            controller.tecs[13].text),
-                        titleValueText(
-                            "Visible Damage ", controller.tecs[14].text),
-                        titleValueText(
-                            "Additonal Observations", controller.tecs[15].text),
-                      ],
-                    )),
-                serviceItem("SERVICE PLAN", Builder(builder: (context) {
-                  List<int> goodService = [];
-                  for (var i = 0; i < controller.allServicesItems.length; i++) {
-                    if (controller.allServicesItems[i]) {
-                      goodService.add(i);
-                    }
-                  }
-                  return SizedBox(
-                    height: 100,
-                    child: Wrap(
-                      direction: Axis.vertical,
-                      children: goodService
-                          .map((e) => AppText.thin(controller.allServices[e]))
-                          .toList(),
-                    ),
+      appBar: AppBar(
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 24.0),
+            child: GestureDetector(
+                onTap: () async {
+                  final pdf = await exd.exportToPdfDocument(
+                    frameId,
                   );
-                })),
-                serviceItem("CONTROL CHECKS", Builder(builder: (context) {
-                  List<Widget> controlChecks = [];
-                  controller.inspectionNo.forEach((key, value) {
-                    controlChecks.add(Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AppText.bold(key),
-                        ...List.generate(value.length, (index) => Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            
-                        AppText.thin(value[index].title),
-                            Ui.boxWidth(16),
-                            value[index].isChecked ? AppIcon(Icons.check,color: AppColors.green,) : AppIcon(Icons.close,color: AppColors.primaryColor,)
-                          ],
-                        ))
-                      ],
-                    ));
-                  });
-                  
-                  return Wrap(
-                    children: controlChecks,
-                  );
-                })),
-                serviceItem(
-                    "VEHICLE CONDTION",
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        titleValueText(
-                            "Urgent Maintenance", controller.tecs[19].text),
-                        titleValueText(
-                            "Before Next Visit", controller.tecs[20].text),
-                        titleValueText("During Next Maintenance Service ",
-                            controller.tecs[21].text),
-                        titleValueText(
-                            "Delivery hour Forecast", controller.tecs[21].text),
-                      ],
-                    )),
-              ],
-            ),
-          ),
+                  await controller.saveFile(pdf, 'static-example');
+                },
+                child: AppIcon(Icons.print)),
+          )
         ],
+      ),
+      body: ExportFrame(
+        frameId: frameId,
+        exportDelegate: exd,
+        child: Stack(
+          children: [
+            Opacity(
+                opacity: 0.16,
+                child: Image.asset(
+                  Assets.backg,
+                  fit: BoxFit.cover,
+                  width: Ui.width(context),
+                  height: Ui.height(context),
+                )),
+            SingleChildScrollView(
+              padding: EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  LogoWidget(100),
+                  AppText.bold("BILLY'S AUTO SERVICE ORDER",
+                      fontSize: 32, att: true, alignment: TextAlign.center),
+                  Ui.boxHeight(16),
+                  serviceItem(
+                      "CUSTOMER",
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          titleValueText("Full Name", controller.tecs[0].text),
+                          titleValueText("Email", controller.tecs[1].text),
+                          titleValueText(
+                              "Phone Number", controller.tecs[2].text),
+                          titleValueText(
+                              "Customer Type", controller.tecs[3].text),
+                        ],
+                      )),
+                  serviceItem(
+                      "VEHICLE",
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          titleValueText("Make", controller.tecs[6].text),
+                          titleValueText("Mode", controller.tecs[7].text),
+                          titleValueText("Year", controller.tecs[8].text),
+                          titleValueText(
+                              "License Plate No", controller.tecs[9].text),
+                        ],
+                      )),
+                  serviceItem(
+                      "CONCERNS",
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [AppText.thin(controller.tecs[11].text)],
+                      )),
+                  serviceItem(
+                      "VEHICLE CONDTION",
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          titleValueText(
+                              "Mileage At Reception", controller.tecs[12].text),
+                          titleValueText("Fuel Level At Reception",
+                              controller.tecs[13].text),
+                          titleValueText(
+                              "Visible Damage ", controller.tecs[14].text),
+                          titleValueText("Additonal Observations",
+                              controller.tecs[15].text),
+                        ],
+                      )),
+                  serviceItem("SERVICE PLAN", Builder(builder: (context) {
+                    List<int> goodService = [];
+                    for (var i = 0;
+                        i < controller.allServicesItems.length;
+                        i++) {
+                      if (controller.allServicesItems[i]) {
+                        goodService.add(i);
+                      }
+                    }
+                    return SizedBox(
+                      height: 100,
+                      child: Wrap(
+                        direction: Axis.vertical,
+                        children: goodService
+                            .map((e) => AppText.thin(controller.allServices[e]))
+                            .toList(),
+                      ),
+                    );
+                  })),
+                  serviceItem("CONTROL CHECKS", Builder(builder: (context) {
+                    List<Widget> controlChecks = [];
+                    controller.inspectionNo.forEach((key, value) {
+                      controlChecks.add(Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AppText.bold(key),
+                          ...List.generate(
+                              value.length,
+                              (index) => Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      AppText.thin(value[index].title),
+                                      Ui.boxWidth(4),
+                                      value[index].isChecked
+                                          ? AppIcon(
+                                              Icons.check,
+                                              color: AppColors.green,
+                                              size: 16,
+                                            )
+                                          : AppIcon(
+                                              Icons.close,
+                                              color: AppColors.primaryColor,
+                                              size: 16,
+                                            )
+                                    ],
+                                  ))
+                        ],
+                      ));
+                    });
+
+                    return Wrap(
+                      spacing: 16,
+                      runSpacing: 16,
+                      children: controlChecks,
+                    );
+                  })),
+                  serviceItem(
+                      "VEHICLE CONDTION",
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          titleValueText(
+                              "Urgent Maintenance", controller.tecs[19].text),
+                          titleValueText(
+                              "Before Next Visit", controller.tecs[20].text),
+                          titleValueText("During Next Maintenance Service ",
+                              controller.tecs[21].text),
+                          titleValueText("Delivery hour Forecast",
+                              controller.tecs[21].text),
+                        ],
+                      )),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -186,13 +236,14 @@ class _OrderSummaryState extends State<OrderSummary> {
     return Text.rich(TextSpan(
         text: "$key : ",
         style: TextStyle(
-            color: AppColors.black, fontWeight: FontWeight.w500, fontSize: 16),
+            color: AppColors.black, fontWeight: FontWeight.w500, fontSize: 16,fontFamily: Assets.appFontFamily),
         children: [
           TextSpan(
             text: value,
             style: TextStyle(
                 color: AppColors.black,
                 fontWeight: FontWeight.w400,
+                fontFamily: Assets.appFontFamily,
                 fontSize: 16),
           )
         ]));

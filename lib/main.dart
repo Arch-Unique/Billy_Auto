@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:inventory/tools/assets.dart';
 import 'package:inventory/views/onboarding/splashscreen.dart';
 
 import 'controllers/dependency.dart';
@@ -17,8 +18,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const GetMaterialApp(
-      home:SplashScreen()
+    return GetMaterialApp(
+      home:SplashScreen(),
+      theme: ThemeData(
+          fontFamily: Assets.appFontFamily,),
+      
     );
   }
 }

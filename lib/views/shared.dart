@@ -349,22 +349,23 @@ class AppText extends StatelessWidget {
       fontSize: (fontSize ?? 14),
       color: color ?? Colors.black,
       fontWeight: weight,
+      
       overflow: overflow,
       fontStyle: style,
-      fontFamily: fontFamily,
+      fontFamily: fontFamily ?? Assets.appFontFamily,
     );
 
-    if (shdUseATT) {
-      return AutoSizeText(
-        text,
-        maxLines: maxlines ?? 2,
-        // softWrap: false,
-        wrapWords: false,
+    // if (shdUseATT) {
+    //   return AutoSizeText(
+    //     text,
+    //     maxLines: maxlines ?? 2,
+    //     // softWrap: false,
+    //     wrapWords: false,
 
-        style: ts,
-        textAlign: alignment,
-      );
-    }
+    //     style: ts,
+    //     textAlign: alignment,
+    //   );
+    // }
 
     final tt = Text(
       text,

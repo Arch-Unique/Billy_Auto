@@ -12,8 +12,10 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_svg: ^2.0.10+1
+  flutter_to_pdf: ^0.2.0
   get: ^4.6.6
   get_storage: ^2.1.1
+  path_provider: ^2.1.4
   syncfusion_flutter_signaturepad: ^27.2.5
 
 dev_dependencies:
@@ -27,3 +29,13 @@ flutter:
   assets:
     - assets/images/
     - assets/json/
+
+  fonts:
+    - family: Raleway
+      fonts:
+        - asset: assets/fonts/Raleway-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Raleway-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Raleway-Bold.ttf
+          weight: 700  

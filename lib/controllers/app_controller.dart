@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inventory/tools/enums.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../models/step.dart';
 
@@ -47,7 +49,7 @@ class AppController extends GetxController {
   Rx<Uint8List> techSig = Uint8List(0).obs;
   RxList<CStep> allSteps = <CStep>[].obs;
 
-  List<String> totalConditionsHeaders = ["A","B","C","D","E"];
+  List<String> totalConditionsHeaders = ["VEHICLE PARTICULARS","UNDERHOOD (ENGINE COMPARTMENT)","VEHICLE INTERIOR","BRAKING SYSTEM CONTROL","TIRE CONTROL"];
   RxList<bool> totalConditionsExpanded = <bool>[].obs;
   List<int> totalConditionsItems = [2, 4, 3, 5, 3];
   List<int> totalConditionsItemsZero = [2, 4, 3, 5, 3];
@@ -69,5 +71,13 @@ class AppController extends GetxController {
       allSteps.addAll(allStepItem);
       inspectionNo[totalConditionsHeaders[j]] = allStepItem;
     }
+  }
+
+  Future<void> saveFile(document, String name) async {
+    final Directory dir = await getApplicationDocumentsDirectory();
+    final File file = File('${dir.path}/$name.pdf');
+
+    await file.writeAsBytes(await document.save());
+    debugPrint('Saved exported PDF at: ${file.path}');
   }
 }
