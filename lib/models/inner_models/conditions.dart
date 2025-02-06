@@ -1,16 +1,17 @@
 class BillyConditions {
   int id;
-  String name,conditionsCategory;
+  String name, conditionsCategory;
   int conditionsCategoryId;
-  DateTime createdAt;
-  DateTime updatedAt;
+  DateTime? createdAt;
+  DateTime? updatedAt;
 
   BillyConditions({
-    required this.id,
+    this.id = 0,
     required this.name,
     required this.conditionsCategoryId,
-    required this.conditionsCategory,required this.createdAt,
-    required this.updatedAt,
+    this.conditionsCategory="",
+    this.createdAt,
+    this.updatedAt,
   });
 
   // Convert BillyConditions object to JSON
@@ -37,13 +38,14 @@ class BillyConditions {
 class BillyConditionCategory {
   int id;
   String name;
-  DateTime createdAt;
-  DateTime updatedAt;
+  DateTime? createdAt;
+  DateTime? updatedAt;
 
   BillyConditionCategory({
-    required this.id,
-    required this.name,required this.createdAt,
-    required this.updatedAt,
+    this.id = 0,
+    required this.name,
+    this.createdAt,
+    this.updatedAt,
   });
 
   // Convert BillyConditionCategory object to JSON

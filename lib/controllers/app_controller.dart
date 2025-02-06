@@ -6,8 +6,10 @@ import 'package:get/get.dart';
 import 'package:inventory/models/table_repo.dart';
 import 'package:inventory/tools/demo.dart';
 import 'package:inventory/tools/enums.dart';
+import 'package:inventory/views/shared.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../models/inner_models/barrel.dart';
 import '../models/step.dart';
 
 class AppController extends GetxController {
@@ -63,7 +65,6 @@ class AppController extends GetxController {
   //EXPLORER
   RxList<FilterModel> currentFilters = <FilterModel>[].obs;
   RxList<String> currentHeaders = <String>[].obs;
-  Rx<int> currentType = 0.obs;
 
   initApp() async {
     totalConditionsItemsZero.insert(0, 0);
@@ -85,8 +86,14 @@ class AppController extends GetxController {
     final File file = File('${dir.path}/$name.png');
 
     await file.writeAsBytes(document);
-    debugPrint('Saved exported PDF at: ${file.path}');
+    Ui.showInfo('Saved exported Image at: ${file.path}');
   }
+
+  // createOrderForm() async{
+  //   Customer customer = Customer(id: 0, email: tecs[1].text, phone: tecs[2].text, fullName: tecs[0].text, signature: "", customerType: tecs[3].text, createdAt: DateTime.now(), updatedAt: DateTime.now());
+  //   CustomerCar car = CustomerCar(id: 0, makeId: makeId, modelId: modelId, desc: tecs[4].text, year: tecs[8].text, licenseNo: tecs[9].text, createdAt: createdAt, updatedAt: updatedAt, customerId: customerId)
+  //   Order order = Order(customerId: customerId, createdAt: createdAt, updatedAt: updatedAt)
+  // }
 
   //EXPLORER
 

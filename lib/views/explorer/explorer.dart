@@ -29,9 +29,9 @@ class _ExplorerPageState extends State<ExplorerPage> {
     screens = [
       
       Placeholder(),
-      CustomTablePage<Inventory>("Inventory"),
-      CustomTablePage<Product>("Products"),
-      CustomTablePage<Order>("Orders"),
+      CustomTablePage<Inventory>([HeaderChooser([HeaderItem("Inventory"),HeaderItem("Inbound"),HeaderItem("Outbound")])],),
+      CustomTablePage<Product>( [HeaderChooser([HeaderItem("Products"),HeaderItem("Categories"),HeaderItem("Types")])],),
+      CustomTablePage<Order>([HeaderChooser([HeaderItem("Orders"),HeaderItem("Custoomers"),HeaderItem("Customer Cars")])],),
       Placeholder(),
     ];
     super.initState();
@@ -50,6 +50,11 @@ class _ExplorerPageState extends State<ExplorerPage> {
                   width: Ui.width(context),
                   height: Ui.height(context),
                 )),
+                Container(
+              width: Ui.width(context),
+              height: Ui.height(context),
+              color: AppColors.white.withOpacity(0.7),
+            ),
           Column(
             children: [
               header(),

@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_to_pdf/flutter_to_pdf.dart';
 import 'package:get/get.dart';
 import 'package:inventory/controllers/app_controller.dart';
 import 'package:inventory/tools/colors.dart';
@@ -42,7 +41,7 @@ class _OrderSummaryState extends State<OrderSummary> {
       appBar: AppBar(
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 24.0),
+            padding: const EdgeInsets.only(right: 32.0),
             child: GestureDetector(
                 onTap: () async {
                   setState(() {
@@ -54,7 +53,27 @@ class _OrderSummaryState extends State<OrderSummary> {
                     isSaving = false;
                   });
                 },
-                child: AppIcon(Icons.print)),
+                child: CircleAvatar(
+                  backgroundColor: AppColors.primaryColor,
+                  radius: 24,
+                  child: Center(child: AppIcon(Icons.print,color: AppColors.white,)))),
+          ),Padding(
+            padding: const EdgeInsets.only(right: 32.0),
+            child: GestureDetector(
+                onTap: () async {
+                  setState(() {
+                    isSaving = true;
+                  });
+                  final pdf = await imageController.capture();
+                  await controller.saveFile(pdf!, 'static-example');
+                  setState(() {
+                    isSaving = false;
+                  });
+                },
+                child: CircleAvatar(
+                  backgroundColor: AppColors.primaryColor,
+                  radius: 24,
+                  child: Center(child: AppIcon(Icons.upload,color: AppColors.green,)))),
           )
         ],
       ),

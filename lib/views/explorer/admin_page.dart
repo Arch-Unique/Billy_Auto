@@ -20,7 +20,6 @@ class CustomTable<T> extends StatefulWidget {
 }
 
 class _CustomTableState<T> extends State<CustomTable<T>> {
-
   @override
   Widget build(BuildContext context) {
     return CurvedContainer(
@@ -32,16 +31,17 @@ class _CustomTableState<T> extends State<CustomTable<T>> {
       child: AsyncPaginatedDataTable2(
         minWidth: (Ui.width(context)),
         onRowsPerPageChanged: (value) {
-            print('Row per page changed to $value');
-          },
+          print('Row per page changed to $value');
+        },
         columnSpacing: 0,
-        onSelectAll: (v){
+        onSelectAll: (v) {
           print(v);
         },
         header: AppText.medium("Records",
             fontFamily: Assets.appFontFamily2, fontSize: 16),
-        columns:
-            widget.tm.map((e) => DataColumn2(label: AppText.bold(e),size: ColumnSize.S)).toList(),
+        columns: widget.tm
+            .map((e) => DataColumn2(label: AppText.bold(e), size: ColumnSize.S))
+            .toList(),
         source: TableModelDataSource<T>(widget.tm, widget.fm),
       ),
     );
@@ -101,34 +101,36 @@ class TableModelDataSource<T> extends AsyncDataTableSource {
 
   @override
   Future<AsyncRowsResponse> getRows(int startIndex, int count) async {
-    
     return AsyncRowsResponse(
         20,
-        List.generate(
-            count,
-            (index) {
-              return DataRow2(
-              onSelectChanged: (b){
-               
-              },
-                cells: List.generate(
-                    tm.length, (jindex) {
-                      if(jindex == tm.length-1){
-                        return DataCell(Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            AppIcon(Icons.remove_red_eye,color: Colors.brown,),
-                            Ui.boxWidth(12),
-                            AppIcon(Icons.edit,color: AppColors.green,),
-                            Ui.boxWidth(12),
-                            AppIcon(Icons.delete,color: Colors.red,),
-                          ],
-            
-                        ));
-                      }
-                      return DataCell(AppText.thin("${startIndex + index} $jindex"));
-                    }));
-            }));
+        List.generate(count, (index) {
+          return DataRow2(
+              onSelectChanged: (b) {},
+              cells: List.generate(tm.length, (jindex) {
+                if (jindex == tm.length - 1) {
+                  return DataCell(Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AppIcon(
+                        Icons.remove_red_eye,
+                        color: Colors.brown,
+                      ),
+                      Ui.boxWidth(12),
+                      AppIcon(
+                        Icons.edit,
+                        color: AppColors.green,
+                      ),
+                      Ui.boxWidth(12),
+                      AppIcon(
+                        Icons.delete,
+                        color: Colors.red,
+                      ),
+                    ],
+                  ));
+                }
+                return DataCell(AppText.thin("${startIndex + index} $jindex"));
+              }));
+        }));
   }
 }
 
@@ -171,8 +173,7 @@ class CustomTableTitle extends StatelessWidget {
 }
 
 class CustomTablePage<T> extends StatefulWidget {
-  const CustomTablePage(this.title, {this.actions = const [], super.key});
-  final String title;
+  const CustomTablePage(this.actions, {super.key});
   final List<Widget> actions;
 
   @override
@@ -185,6 +186,10 @@ class _CustomTablePageState<T> extends State<CustomTablePage<T>> {
   @override
   void initState() {
     controller.currentHeaders.value = AllTables.tablesData[T]!.headers;
+    if(!controller.currentHeaders.contains("actions")){
+
+    controller.currentHeaders.add("actions");
+    }
     controller.currentFilters.value = AllTables.tablesData[T]!.fm;
     super.initState();
   }
@@ -194,7 +199,7 @@ class _CustomTablePageState<T> extends State<CustomTablePage<T>> {
     return Column(
       children: [
         CustomTableTitle(
-          widget.title,
+          "",
           actions: widget.actions,
         ),
         Expanded(
@@ -207,6 +212,56 @@ class _CustomTablePageState<T> extends State<CustomTablePage<T>> {
           ],
         ))
       ],
+    );
+  }
+}
+
+class HeaderChooser extends StatelessWidget {
+  HeaderChooser(this.hi, {super.key});
+  final List<HeaderItem> hi;
+  RxInt curHeader = 0.obs;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(hi.length, (i) {
+        const rd = Radius.circular(12);
+        return MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () {
+              curHeader.value = i;
+              if (hi[i].vb != null) hi[i].vb!();
+            },
+            child: Obx(
+               () {
+                return Container(
+                  padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      topLeft: i == 0 ? rd : Radius.zero,
+                      topRight: i == hi.length - 1 ? rd : Radius.zero,
+                      bottomLeft: i == 0 ? rd : Radius.zero,
+                      bottomRight: i == hi.length - 1 ? rd : Radius.zero,
+                    ),
+                    color: curHeader.value == i
+                        ? AppColors.primaryColor
+                        : AppColors.white,
+                  ),
+                  child: AppText.medium(
+                    hi[i].title,
+                    fontSize: 16,
+                    color: curHeader.value == i
+                        ? AppColors.white
+                        : AppColors.primaryColor,
+                  ),
+                );
+              }
+            ),
+          ),
+        );
+      }),
     );
   }
 }

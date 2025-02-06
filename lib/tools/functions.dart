@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 ///file for all #resusable functions
 ///Guideline: strongly type all variables and functions
@@ -55,5 +56,11 @@ abstract class UtilFunctions {
 
   static bool isSuccess(int? a) {
     return successCodes.contains(a);
+  }
+
+  static Future<String?> showCamera() async {
+    final ImagePicker picker = ImagePicker();
+    final img = await picker.pickImage(source: ImageSource.gallery);
+    return img?.path;
   }
 }

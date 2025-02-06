@@ -6,24 +6,24 @@ class Product {
   int productCategoryId;
   String code;
   String image;
-  DateTime createdAt;
-  DateTime updatedAt;
+  DateTime? createdAt;
+  DateTime? updatedAt;
   int productTypeId;
-  String productCategory,productType;
+  String productCategory, productType;
 
   Product({
-    required this.id,
+    this.id = 0,
     required this.name,
     required this.cost,
     required this.sellingPrice,
     required this.productCategoryId,
-    required this.productCategory,
-    required this.code,
-    required this.image,
-    required this.createdAt,
-    required this.updatedAt,
+    this.productCategory="",
+    this.code="",
+    this.image="",
+    this.createdAt,
+    this.updatedAt,
     required this.productTypeId,
-    required this.productType,
+    this.productType="",
   });
 
   // Convert Product object to JSON
@@ -62,20 +62,20 @@ class ProductType {
   int id;
   String name;
   String code;
-  String image,productCategory;
-  DateTime createdAt;
-  DateTime updatedAt;
+  String image, productCategory;
+  DateTime? createdAt;
+  DateTime? updatedAt;
   int productCategoryId;
 
   ProductType({
-    required this.id,
+    this.id = 0,
     required this.name,
     required this.code,
     required this.image,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
     required this.productCategoryId,
-    required this.productCategory,
+    this.productCategory="",
   });
 
   // Convert ProductType object to JSON
@@ -108,25 +108,21 @@ class ProductCategory {
   String name;
   String code;
   String image;
-  DateTime createdAt;
-  DateTime updatedAt;
+  DateTime? createdAt;
+  DateTime? updatedAt;
 
   ProductCategory({
-    required this.id,
+    this.id = 0,
     required this.name,
     required this.code,
     required this.image,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   // Convert ProductCategory object to JSON
   Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'code': code,
-      'image': image
-    };
+    return {'name': name, 'code': code, 'image': image};
   }
 
   // Create ProductCategory object from JSON

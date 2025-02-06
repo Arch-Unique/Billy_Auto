@@ -2,23 +2,20 @@ class BillyServices {
   int id;
   String name;
   String image;
-  DateTime createdAt;
-  DateTime updatedAt;
+  DateTime? createdAt;
+  DateTime? updatedAt;
 
   BillyServices({
-    required this.id,
+    this.id = 0,
     required this.name,
     required this.image,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   // Convert Services object to JSON
   Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'image': image
-    };
+    return {'name': name, 'image': image};
   }
 
   // Create Services object from JSON

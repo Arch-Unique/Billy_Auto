@@ -1,14 +1,14 @@
 class CarMake {
   int id;
   String make;
-  DateTime createdAt;
-  DateTime updatedAt;
+  DateTime? createdAt;
+  DateTime? updatedAt;
 
   CarMake({
-    required this.id,
+    this.id = 0,
     required this.make,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   // Convert CarMake object to JSON
@@ -32,25 +32,22 @@ class CarMake {
 class CarModels {
   int id;
   int makeId;
-  String model,make;
-  DateTime createdAt;
-  DateTime updatedAt;
+  String model, make;
+  DateTime? createdAt;
+  DateTime? updatedAt;
 
   CarModels({
-    required this.id,
+    this.id = 0,
     required this.makeId,
     required this.model,
-    required this.make,
-    required this.createdAt,
-    required this.updatedAt,
+    this.make="",
+    this.createdAt,
+    this.updatedAt,
   });
 
   // Convert CarModels object to JSON
   Map<String, dynamic> toJson() {
-    return {
-      'makeId': makeId,
-      'model': model
-    };
+    return {'makeId': makeId, 'model': model};
   }
 
   // Create CarModels object from JSON

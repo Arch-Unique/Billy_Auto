@@ -5,18 +5,18 @@ class Customer {
   String fullName;
   String signature;
   String customerType;
-  DateTime createdAt;
-  DateTime updatedAt;
+  DateTime? createdAt;
+  DateTime? updatedAt;
 
   Customer({
-    required this.id,
+    this.id = 0,
     required this.email,
     required this.phone,
     required this.fullName,
     required this.signature,
     required this.customerType,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   // Convert Customer object to JSON

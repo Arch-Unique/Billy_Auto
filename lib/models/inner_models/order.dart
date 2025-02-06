@@ -11,31 +11,31 @@ class Order {
   String? fuelLevel;
   String? bodyCheck;
   List<int> servicesPerformed; //id of services
-  DateTime createdAt;
-  DateTime updatedAt;
+  DateTime? createdAt;
+  DateTime? updatedAt;
   List<int> conditions; //0-false,1-true
   String lostSales;
   double cost;
-  String customer,car;
+  String customer, car;
 
   Order({
     required this.customerId,
-    this.customer="",
-    this.id=0,
-    this.carId=0,
-    this.car="",
-    this.mileageOnReception=0,
+    this.customer = "",
+    this.id = 0,
+    this.carId = 0,
+    this.car = "",
+    this.mileageOnReception = 0,
     this.customerConcerns,
     this.observations,
-    this.maintenanceType=const[],
+    this.maintenanceType = const [],
     this.fuelLevel,
     this.bodyCheck,
-    this.servicesPerformed=const [],
-    required this.createdAt,
-    required this.updatedAt,
-    this.conditions=const[],
-    this.lostSales="",
-    this.cost=0,
+    this.servicesPerformed = const [],
+    this.createdAt,
+    this.updatedAt,
+    this.conditions = const [],
+    this.lostSales = "",
+    this.cost = 0,
   });
 
   // Convert Order object to JSON
@@ -46,7 +46,7 @@ class Order {
       'mileageOnReception': mileageOnReception,
       'customerConcerns': customerConcerns,
       'observations': observations,
-      'maintenanceType': jsonEncode(maintenanceType) ,
+      'maintenanceType': jsonEncode(maintenanceType),
       'fuelLevel': fuelLevel,
       'bodyCheck': bodyCheck,
       'servicesPerformed': jsonEncode(servicesPerformed),
@@ -64,18 +64,18 @@ class Order {
       id: json['id'],
       carId: json['carId'] ?? 0,
       car: json['car'] ?? "",
-      mileageOnReception: json['mileageOnReception']?? "",
-      customerConcerns: json['customerConcerns']?? "",
-      observations: json['observations']?? "",
+      mileageOnReception: json['mileageOnReception'] ?? "",
+      customerConcerns: json['customerConcerns'] ?? "",
+      observations: json['observations'] ?? "",
       maintenanceType: List<String>.from(json['maintenanceType'] ?? []),
-      fuelLevel: json['fuelLevel']?? "",
+      fuelLevel: json['fuelLevel'] ?? "",
       bodyCheck: json['bodyCheck'] ?? "",
       servicesPerformed: List<int>.from(json['servicesPerformed'] ?? []),
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
       conditions: List<int>.from(json['conditions'] ?? []),
-      lostSales: json['lostSales']?? "",
-      cost: json['cost']?? 0,
+      lostSales: json['lostSales'] ?? "",
+      cost: json['cost'] ?? 0,
     );
   }
 }

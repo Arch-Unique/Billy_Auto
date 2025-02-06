@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -9,6 +11,7 @@ import 'package:inventory/views/shared.dart';
 import '../../tools/assets.dart';
 import '../../tools/colors.dart';
 import '../../tools/demo.dart';
+import '../../tools/functions.dart';
 
 class CheckListPage extends StatefulWidget {
   const CheckListPage({super.key});
@@ -49,9 +52,9 @@ class _CheckListPageState extends State<CheckListPage> {
               .values[controller.currentChecklistMode.value.index - 1];
         }
 
-        if(controller.currentChecklistMode.value.index == 0){
+        if (controller.currentChecklistMode.value.index == 0) {
           setState(() {
-            shouldPop=true;
+            shouldPop = true;
           });
         }
       },
@@ -83,11 +86,11 @@ class _CheckListPageState extends State<CheckListPage> {
                   width: Ui.width(context),
                   height: Ui.height(context),
                 )),
-                Container(
-width: Ui.width(context),
-                  height: Ui.height(context),
-                  color: AppColors.white.withOpacity(0.7),
-                ),
+            Container(
+              width: Ui.width(context),
+              height: Ui.height(context),
+              color: AppColors.white.withOpacity(0.7),
+            ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -116,8 +119,8 @@ width: Ui.width(context),
                         }
                         if (controller.currentChecklistMode.value.index ==
                             ChecklistModes.values.length - 1) {
-                              Get.to(OrderSummary());
-                            }
+                          Get.to(OrderSummary());
+                        }
                       },
                       text: controller.currentChecklistMode.value.index ==
                               ChecklistModes.values.length - 1
@@ -184,7 +187,7 @@ width: Ui.width(context),
     return [
       CustomTextField.dropdown(["None"], controller.tecs[5],
           "Select Customer (Only if the customer exist)"),
-     
+
       Align(
           alignment: Alignment.center,
           child: AppText.thin("Or register a new customer")),
@@ -215,10 +218,13 @@ width: Ui.width(context),
           child: AppText.thin("Or register a new customer car")),
       Ui.boxHeight(32),
       CustomTextField.dropdown(
-          cars.keys.toList(), controller.tecs[6], "Car Brand",onChanged: (_){
-carBrand.value = controller.tecs[6].text;
-          }),
-          Obx(() => CustomTextField.dropdown(cars[carBrand.value]!, controller.tecs[7], "Car Model"),),
+          cars.keys.toList(), controller.tecs[6], "Car Brand", onChanged: (_) {
+        carBrand.value = controller.tecs[6].text;
+      }),
+      Obx(
+        () => CustomTextField.dropdown(
+            cars[carBrand.value]!, controller.tecs[7], "Car Model"),
+      ),
       CustomTextField.dropdown(
           List.generate(DateTime.now().year - 1980,
               (index) => (DateTime.now().year - index).toString()),
@@ -247,27 +253,68 @@ carBrand.value = controller.tecs[6].text;
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-            CustomTextField("Mileage At Reception", controller.tecs[12],
-            prefix: Icons.drive_eta_rounded),
-                  CustomTextField("Fuel Level At Reception", controller.tecs[13],
-            prefix: Icons.local_gas_station_rounded),
+                CustomTextField("Mileage At Reception", controller.tecs[12],
+                    prefix: Icons.drive_eta_rounded),
+                CustomTextField("Fuel Level At Reception", controller.tecs[13],
+                    prefix: Icons.local_gas_station_rounded),
               ],
             ),
           ),
-          Builder(
-            builder: (context) {
-              return CurvedContainer(
-                border: Border.all(color: AppColors.grey),
-                width: Ui.width(context)/3,
-                height: 156,
-                padding: EdgeInsets.all(24),
-                margin: EdgeInsets.all(24),
-                child: Center(child: AppIcon(Icons.add_a_photo,size: 48,)));
-            }
-          )
+          Builder(builder: (context) {
+            RxString curImg = "".obs;
+            return Obx(() {
+              final cc = CurvedContainer(
+                  width: Ui.width(context) / 3,
+                  height: 156,
+                  border: Border.all(color: AppColors.grey),
+                  onPressed: () async {
+                    final img = await UtilFunctions.showCamera();
+                    if (img != null) {
+                      curImg.value = img;
+                    }
+                  },
+                  padding: EdgeInsets.all(curImg.value.isNotEmpty ? 0 : 24),
+                  margin: EdgeInsets.all(24),
+                  child: curImg.value.isNotEmpty
+                      ? Image.file(
+                          File(curImg.value),
+                          fit: BoxFit.cover,
+                        )
+                      : Center(
+                          child: AppIcon(
+                          Icons.add_a_photo,
+                          size: Ui.width(context) < 750 ? 24 : 48,
+                        )));
+              if (curImg.value.isNotEmpty) {
+                return Stack(
+                  children: [
+                    cc,
+                    Positioned(
+                        top: 0,
+                        right: 0,
+                        child: AppIcon(
+                          Icons.remove_circle_rounded,
+                          color: Colors.red,
+                          onTap: () {
+                            curImg.value = "";
+                          },
+                        ))
+                  ],
+                );
+              }
+              return cc;
+            });
+
+            // return CurvedContainer(
+            //   border: Border.all(color: AppColors.grey),
+            //   width: Ui.width(context)/3,
+            //   height: 156,
+            //   padding: EdgeInsets.all(24),
+            //   margin: EdgeInsets.all(24),
+            //   child: Center(child: AppIcon(Icons.add_a_photo,size: 48,)));
+          })
         ],
       ),
-      
       CustomTextField("Visible Damage (Body Check)", controller.tecs[14],
           varl: FPL.multi),
       CustomTextField("Additional Observations", controller.tecs[15],
@@ -309,19 +356,25 @@ carBrand.value = controller.tecs[6].text;
                   body: Column(
                     children: List.generate(
                         controller.totalConditionsItems[index], (jindex) {
-                      final cstep = controller.allSteps[
-                          controller.totalConditionsItemsZero.sublist(0,index+1).reduce((value, element) => value+element) + jindex];
+                      final cstep = controller.allSteps[controller
+                              .totalConditionsItemsZero
+                              .sublist(0, index + 1)
+                              .reduce((value, element) => value + element) +
+                          jindex];
                       return Row(
                         children: [
                           Expanded(
                               child: Padding(
-                            padding: const EdgeInsets.only(left: 16.0,top: 8,bottom: 8),
+                            padding: const EdgeInsets.only(
+                                left: 16.0, top: 8, bottom: 8),
                             child: AppText.thin(cstep.title),
                           )),
-                          Checkbox(value: cstep.isChecked, onChanged: (b){
-                            cstep.isChecked = (b?? false);
-                            controller.allSteps.refresh();
-                          }),
+                          Checkbox(
+                              value: cstep.isChecked,
+                              onChanged: (b) {
+                                cstep.isChecked = (b ?? false);
+                                controller.allSteps.refresh();
+                              }),
                           Ui.boxWidth(24)
                           // Padding(
                           //     padding: EdgeInsets.all(8),
@@ -385,5 +438,4 @@ carBrand.value = controller.tecs[6].text;
           prefix: Icons.timer),
     ];
   }
-
 }

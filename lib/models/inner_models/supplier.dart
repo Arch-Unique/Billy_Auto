@@ -5,18 +5,18 @@ class Supplier {
   String phone;
   String address;
   String code;
-  DateTime createdAt;
-  DateTime updatedAt;
+  DateTime? createdAt;
+  DateTime? updatedAt;
 
   Supplier({
-    required this.id,
+    this.id = 0,
     required this.fullName,
     required this.email,
     required this.phone,
     required this.address,
     required this.code,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   // Convert Supplier object to JSON
@@ -38,7 +38,7 @@ class Supplier {
       email: json['email'] ?? "",
       phone: json['phone'] ?? "",
       address: json['address'] ?? "",
-      code: json['code'] ??"",
+      code: json['code'] ?? "",
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
     );

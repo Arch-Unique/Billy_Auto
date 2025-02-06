@@ -9,6 +9,13 @@ class TableModel {
   TableModel(this.headers, this.fm);
 }
 
+class HeaderItem {
+  String title;
+  void Function()? vb;
+
+  HeaderItem(this.title, {this.vb});
+}
+
 class FilterModel {
   /// 0 - string/dropdown
   /// 1 - date/daterange
@@ -20,12 +27,12 @@ class FilterModel {
   int? id;
 
   FilterModel(this.title, this.tableTitle, this.filterType,
-      {this.options, this.dtr, this.tec, this.id}){
-        dtr = DateTimeRange(start: DateTime(2000), end: DateTime.now());
-        tec=TextEditingController();
-        options=[];
-        id = 0;
-      }
+      {this.options, this.dtr, this.tec, this.id}) {
+    dtr = DateTimeRange(start: DateTime(2000), end: DateTime.now());
+    tec = TextEditingController();
+    options = [];
+    id = 0;
+  }
 }
 
 class AllTables {

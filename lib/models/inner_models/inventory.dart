@@ -9,28 +9,28 @@ class Inventory {
   int productCategoryId;
   String location;
   DateTime shelfLife;
-  DateTime createdAt;
-  DateTime updatedAt;
+  DateTime? createdAt;
+  DateTime? updatedAt;
   int productTypeId;
-  String productType,productCategory,product;
+  String productType, productCategory, product;
 
   Inventory({
-    required this.id,
+    this.id = 0,
     required this.productId,
-    required this.product,
+    this.product="",
     required this.qty,
     required this.transactionType,
     required this.status,
-    required this.supplier,
+    this.supplier="",
     required this.supplierId,
     required this.productCategoryId,
-    required this.productCategory,
+    this.productCategory="",
     required this.location,
     required this.shelfLife,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
     required this.productTypeId,
-    required this.productType,
+    this.productType="",
   });
 
   // Convert Inventory object to JSON
