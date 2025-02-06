@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:inventory/controllers/app_controller.dart';
+import 'package:inventory/models/inner_models/barrel.dart';
 import 'package:inventory/models/table_repo.dart';
 import 'package:inventory/tools/colors.dart';
 import 'package:inventory/tools/enums.dart';
@@ -25,19 +26,12 @@ class _ExplorerPageState extends State<ExplorerPage> {
   @override
   void initState() {
     // TODO: implement initState
-    controller.currentHeaders.value = ["id","name","age","gender","free","actions"];
-    controller.currentFilters.value = [
-      FilterModel("Full Name", 0,options: ["Ikenna","John"],tec: TextEditingController()),
-      FilterModel("Age", 0,options: ["10","11"],tec: TextEditingController()),
-      FilterModel("Gender", 0,options: ["Male","Female"],tec: TextEditingController()),
-      FilterModel("Date", 1,dtr: DateTimeRange(start: DateTime(2000), end: DateTime(2010)),tec: TextEditingController()),
-    ];
     screens = [
       
       Placeholder(),
-      CustomTablePage("Inventory"),
-      CustomTablePage("Products"),
-      CustomTablePage("Orders"),
+      CustomTablePage<Inventory>("Inventory"),
+      CustomTablePage<Product>("Products"),
+      CustomTablePage<Order>("Orders"),
       Placeholder(),
     ];
     super.initState();

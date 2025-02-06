@@ -2,6 +2,7 @@ class CustomerCar {
   int id;
   int makeId;
   int modelId;
+  String desc,customer;
   String licenseNo,make,model,year;
   DateTime createdAt;
   DateTime updatedAt;
@@ -11,9 +12,11 @@ class CustomerCar {
     required this.id,
     required this.makeId,
     required this.modelId,
+    required this.desc,
     required this.make,
     required this.model,
     required this.year,
+    this.customer="",
     required this.licenseNo,
     required this.createdAt,
     required this.updatedAt,
@@ -25,6 +28,7 @@ class CustomerCar {
     return {
       'makeId': makeId,
       'modelId': modelId,
+      'desc': desc,
       'year': year,
       'licenseNo': licenseNo,
       'customerId': customerId,
@@ -38,12 +42,14 @@ class CustomerCar {
       makeId: json['makeId'],
       modelId: json['modelId'],
       make: json['make'],
+      desc: json['desc'],
       model: json['model'],
       year: json['year'] ?? "",
       licenseNo: json['licenseNo'] ?? "",
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
       customerId: json['customerId'],
+      customer: json['customer'] ?? "",
     );
   }
 }

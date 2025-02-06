@@ -48,7 +48,7 @@ class Product {
       sellingPrice: json['sellingPrice'],
       productCategoryId: json['productCategoryId'],
       productCategory: json['productCategory'],
-      code: json['code'],
+      code: json['code'] ?? "",
       image: json['image'] ?? "",
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),

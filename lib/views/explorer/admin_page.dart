@@ -10,17 +10,17 @@ import 'package:inventory/views/checklist/shared2.dart';
 
 import '../shared.dart';
 
-class CustomTable extends StatefulWidget {
-  const CustomTable(this.type, this.tm, {this.fm = const [], super.key});
+class CustomTable<T> extends StatefulWidget {
+  const CustomTable(this.tm, {this.fm = const [], super.key});
   final List<String> tm;
   final List<FilterModel> fm;
-  final int type;
 
   @override
-  State<CustomTable> createState() => _CustomTableState();
+  State<CustomTable<T>> createState() => _CustomTableState<T>();
 }
 
-class _CustomTableState extends State<CustomTable> {
+class _CustomTableState<T> extends State<CustomTable<T>> {
+
   @override
   Widget build(BuildContext context) {
     return CurvedContainer(
@@ -30,13 +30,19 @@ class _CustomTableState extends State<CustomTable> {
       padding: EdgeInsets.only(left: 16, right: 16, bottom: 16),
       margin: EdgeInsets.symmetric(vertical: 8),
       child: AsyncPaginatedDataTable2(
-        sortArrowAlwaysVisible: true,
-        showCheckboxColumn: true,
+        minWidth: (Ui.width(context)),
+        onRowsPerPageChanged: (value) {
+            print('Row per page changed to $value');
+          },
+        columnSpacing: 0,
+        onSelectAll: (v){
+          print(v);
+        },
         header: AppText.medium("Records",
             fontFamily: Assets.appFontFamily2, fontSize: 16),
         columns:
-            widget.tm.map((e) => DataColumn2(label: AppText.bold(e))).toList(),
-        source: TableModelDataSource(widget.type, widget.tm, widget.fm),
+            widget.tm.map((e) => DataColumn2(label: AppText.bold(e),size: ColumnSize.S)).toList(),
+        source: TableModelDataSource<T>(widget.tm, widget.fm),
       ),
     );
   }
@@ -88,19 +94,23 @@ class CustomTableFilter extends StatelessWidget {
   }
 }
 
-class TableModelDataSource extends AsyncDataTableSource {
+class TableModelDataSource<T> extends AsyncDataTableSource {
   List<FilterModel> filters;
   List<String> tm;
-  int t;
-  TableModelDataSource(this.t, this.tm, this.filters);
+  TableModelDataSource(this.tm, this.filters);
 
   @override
   Future<AsyncRowsResponse> getRows(int startIndex, int count) async {
+    
     return AsyncRowsResponse(
         20,
         List.generate(
             count,
-            (index) => DataRow2(
+            (index) {
+              return DataRow2(
+              onSelectChanged: (b){
+               
+              },
                 cells: List.generate(
                     tm.length, (jindex) {
                       if(jindex == tm.length-1){
@@ -113,11 +123,12 @@ class TableModelDataSource extends AsyncDataTableSource {
                             Ui.boxWidth(12),
                             AppIcon(Icons.delete,color: Colors.red,),
                           ],
-
+            
                         ));
                       }
                       return DataCell(AppText.thin("${startIndex + index} $jindex"));
-                    }))));
+                    }));
+            }));
   }
 }
 
@@ -159,26 +170,39 @@ class CustomTableTitle extends StatelessWidget {
   }
 }
 
-class CustomTablePage extends StatelessWidget {
-  CustomTablePage(this.title, {this.actions = const [], super.key});
+class CustomTablePage<T> extends StatefulWidget {
+  const CustomTablePage(this.title, {this.actions = const [], super.key});
   final String title;
   final List<Widget> actions;
+
+  @override
+  State<CustomTablePage<T>> createState() => _CustomTablePageState<T>();
+}
+
+class _CustomTablePageState<T> extends State<CustomTablePage<T>> {
   final controller = Get.find<AppController>();
+
+  @override
+  void initState() {
+    controller.currentHeaders.value = AllTables.tablesData[T]!.headers;
+    controller.currentFilters.value = AllTables.tablesData[T]!.fm;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         CustomTableTitle(
-          title,
-          actions: actions,
+          widget.title,
+          actions: widget.actions,
         ),
         Expanded(
             child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             CustomTableFilter(controller.currentFilters),
-            CustomTable(controller.currentType.value, controller.currentHeaders,
+            CustomTable<T>(controller.currentHeaders,
                 fm: controller.currentFilters)
           ],
         ))

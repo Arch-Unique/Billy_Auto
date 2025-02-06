@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inventory/models/table_repo.dart';
+import 'package:inventory/tools/demo.dart';
 import 'package:inventory/tools/enums.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -50,12 +51,12 @@ class AppController extends GetxController {
   Rx<Uint8List> techSig = Uint8List(0).obs;
   RxList<CStep> allSteps = <CStep>[].obs;
 
-  List<String> totalConditionsHeaders = ["VEHICLE PARTICULARS","UNDERHOOD (ENGINE COMPARTMENT)","VEHICLE INTERIOR","BRAKING SYSTEM CONTROL","TIRE CONTROL"];
+  List<String> totalConditionsHeaders = vehicleChecklist.keys.toList();
   RxList<bool> totalConditionsExpanded = <bool>[].obs;
-  List<int> totalConditionsItems = [2, 4, 3, 5, 3];
-  List<int> totalConditionsItemsZero = [2, 4, 3, 5, 3];
+  List<int> totalConditionsItems = [2, 4, 7, 3, 5];
+  List<int> totalConditionsItemsZero = [2, 4, 7, 3, 5];
 
-  RxList<String> allServices = ["Tires","Break Pads","Oil Filters"].obs;
+  RxList<String> allServices = ["Tires","Break Pads","Oil Filters","Air filters","Cabin Filters","Batteries","Spark Plugs","Wiper Blade","Bulbs","Wheel Alignment","Tyre Change","AC Maintenance","Fuse"].obs;
   RxList<bool> allServicesItems = <bool>[].obs;
   Map<String,List<CStep>> inspectionNo = {};
 
@@ -66,13 +67,13 @@ class AppController extends GetxController {
 
   initApp() async {
     totalConditionsItemsZero.insert(0, 0);
-    totalConditionsExpanded.value = totalConditionsHeaders.map((e) => false).toList();
+    totalConditionsExpanded.value = totalConditionsHeaders.map((e) => true).toList();
     allServicesItems.value = allServices.map((e) => false).toList();
 
     for (var j = 0; j < totalConditionsItems.length; j++) {
       List<CStep> allStepItem = [];
       for (var i = 0; i < totalConditionsItems[j]; i++) {
-        allStepItem.add(CStep(22 + totalConditionsItemsZero.sublist(0,j+1).reduce((value, element) => value+element) + i + 1, "Text"));
+        allStepItem.add(CStep(22 + totalConditionsItemsZero.sublist(0,j+1).reduce((value, element) => value+element) + i + 1, vehicleChecklist[totalConditionsHeaders[j]]![i]));
       }
       allSteps.addAll(allStepItem);
       inspectionNo[totalConditionsHeaders[j]] = allStepItem;

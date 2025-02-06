@@ -38,7 +38,7 @@ class Supplier {
       email: json['email'] ?? "",
       phone: json['phone'] ?? "",
       address: json['address'] ?? "",
-      code: json['code'],
+      code: json['code'] ??"",
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
     );

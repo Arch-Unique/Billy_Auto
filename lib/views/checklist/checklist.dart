@@ -8,6 +8,7 @@ import 'package:inventory/views/shared.dart';
 
 import '../../tools/assets.dart';
 import '../../tools/colors.dart';
+import '../../tools/demo.dart';
 
 class CheckListPage extends StatefulWidget {
   const CheckListPage({super.key});
@@ -205,6 +206,7 @@ width: Ui.width(context),
   }
 
   List<Widget> carDetails() {
+    RxString carBrand = "Seat".obs;
     return [
       CustomTextField.dropdown(["None"], controller.tecs[10],
           "Select Customer Car (Only if the customer car exist)"),
@@ -213,8 +215,10 @@ width: Ui.width(context),
           child: AppText.thin("Or register a new customer car")),
       Ui.boxHeight(32),
       CustomTextField.dropdown(
-          ["Toyota", "Mazda"], controller.tecs[6], "Car Make"),
-      CustomTextField.dropdown(["Camry", "H"], controller.tecs[7], "Car Model"),
+          cars.keys.toList(), controller.tecs[6], "Car Brand",onChanged: (_){
+carBrand.value = controller.tecs[6].text;
+          }),
+          Obx(() => CustomTextField.dropdown(cars[carBrand.value]!, controller.tecs[7], "Car Model"),),
       CustomTextField.dropdown(
           List.generate(DateTime.now().year - 1980,
               (index) => (DateTime.now().year - index).toString()),

@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:inventory/tools/assets.dart';
 import 'package:inventory/tools/colors.dart';
+import 'package:inventory/tools/demo.dart';
 import 'package:inventory/tools/enums.dart';
 import 'package:inventory/views/shared.dart';
 
@@ -176,6 +177,8 @@ width: Ui.width(context),
   }
 
   List<Widget> carDetails() {
+    
+    RxString carBrand = "Seat".obs;
     return [
       CustomTextField2.dropdown(["None"], controller.tecs[10],
           "Select Customer Car"),
@@ -184,8 +187,11 @@ width: Ui.width(context),
           child: AppText.thin("Or register a new customer car")),
       Ui.boxHeight(32),
       CustomTextField2.dropdown(
-          ["Toyota", "Mazda"], controller.tecs[6], "Car Make"),
-      CustomTextField2.dropdown(["Camry", "H"], controller.tecs[7], "Car Model"),
+          cars.keys.toList(), controller.tecs[6], "Car Brand",onChanged: (_){
+carBrand.value = controller.tecs[6].text;
+          }),
+          Obx(() => CustomTextField2.dropdown(cars[carBrand.value]!, controller.tecs[7], "Car Model"),),
+      
       CustomTextField2.dropdown(
           List.generate(DateTime.now().year - 1980,
               (index) => (DateTime.now().year - index).toString()),

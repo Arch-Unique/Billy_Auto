@@ -1,11 +1,11 @@
 class Inventory {
   int id;
   int productId;
-  int? orderId;
   int qty;
   String transactionType;
   String status;
-  int supplier;
+  int supplierId;
+  String supplier;
   int productCategoryId;
   String location;
   DateTime shelfLife;
@@ -20,9 +20,9 @@ class Inventory {
     required this.product,
     required this.qty,
     required this.transactionType,
-    this.orderId=0,
     required this.status,
     required this.supplier,
+    required this.supplierId,
     required this.productCategoryId,
     required this.productCategory,
     required this.location,
@@ -36,13 +36,11 @@ class Inventory {
   // Convert Inventory object to JSON
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'productId': productId,
       'qty': qty,
       'transactionType': transactionType,
-      'orderId': orderId,
       'status': status,
-      'supplier': supplier,
+      'supplierId': supplierId,
       'productCategoryId': productCategoryId,
       'location': location,
       'shelfLife': shelfLife.toIso8601String(),
@@ -58,8 +56,8 @@ class Inventory {
       product: json['product'],
       qty: json['qty'],
       transactionType: json['transactionType'],
-      orderId: json['orderId'] ?? "",
       status: json['status'],
+      supplierId: json['supplierId'],
       supplier: json['supplier'],
       productCategoryId: json['productCategoryId'],
       productCategory: json['productCategory'],
