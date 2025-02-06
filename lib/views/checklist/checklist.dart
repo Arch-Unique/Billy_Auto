@@ -82,6 +82,11 @@ class _CheckListPageState extends State<CheckListPage> {
                   width: Ui.width(context),
                   height: Ui.height(context),
                 )),
+                Container(
+width: Ui.width(context),
+                  height: Ui.height(context),
+                  color: AppColors.white.withOpacity(0.7),
+                ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

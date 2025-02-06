@@ -61,6 +61,11 @@ class _CheckList2PageState extends State<CheckList2Page> {
                   width: Ui.width(context),
                   height: Ui.height(context),
                 )),
+                Container(
+width: Ui.width(context),
+                  height: Ui.height(context),
+                  color: AppColors.white.withOpacity(0.7),
+                ),
             Column(
               children: [
                 Ui.boxWidth(Ui.width(context)),
@@ -206,7 +211,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
       Builder(
         builder: (context) {
           return Padding(
-            padding: EdgeInsets.symmetric(horizontal: Ui.width(context) <600 ? 42:  84.0),
+            padding: EdgeInsets.symmetric(horizontal: Ui.width(context) <650 ? 42:  84.0),
             child: Row(
               
               children: [
@@ -252,7 +257,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
           child: Builder(
             builder: (context) {
               return Padding(
-                      padding: EdgeInsets.only(left: Ui.width(context) <600 ? 42:  84.0),
+                      padding: EdgeInsets.only(left: Ui.width(context) <650 ? 42:  84.0),
                       child: AppText.thin("Fill Up 10-Point Free Inspection"),
                     );
             }
@@ -261,7 +266,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
       Builder(
         builder: (context) {
           return Padding(
-            padding: EdgeInsets.symmetric(horizontal: Ui.width(context) <600 ? 42:  84.0),
+            padding: EdgeInsets.symmetric(horizontal: Ui.width(context) <650 ? 42:  84.0),
             child: Obx(() {
               return ExpansionPanelList(
                 expansionCallback: (index, isExpanded) {

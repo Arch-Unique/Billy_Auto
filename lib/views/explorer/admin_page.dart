@@ -102,8 +102,8 @@ class TableModelDataSource extends AsyncDataTableSource {
             count,
             (index) => DataRow2(
                 cells: List.generate(
-                    tm.length+1, (jindex) {
-                      if(jindex == tm.length){
+                    tm.length, (jindex) {
+                      if(jindex == tm.length-1){
                         return DataCell(Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

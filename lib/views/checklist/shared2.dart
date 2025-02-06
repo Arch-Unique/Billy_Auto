@@ -276,5 +276,5 @@ class CustomTextField2 extends StatelessWidget {
 }
 
 double wideUi(BuildContext context){
-  return Ui.width(context) < 600 ?  Ui.width(context) < 450 ? Ui.width(context)-50: Ui.width(context)-100 : Ui.width(context) - 200;
+  return Ui.width(context) < 650 ?  Ui.width(context) < 450 ? Ui.width(context)-50: Ui.width(context)-100 : Ui.width(context) - 200;
 }
