@@ -99,11 +99,11 @@ class TableModelDataSource extends AsyncDataTableSource {
     return AsyncRowsResponse(
         20,
         List.generate(
-            20,
+            count,
             (index) => DataRow2(
                 cells: List.generate(
-                    6, (jindex) {
-                      if(jindex == 5){
+                    tm.length+1, (jindex) {
+                      if(jindex == tm.length){
                         return DataCell(Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -116,7 +116,7 @@ class TableModelDataSource extends AsyncDataTableSource {
 
                         ));
                       }
-                      return DataCell(AppText.thin("$index $jindex"));
+                      return DataCell(AppText.thin("${startIndex + index} $jindex"));
                     }))));
   }
 }

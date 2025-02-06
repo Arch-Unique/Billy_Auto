@@ -200,7 +200,7 @@ class _OrderSummaryState extends State<OrderSummary> {
               return Container(
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  image: DecorationImage(image: AssetImage(Assets.backg),repeat: ImageRepeat.repeat,opacity: 0.16,)
+                  image: DecorationImage(image: AssetImage(Assets.backg),repeat: ImageRepeat.repeat,opacity: 0.08,)
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),

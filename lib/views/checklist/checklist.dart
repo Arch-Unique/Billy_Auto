@@ -75,7 +75,7 @@ class _CheckListPageState extends State<CheckListPage> {
         body: Stack(
           children: [
             Opacity(
-                opacity: 0.16,
+                opacity: 0.08,
                 child: Image.asset(
                   Assets.backg,
                   fit: BoxFit.cover,

@@ -54,7 +54,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
         body: Stack(
           children: [
             Opacity(
-                opacity: 0.16,
+                opacity: 0.08,
                 child: Image.asset(
                   Assets.backg,
                   fit: BoxFit.cover,
@@ -126,12 +126,14 @@ class _CheckList2PageState extends State<CheckList2Page> {
               ],
             ),
             Positioned(
-              top: 4,
+              top: 24,
               left: 8,
-              child: BackButton(
-                onPressed: (){
-                  Get.back();
-                },
+              child: SafeArea(
+                child: BackButton(
+                  onPressed: (){
+                    Get.back();
+                  },
+                ),
               ))
           ],
         ),
@@ -384,8 +386,7 @@ class CheckList2Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        LogoWidget(144),
-        Ui.boxHeight(24),
+        LogoWidget(120),
         Obx(() {
           return AppText.medium(controller.currentChecklistMode.value.title,
               fontSize: 32,
@@ -400,7 +401,7 @@ class CheckList2Header extends StatelessWidget {
               fontFamily: Assets.appFontFamily1,
               color: AppColors.lightTextColor);
         }),
-        Ui.boxHeight(24),
+        Ui.boxHeight(12),
         Stack(
           alignment: AlignmentDirectional.center,
           children: [
@@ -467,7 +468,7 @@ class CheckList2Header extends StatelessWidget {
             )
           ],
         ),
-        Ui.boxHeight(40)
+        Ui.boxHeight(24)
       ],
     );
   }
