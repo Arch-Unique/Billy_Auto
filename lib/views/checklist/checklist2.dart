@@ -125,6 +125,14 @@ class _CheckList2PageState extends State<CheckList2Page> {
                 Ui.boxHeight(24),
               ],
             ),
+            Positioned(
+              top: 4,
+              left: 8,
+              child: BackButton(
+                onPressed: (){
+                  Get.back();
+                },
+              ))
           ],
         ),
       ),
@@ -427,24 +435,32 @@ class CheckList2Header extends StatelessWidget {
                             ),
                           ));
                     }
-                    return Container(
-                        height: 32,
-                        width: 32,
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: controller.currentChecklistMode.value.index >
-                                    index
-                                ? AppColors.primaryColor
-                                : AppColors.white,
-                            border: Border.all(color: AppColors.primaryColor)),
-                        child: Center(
-                          child: AppText.thin("${index + 1}",
-                              fontFamily: Assets.appFontFamily1,
-                              color: controller.currentChecklistMode.value.index <
+                    return InkWell(
+                      mouseCursor: SystemMouseCursors.click,
+                      onTap: (){
+                        controller.currentChecklistMode.value =
+                                  ChecklistModes.values[index];
+                      },
+                      child: Container(
+                          height: 32,
+                          
+                          width: 32,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: controller.currentChecklistMode.value.index >
                                       index
                                   ? AppColors.primaryColor
-                                  : AppColors.white),
-                        ));
+                                  : AppColors.white,
+                              border: Border.all(color: AppColors.primaryColor)),
+                          child: Center(
+                            child: AppText.thin("${index + 1}",
+                                fontFamily: Assets.appFontFamily1,
+                                color: controller.currentChecklistMode.value.index <
+                                        index
+                                    ? AppColors.primaryColor
+                                    : AppColors.white),
+                          )),
+                    );
                   });
                 }),
               ),

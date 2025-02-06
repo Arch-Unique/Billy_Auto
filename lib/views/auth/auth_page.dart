@@ -36,11 +36,45 @@ class _AuthPageState extends State<AuthPage> {
                 CustomTextField("Password", TextEditingController(),varl: FPL.password,),
                 Ui.boxWidth(24),
                 AppButton(onPressed: (){
-                  Get.to(ExplorerPage());
+                  Get.to(ChoosePage());
                 },text: "Log In",),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+//ONLY IN DEMO
+class ChoosePage extends StatelessWidget {
+  const ChoosePage({super.key});
+  static final pages = ["Checklist1","Checklist2","Inventory"];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ...List.generate(3, (index) => SizedBox(
+              width: Ui.width(context)/3,
+              child: Ui.padding(
+                child: AppButton(onPressed: (){
+                  if(index == 0){
+                    Get.to(CheckListPage());
+                  } else if(index == 1){
+                    Get.to(CheckList2Page());
+                  }else if(index == 2){
+                    Get.to(ExplorerPage());
+                  }
+                },text: pages[index],),
+              ),
+            ))
+          ],
         ),
       ),
     );

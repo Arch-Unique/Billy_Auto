@@ -19,6 +19,7 @@ class CheckListPage extends StatefulWidget {
 class _CheckListPageState extends State<CheckListPage> {
   final controller = Get.find<AppController>();
   List<dynamic> screens = [];
+  bool shouldPop = false;
 
   @override
   void initState() {
@@ -38,13 +39,19 @@ class _CheckListPageState extends State<CheckListPage> {
   Widget build(BuildContext context) {
     print(Ui.width(context));
     return PopScope(
-      canPop: false,
+      canPop: shouldPop,
       onPopInvoked: (dp) {
         if (controller.currentChecklistMode.value.index > 0 &&
             controller.currentChecklistMode.value.index <
                 ChecklistModes.values.length) {
           controller.currentChecklistMode.value = ChecklistModes
               .values[controller.currentChecklistMode.value.index - 1];
+        }
+
+        if(controller.currentChecklistMode.value.index == 0){
+          setState(() {
+            shouldPop=true;
+          });
         }
       },
       child: Scaffold(

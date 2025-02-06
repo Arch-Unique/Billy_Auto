@@ -148,14 +148,15 @@ class _CurvedContainerState extends State<CurvedContainer>
 
 class AppIcon extends StatelessWidget {
   const AppIcon(this.asset,
-      {this.size = 24, this.color = Colors.black, super.key});
+      {this.size = 24, this.color = Colors.black, this.onTap, super.key});
   final dynamic asset;
   final Color? color;
   final double size;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return asset is String
+    final ct = asset is String
         ? asset.endsWith("svg")
             ? SvgPicture.asset(asset)
             : Image.asset(
@@ -167,6 +168,15 @@ class AppIcon extends StatelessWidget {
             size: size,
             color: color,
           );
+
+    if (onTap != null) {
+      return InkWell(
+        mouseCursor: SystemMouseCursors.click,
+        onTap: onTap,
+        child: ct,
+      );
+    }
+    return ct;
   }
 }
 
@@ -581,7 +591,7 @@ class _AppButtonState extends State<AppButton> {
             )
           : Container(
               padding: EdgeInsets.symmetric(
-                vertical: 14,
+                vertical: 12,
               ),
               width: widget.isWide
                   ? double.maxFinite
@@ -1184,11 +1194,13 @@ class MultiSelectDropdownState extends State<MultiSelectDropdown> {
                   hint: AppText.thin(selectedOptions.isEmpty
                       ? 'Select options'
                       : selectedOptions.join(', ')),
-                      selectedItemBuilder: (context){
-                        return [AppText.thin(selectedOptions.isEmpty
-                      ? 'Select options'
-                      : selectedOptions.join(', '))];
-                      },
+                  selectedItemBuilder: (context) {
+                    return [
+                      AppText.thin(selectedOptions.isEmpty
+                          ? 'Select options'
+                          : selectedOptions.join(', '))
+                    ];
+                  },
                   icon: Icon(
                     Icons.keyboard_arrow_down_rounded,
                     color: AppColors.primaryColor,
@@ -1197,7 +1209,6 @@ class MultiSelectDropdownState extends State<MultiSelectDropdown> {
                   items: widget.options.map((e) {
                     return DropdownMenuItem<String>(
                       value: e,
-                      
                       child: Row(
                         children: [
                           Checkbox(
@@ -1322,7 +1333,6 @@ class _SignatureViewState extends State<SignatureView> {
                       height: 32,
                       width: 32,
                       color: AppColors.primaryColor,
-                      
                       onPressed: () async {
                         ui.Image image =
                             await signaturePadKey.currentState!.toImage();
@@ -1342,22 +1352,22 @@ class _SignatureViewState extends State<SignatureView> {
                         Icons.camera_rounded,
                         color: AppColors.white,
                       ))),
-                      Ui.boxHeight(20),
-                      CurvedContainer(
+                  Ui.boxHeight(20),
+                  CurvedContainer(
                       height: 32,
                       width: 32,
                       color: AppColors.white,
                       border: Border.all(color: AppColors.lightTextColor),
                       onPressed: () {
-              if (isCaptured) {
-                setState(() {
-                  isCaptured = false;
-                  bytes = null;
-                });
-              } else {
-                signaturePadKey.currentState!.clear();
-              }
-            },
+                        if (isCaptured) {
+                          setState(() {
+                            isCaptured = false;
+                            bytes = null;
+                          });
+                        } else {
+                          signaturePadKey.currentState!.clear();
+                        }
+                      },
                       child: Center(
                           child: AppIcon(
                         Icons.close,

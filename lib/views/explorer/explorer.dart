@@ -25,7 +25,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
   @override
   void initState() {
     // TODO: implement initState
-    controller.currentHeaders.value = ["id","name","age","gender","free"];
+    controller.currentHeaders.value = ["id","name","age","gender","free","actions"];
     controller.currentFilters.value = [
       FilterModel("Full Name", 0,options: ["Ikenna","John"],tec: TextEditingController()),
       FilterModel("Age", 0,options: ["10","11"],tec: TextEditingController()),
@@ -33,10 +33,11 @@ class _ExplorerPageState extends State<ExplorerPage> {
       FilterModel("Date", 1,dtr: DateTimeRange(start: DateTime(2000), end: DateTime(2010)),tec: TextEditingController()),
     ];
     screens = [
-      CustomTablePage(),
+      
       Placeholder(),
-      Placeholder(),
-      Placeholder(),
+      CustomTablePage("Inventory"),
+      CustomTablePage("Products"),
+      CustomTablePage("Orders"),
       Placeholder(),
     ];
     super.initState();
@@ -73,6 +74,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
       color: AppColors.primaryColor,
       child: Row(
               children: [
+                BackButton(),
                 Ui.boxWidth(24),
                 LogoWidget(64,isWhite:  false),
                 Spacer(),
@@ -115,6 +117,14 @@ class _ExplorerPageState extends State<ExplorerPage> {
                     );
                   });
                 }),
+                 Ui.boxWidth(24),
+                 CircleAvatar(
+                  radius: 20,
+                  backgroundColor: AppColors.white,
+                  child: CircleAvatar(radius: 19,
+                  backgroundColor: AppColors.green,
+                  child: Center(child: AppText.thin("A",color: AppColors.white),),),
+                 ),
                  Ui.boxWidth(24),
               ],
             ),
