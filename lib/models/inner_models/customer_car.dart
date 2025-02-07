@@ -1,15 +1,17 @@
-class CustomerCar {
-  int id;
+import 'base_model.dart';
+
+class CustomerCar extends BaseModel{
+  
   int makeId;
   int modelId;
   String desc, customer;
   String licenseNo, make, model, year;
-  DateTime? createdAt;
-  DateTime? updatedAt;
+  
+  
   int customerId;
 
   CustomerCar({
-    this.id = 0,
+    super.id = 0,
     required this.makeId,
     required this.modelId,
     this.desc = "",
@@ -18,13 +20,14 @@ class CustomerCar {
     required this.year,
     this.customer = "",
     required this.licenseNo,
-    this.createdAt,
-    this.updatedAt,
+    super.createdAt,
+    super.updatedAt,
     required this.customerId,
   });
 
   // Convert CustomerCar object to JSON
-  Map<String, dynamic> toJson() {
+  @override
+Map<String, dynamic> toJson() {
     return {
       'makeId': makeId,
       'modelId': modelId,
@@ -33,6 +36,11 @@ class CustomerCar {
       'licenseNo': licenseNo,
       'customerId': customerId,
     };
+  }
+
+      @override
+List<dynamic> toTableRows(){
+    return [id,make,model,year,licenseNo,customer,createdAt];
   }
 
   // Create CustomerCar object from JSON

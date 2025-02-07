@@ -5,6 +5,7 @@ import 'package:inventory/tools/assets.dart';
 import 'package:inventory/views/onboarding/splashscreen.dart';
 
 import 'controllers/dependency.dart';
+import 'tools/urls.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +20,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      home:SplashScreen(),
+      initialRoute: AppRoutes.home,
+      title: 'Billy Auto Plus',
+      getPages: AppPages.getPages,
       theme: ThemeData(
           fontFamily: Assets.appFontFamily,),
       

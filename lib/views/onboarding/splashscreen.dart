@@ -11,7 +11,7 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Future.delayed(Duration(seconds: 2),(){
-      Get.to(AuthPage());
+      Get.offAll(AuthPage());
     });
     return  Scaffold(
       body: Center(

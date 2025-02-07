@@ -55,94 +55,79 @@ class _CheckList2PageState extends State<CheckList2Page> {
         }
       },
       child: Scaffold(
-        body: Stack(
-          children: [
-            Opacity(
-                opacity: 0.08,
-                child: Image.asset(
-                  Assets.backg,
-                  fit: BoxFit.cover,
-                  width: Ui.width(context),
-                  height: Ui.height(context),
-                )),
-            Container(
-              width: Ui.width(context),
-              height: Ui.height(context),
-              color: AppColors.white.withOpacity(0.7),
-            ),
-            Column(
-              children: [
-                Ui.boxWidth(Ui.width(context)),
-                CheckList2Header(),
-                Expanded(
-                    child: SingleChildScrollView(
-                  padding: EdgeInsets.all(16),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 850),
-                    child: Obx(() {
-                      return Column(
-                        children: screens[
-                            controller.currentChecklistMode.value.index],
-                      );
-                    }),
-                  ),
-                )),
-                Ui.boxHeight(24),
-                SizedBox(
-                  width: 320,
+        body: BackgroundScaffold(
+          hasBack: true,
+          child: Column(
+            children: [
+              Ui.boxWidth(Ui.width(context)),
+              CheckList2Header(),
+              Expanded(
+                  child: SingleChildScrollView(
+                padding: EdgeInsets.all(16),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 850),
                   child: Obx(() {
-                    return Row(
+                    return Column(
                       children: [
-                        if (controller.currentChecklistMode.value.index > 0)
-                          Expanded(
-                              child: AppButton(
-                            onPressed: () {
-                              controller.currentChecklistMode.value =
-                                  ChecklistModes.values[controller
-                                          .currentChecklistMode.value.index -
-                                      1];
-                            },
-                            text: "Back",
-                            borderColor: AppColors.lightTextColor,
-                            color: Color(0xFFD1D1D1),
-                          )),
-                        Ui.boxWidth(24),
-                        Expanded(
-                            child: AppButton(
-                          onPressed: () {
-                            if (controller.currentChecklistMode.value.index ==
-                                ChecklistModes.values.length - 1) {
-                              Get.to(OrderSummary());
-                            } else {
-                              controller.currentChecklistMode.value =
-                                  ChecklistModes.values[controller
-                                          .currentChecklistMode.value.index +
-                                      1];
-                            }
-                          },
-                          text: controller.currentChecklistMode.value.index <
-                                  ChecklistModes.values.length - 1
-                              ? "Next"
-                              : "Complete",
-                        )),
+                        ...screens[controller.currentChecklistMode.value.index],
+                        Ui.boxHeight(24),
+                        SizedBox(
+                          width: 320,
+                          child: Obx(() {
+                            return Row(
+                              children: [
+                                if (controller
+                                        .currentChecklistMode.value.index >
+                                    0)
+                                  Expanded(
+                                      child: AppButton(
+                                    onPressed: () {
+                                      controller.currentChecklistMode.value =
+                                          ChecklistModes.values[controller
+                                                  .currentChecklistMode
+                                                  .value
+                                                  .index -
+                                              1];
+                                    },
+                                    text: "Back",
+                                    borderColor: AppColors.lightTextColor,
+                                    color: Color(0xFFD1D1D1),
+                                  )),
+                                Ui.boxWidth(24),
+                                Expanded(
+                                    child: AppButton(
+                                  onPressed: () {
+                                    if (controller
+                                            .currentChecklistMode.value.index ==
+                                        ChecklistModes.values.length - 1) {
+                                      Get.to(OrderSummary());
+                                    } else {
+                                      controller.currentChecklistMode.value =
+                                          ChecklistModes.values[controller
+                                                  .currentChecklistMode
+                                                  .value
+                                                  .index +
+                                              1];
+                                    }
+                                  },
+                                  text: controller.currentChecklistMode.value
+                                              .index <
+                                          ChecklistModes.values.length - 1
+                                      ? "Next"
+                                      : "Complete",
+                                )),
+                              ],
+                            );
+                          }),
+                        ),
+                        Ui.boxHeight(24),
                       ],
                     );
                   }),
                 ),
-                Ui.boxHeight(24),
-              ],
-            ),
-            Positioned(
-                top: 24,
-                left: 8,
-                child: SafeArea(
-                  child: BackButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                  ),
-                ))
-          ],
+              )),
+            ],
+          ),
         ),
       ),
     );
@@ -186,12 +171,12 @@ class _CheckList2PageState extends State<CheckList2Page> {
           child: AppText.thin("Or register a new customer car")),
       Ui.boxHeight(32),
       CustomTextField2.dropdown(
-          cars.keys.toList(), controller.tecs[6], "Car Brand", onChanged: (_) {
+          controller.allCarMakes.map((element) => element.make).toList(), controller.tecs[6], "Car Brand", onChanged: (_) {
         carBrand.value = controller.tecs[6].text;
       }),
       Obx(
         () => CustomTextField2.dropdown(
-            cars[carBrand.value]!, controller.tecs[7], "Car Model"),
+            controller.allCarModels.where((p0) => p0.make == carBrand.value).map((e) => e.model).toList(), controller.tecs[7], "Car Model"),
       ),
       CustomTextField2.dropdown(
           List.generate(DateTime.now().year - 1980,
@@ -329,12 +314,8 @@ class _CheckList2PageState extends State<CheckList2Page> {
                     canTapOnHeader: true,
                     body: Column(
                       children: List.generate(
-                          controller.totalConditionsItems[index], (jindex) {
-                        final cstep = controller.allSteps[controller
-                                .totalConditionsItemsZero
-                                .sublist(0, index + 1)
-                                .reduce((value, element) => value + element) +
-                            jindex];
+                          controller.condItem[controller.totalConditionsHeaders[index]]!, (jindex) {
+                        final cstep = controller.inspectionNo[controller.totalConditionsHeaders[index]]![jindex];
                         return Row(
                           children: [
                             Expanded(
@@ -347,7 +328,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
                                 value: cstep.isChecked,
                                 onChanged: (b) {
                                   cstep.isChecked = (b ?? false);
-                                  controller.allSteps.refresh();
+                                  controller.inspectionNo.refresh();
                                 }),
                             Ui.boxWidth(24)
                             // Padding(
@@ -390,7 +371,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
   List<Widget> servicePlanDetails() {
     return [
       ...List.generate(
-          controller.allServices.length,
+          controller.allBillyServices.length,
           (index) => Builder(builder: (context) {
                 return CurvedContainer(
                   radius: 0,
@@ -407,7 +388,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
                       },
                       // activeColor: AppColors.primaryColorLight,
                       // tileColor: AppColors.primaryColorLight,
-                      title: AppText.thin(controller.allServices[index]),
+                      title: AppText.thin(controller.allBillyServices[index].name),
                     );
                   }),
                 );

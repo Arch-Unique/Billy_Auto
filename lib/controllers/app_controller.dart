@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../models/inner_models/barrel.dart';
 import '../models/step.dart';
+import '../repo/app_repo.dart';
 
 class AppController extends GetxController {
   Rx<DashboardModes> currentDashboardMode = DashboardModes.dashboard.obs;
@@ -48,33 +49,60 @@ class AppController extends GetxController {
   /// 22 - 72 - checks 
   List<TextEditingController> tecs =
       List.generate(72, (index) => TextEditingController());
+
   Rx<Uint8List> userSig = Uint8List(0).obs;
   Rx<Uint8List> advSig = Uint8List(0).obs;
   Rx<Uint8List> techSig = Uint8List(0).obs;
   RxList<CStep> allSteps = <CStep>[].obs;
 
-  List<String> totalConditionsHeaders = vehicleChecklist.keys.toList();
+  List<String> totalConditionsHeaders = [];
   RxList<bool> totalConditionsExpanded = <bool>[].obs;
-  List<int> totalConditionsItems = [2, 4, 7, 3, 5];
-  List<int> totalConditionsItemsZero = [2, 4, 7, 3, 5];
+  Map<String,int> condItem = {};
 
-  RxList<String> allServices = ["Tires","Break Pads","Oil Filters","Air filters","Cabin Filters","Batteries","Spark Plugs","Wiper Blade","Bulbs","Wheel Alignment","Tyre Change","AC Maintenance","Fuse"].obs;
   RxList<bool> allServicesItems = <bool>[].obs;
-  Map<String,List<CStep>> inspectionNo = {};
+  RxMap<String,List<CStep>> inspectionNo = <String,List<CStep>>{}.obs;
 
   //EXPLORER
   RxList<FilterModel> currentFilters = <FilterModel>[].obs;
   RxList<String> currentHeaders = <String>[].obs;
 
-  initApp() async {
-    totalConditionsItemsZero.insert(0, 0);
-    totalConditionsExpanded.value = totalConditionsHeaders.map((e) => true).toList();
-    allServicesItems.value = allServices.map((e) => false).toList();
+  //MODELS
+  RxList<BillyServices> allBillyServices = <BillyServices>[].obs;
+  RxList<BillyConditionCategory> allBillyConditionCategories = <BillyConditionCategory>[].obs;
+  RxList<BillyConditions> allBillyConditions = <BillyConditions>[].obs;
+  RxList<ProductCategory> allProductCategory = <ProductCategory>[].obs;
+  RxList<ProductType> allProductType = <ProductType>[].obs;
+  RxList<CarMake> allCarMakes = <CarMake>[].obs;
+  RxList<CarModels> allCarModels = <CarModels>[].obs;
 
-    for (var j = 0; j < totalConditionsItems.length; j++) {
+  final appRepo = Get.find<AppRepo>();
+
+  initApp() async {
+    allBillyServices.value = (await appRepo.getAll<BillyServices>(limit: 10000)).data;
+    allBillyConditionCategories.value = (await appRepo.getAll<BillyConditionCategory>(limit: 10000)).data;
+    allBillyConditions.value = (await appRepo.getAll<BillyConditions>(limit: 10000)).data;
+    allProductCategory.value = (await appRepo.getAll<ProductCategory>(limit: 10000)).data;
+    allProductType.value = (await appRepo.getAll<ProductType>(limit: 10000)).data;
+    allCarMakes.value = (await appRepo.getAll<CarMake>(limit: 10000)).data;
+    allCarModels.value = (await appRepo.getAll<CarModels>(limit: 10000)).data;
+
+    totalConditionsHeaders = allBillyConditionCategories.map((element) => element.name).toList();
+    
+    condItem = allBillyConditions.fold<Map<String, int>>({}, (map, condition) {
+      map[condition.conditionsCategory] = (map[condition.conditionsCategory] ?? 0) + 1;
+      return map;
+    });
+
+    totalConditionsExpanded.value = totalConditionsHeaders.map((e) => true).toList();
+    allServicesItems.value = allBillyServices.map((e) => false).toList();
+
+int k = 0;
+    for (var j = 0; j < condItem.length; j++) {
       List<CStep> allStepItem = [];
-      for (var i = 0; i < totalConditionsItems[j]; i++) {
-        allStepItem.add(CStep(22 + totalConditionsItemsZero.sublist(0,j+1).reduce((value, element) => value+element) + i + 1, vehicleChecklist[totalConditionsHeaders[j]]![i]));
+      final vc = allBillyConditions.where((p0) => p0.conditionsCategory == totalConditionsHeaders[j]).map((e) => e.name).toList();
+      for (var i = 0; i < condItem[totalConditionsHeaders[j]]!; i++) {
+        allStepItem.add(CStep(22 + k + i + 1, vc[i]));
+        k++;
       }
       allSteps.addAll(allStepItem);
       inspectionNo[totalConditionsHeaders[j]] = allStepItem;
@@ -94,6 +122,16 @@ class AppController extends GetxController {
   //   CustomerCar car = CustomerCar(id: 0, makeId: makeId, modelId: modelId, desc: tecs[4].text, year: tecs[8].text, licenseNo: tecs[9].text, createdAt: createdAt, updatedAt: updatedAt, customerId: customerId)
   //   Order order = Order(customerId: customerId, createdAt: createdAt, updatedAt: updatedAt)
   // }
+
+  Future<bool> loginUser(String username, String password) async{
+    try {
+      await appRepo.login(username, password);
+      return true;
+    } catch (e) {
+      Ui.showError(e.toString());
+      return false;
+    }
+  }
 
   //EXPLORER
 

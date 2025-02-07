@@ -3,7 +3,7 @@ import 'dart:convert';
 class Order {
   int customerId;
   int carId;
-  int id;
+  
   int mileageOnReception;
   String? customerConcerns;
   String? observations;
@@ -11,8 +11,8 @@ class Order {
   String? fuelLevel;
   String? bodyCheck;
   List<int> servicesPerformed; //id of services
-  DateTime? createdAt;
-  DateTime? updatedAt;
+  
+  
   List<int> conditions; //0-false,1-true
   String lostSales;
   double cost;
@@ -21,7 +21,7 @@ class Order {
   Order({
     required this.customerId,
     this.customer = "",
-    this.id = 0,
+    super.id = 0,
     this.carId = 0,
     this.car = "",
     this.mileageOnReception = 0,
@@ -31,15 +31,16 @@ class Order {
     this.fuelLevel,
     this.bodyCheck,
     this.servicesPerformed = const [],
-    this.createdAt,
-    this.updatedAt,
+    super.createdAt,
+    super.updatedAt,
     this.conditions = const [],
     this.lostSales = "",
     this.cost = 0,
   });
 
   // Convert Order object to JSON
-  Map<String, dynamic> toJson() {
+  @override
+Map<String, dynamic> toJson() {
     return {
       'customerId': customerId,
       'carId': carId,
@@ -54,6 +55,11 @@ class Order {
       'lostSales': lostSales,
       'cost': cost,
     };
+  }
+
+      @override
+List<dynamic> toTableRows(){
+    return [id,customer,car,mileageOnReception,fuelLevel,createdAt];
   }
 
   // Create Order object from JSON

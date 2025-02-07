@@ -7,6 +7,7 @@ import 'package:inventory/models/inner_models/barrel.dart';
 import 'package:inventory/models/table_repo.dart';
 import 'package:inventory/tools/colors.dart';
 import 'package:inventory/tools/enums.dart';
+import 'package:inventory/tools/service.dart';
 import 'package:inventory/views/explorer/admin_page.dart';
 import 'package:inventory/views/shared.dart';
 
@@ -117,16 +118,11 @@ class _ExplorerPageState extends State<ExplorerPage> {
                   });
                 }),
                  Ui.boxWidth(24),
-                 CircleAvatar(
-                  radius: 20,
-                  backgroundColor: AppColors.white,
-                  child: CircleAvatar(radius: 19,
-                  backgroundColor: AppColors.green,
-                  child: Center(child: AppText.thin("A",color: AppColors.white),),),
-                 ),
+                 ProfileLogo(),
                  Ui.boxWidth(24),
               ],
             ),
     );
   }
 }
+

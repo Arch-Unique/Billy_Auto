@@ -1,21 +1,26 @@
-class CarMake {
-  int id;
+import 'package:inventory/models/inner_models/base_model.dart';
+
+class CarMake extends BaseModel{
   String make;
-  DateTime? createdAt;
-  DateTime? updatedAt;
 
   CarMake({
-    this.id = 0,
+    super.id = 0,
     required this.make,
-    this.createdAt,
-    this.updatedAt,
+    super.createdAt,
+    super.updatedAt,
   });
 
   // Convert CarMake object to JSON
-  Map<String, dynamic> toJson() {
+  @override
+Map<String, dynamic> toJson() {
     return {
       'make': make,
     };
+  }
+
+  @override
+List<dynamic> toTableRows(){
+    return [id,make,createdAt];
   }
 
   // Create CarMake object from JSON
@@ -29,25 +34,31 @@ class CarMake {
   }
 }
 
-class CarModels {
-  int id;
+class CarModels extends BaseModel {
+  
   int makeId;
   String model, make;
-  DateTime? createdAt;
-  DateTime? updatedAt;
+  
+  
 
   CarModels({
-    this.id = 0,
+    super.id = 0,
     required this.makeId,
     required this.model,
     this.make="",
-    this.createdAt,
-    this.updatedAt,
+    super.createdAt,
+    super.updatedAt,
   });
 
   // Convert CarModels object to JSON
-  Map<String, dynamic> toJson() {
+  @override
+Map<String, dynamic> toJson() {
     return {'makeId': makeId, 'model': model};
+  }
+
+    @override
+List<dynamic> toTableRows(){
+    return [id,make,model,createdAt];
   }
 
   // Create CarModels object from JSON

@@ -1,25 +1,33 @@
-class BillyConditions {
-  int id;
+import 'base_model.dart';
+
+class BillyConditions extends BaseModel{
+  
   String name, conditionsCategory;
   int conditionsCategoryId;
-  DateTime? createdAt;
-  DateTime? updatedAt;
+  
+  
 
   BillyConditions({
-    this.id = 0,
+    super.id = 0,
     required this.name,
     required this.conditionsCategoryId,
     this.conditionsCategory="",
-    this.createdAt,
-    this.updatedAt,
+    super.createdAt,
+    super.updatedAt,
   });
 
   // Convert BillyConditions object to JSON
-  Map<String, dynamic> toJson() {
+  @override
+Map<String, dynamic> toJson() {
     return {
       'name': name,
       'conditionsCategoryId': conditionsCategoryId,
     };
+  }
+
+    @override
+List<dynamic> toTableRows(){
+    return [id,name,conditionsCategory,createdAt];
   }
 
   // Create BillyConditions object from JSON
@@ -35,24 +43,30 @@ class BillyConditions {
   }
 }
 
-class BillyConditionCategory {
-  int id;
+class BillyConditionCategory extends BaseModel{
+  
   String name;
-  DateTime? createdAt;
-  DateTime? updatedAt;
+  
+  
 
   BillyConditionCategory({
-    this.id = 0,
+    super.id = 0,
     required this.name,
-    this.createdAt,
-    this.updatedAt,
+    super.createdAt,
+    super.updatedAt,
   });
 
   // Convert BillyConditionCategory object to JSON
-  Map<String, dynamic> toJson() {
+  @override
+Map<String, dynamic> toJson() {
     return {
       'name': name,
     };
+  }
+
+      @override
+List<dynamic> toTableRows(){
+    return [id,name,createdAt];
   }
 
   // Create BillyConditionCategory object from JSON

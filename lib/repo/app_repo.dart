@@ -5,22 +5,28 @@ import 'package:inventory/tools/extensions.dart';
 
 import '../models/inner_models/barrel.dart';
 import '../models/table_repo.dart';
+import '../tools/demo.dart';
 import '../tools/service.dart';
 import '../tools/urls.dart';
 
 typedef FromJsonFactory<T> = T Function(Map<String, dynamic>);
 
 class JsonParser {
-  static List<T> parseList<T>(
+  static TotalResponse<T> parseList<T>(
       dynamic response, FromJsonFactory<dynamic> fromJson) {
     if (!(response.statusCode! as int).isSuccess()) {
-      return <T>[];
+      return TotalResponse<T>(0, <T>[]);
     }
-    final data = response.data["data"] as List<dynamic>;
-    if (data.isEmpty) return <T>[];
-    return data
+    final data = response.data["data"]["data"] as List<dynamic>;
+    final tt = response.data["data"]["total"] ?? 0;
+    List<T> dt = <T>[];
+    if (data.isNotEmpty){
+      
+    dt = data
         .map((item) => fromJson(item as Map<String, dynamic>) as T)
         .toList();
+    }
+    return TotalResponse<T>(tt, dt);
   }
 
   static T? parse<T>(dynamic response, FromJsonFactory<dynamic> fromJson) {
@@ -31,9 +37,17 @@ class JsonParser {
   }
 }
 
+class TotalResponse<T> {
+  final int total;
+  final List<T> data;
+
+TotalResponse(this.total,this.data);
+}
+
 class AppRepo extends GetxController {
   final apiService = Get.find<DioApiService>();
   final prefService = Get.find<MyPrefService>();
+  final appService = Get.find<AppService>();
 
   final Map<Type, FromJsonFactory> factories = {
     User: User.fromJson,
@@ -47,7 +61,7 @@ class AppRepo extends GetxController {
     Product: Product.fromJson,
     ProductType: ProductType.fromJson,
     ProductCategory: ProductCategory.fromJson,
-    BillyConditions: ProductCategory.fromJson,
+    BillyConditions: BillyConditions.fromJson,
     BillyConditionCategory: BillyConditionCategory.fromJson,
     BillyServices: BillyServices.fromJson
   };
@@ -69,7 +83,7 @@ class AppRepo extends GetxController {
     BillyServices: AppUrls.service
   };
 
-  List<T> getListOf<T>(dynamic res) {
+  TotalResponse<T> getListOf<T>(dynamic res) {
     return JsonParser.parseList<T>(res, factories[T]!);
   }
 
@@ -77,7 +91,7 @@ class AppRepo extends GetxController {
     return JsonParser.parse<T>(res, factories[T]!);
   }
 
-  Future<String> create<T>(Map<String, dynamic> data) async {
+  Future<int> create<T>(Map<String, dynamic> data) async {
     final res = await apiService.post(urls[T]!, data: data);
     if (!res.statusCode!.isSuccess()) {
       throw res.data["error"];
@@ -98,7 +112,7 @@ class AppRepo extends GetxController {
     return getOf<T>(res);
   }
 
-  Future<List<T>> getAll<T>(
+  Future<TotalResponse<T>> getAll<T>(
       {List<FilterModel> fm = const [],
       int page = 1,
       int limit = 10,
@@ -115,8 +129,9 @@ class AppRepo extends GetxController {
       'page': page.toString(),
       'limit': limit.toString(),
       'q': query,
-      'filter': jsonEncode(ffm), // Convert filter to JSON string
+      'filter': ffm.isEmpty ? null : jsonEncode(ffm), // Convert filter to JSON string
     };
+    
 
     // Remove null or empty values
     queryParams
@@ -139,4 +154,81 @@ class AppRepo extends GetxController {
     }
     return res.data["data"];
   }
+
+  login(String username, String password) async {
+    final res = await apiService.post(AppUrls.login,
+        data: {"username": username, "password": password});
+    if (res.statusCode!.isSuccess()) {
+      await appService.loginUser(res.data["data"]["jwt"]);
+    } else {
+      throw res.data["error"];
+    }
+  }
+
+  // sendDemoToBackend() async {
+  //   //Do For Cars
+  //   final carMakes = cars.keys.toList();
+  //   for (var i = 0; i < carMakes.length; i++) {
+  //     await create<CarMake>(CarMake(make: carMakes[i]).toJson()).then((v) async{
+  //       for (var j = 0; j < cars[carMakes[i]]!.length; j++) {
+  //         await create<CarModels>(
+  //                 CarModels(makeId: v, model: cars[carMakes[i]]![j]).toJson())
+  //             .then((vi) {
+  //           print("done car$i $vi");
+  //         }).catchError((e) {});
+  //       }
+  //     }).catchError((e) {});
+  //   }
+
+  //   //Do For Products
+  //   final prodCat = autoParts.keys.toList();
+  //   for (var i = 0; i < prodCat.length; i++) {
+  //     await create<ProductCategory>(
+  //             ProductCategory(name: prodCat[i], code: "", image: "").toJson())
+  //         .then((v) async{
+  //       for (var j = 0; j < autoParts[prodCat[i]]!.length; j++) {
+  //         await create<ProductType>(ProductType(
+  //                     productCategoryId: v,
+  //                     code: "",
+  //                     image: "",
+  //                     name: autoParts[prodCat[i]]![j])
+  //                 .toJson())
+  //             .then((vi) {
+  //           print("done prod$i $vi");
+  //         }).catchError((e) {});
+  //       }
+  //     }).catchError((e) {});
+  //   }
+
+  //   //Do For Coditons
+  //   final condCat = vehicleChecklist.keys.toList();
+  //   for (var i = 0; i < condCat.length; i++) {
+  //     await create<BillyConditionCategory>(
+  //             BillyConditionCategory(name: condCat[i]).toJson())
+  //         .then((v) async{
+  //       for (var j = 0; j < vehicleChecklist[condCat[i]]!.length; j++) {
+  //         await create<BillyConditions>(BillyConditions(
+  //                     conditionsCategoryId: v,
+  //                     name: vehicleChecklist[condCat[i]]![j])
+  //                 .toJson())
+  //             .then((vi) {
+  //           print("done cond$i $vi");
+  //         }).catchError((e) {});
+  //       }
+  //     }).catchError((e) {});
+
+  //     print("done con$i");
+  //   }
+
+  //   //Do For Services
+  //   for (var i = 0; i < demoServices.length; i++) {
+  //     await create<BillyServices>(
+  //             BillyServices(name: demoServices[i], image: "").toJson())
+  //         .then((v) {})
+  //         .catchError((e) {});
+  //     print("done ser$i");
+  //   }
+  // }
+
+
 }

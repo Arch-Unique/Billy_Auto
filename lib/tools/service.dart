@@ -217,6 +217,7 @@ class AppService extends GetxService {
     final msg = Jwt.parseJwt(jwt);
     await prefService.saveAll({
       MyPrefs.mpLoginExpiry: msg["exp"],
+      MyPrefs.mpUserID: msg["id"],
       MyPrefs.mpUserJWT: jwt,
       MyPrefs.mpIsLoggedIn: true,
     });
@@ -224,14 +225,14 @@ class AppService extends GetxService {
 
 
   _setCurrentUser() async {
-    final res = await apiService.get(AppUrls.getUser);
+    final res = await apiService.get("${AppUrls.getUser}/${prefService.get(MyPrefs.mpUserID)}");
     print(res.data);
-    currentUser.value = User.fromJson(res.data);
+    currentUser.value = User.fromJson(res.data["data"]);
   }
 
   refreshUser() async {
-    final res = await apiService.get(AppUrls.getUser);
-    currentUser.value = User.fromJson(res.data);
+    final res = await apiService.get("${AppUrls.getUser}/${prefService.get(MyPrefs.mpUserID)}");
+    currentUser.value = User.fromJson(res.data["data"]);
     currentUser.refresh();
   }
 

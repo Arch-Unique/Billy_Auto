@@ -153,7 +153,7 @@ class _OrderSummaryState extends State<OrderSummary> {
                       child: Wrap(
                         direction: Axis.vertical,
                         children: goodService
-                            .map((e) => AppText.thin(controller.allServices[e]))
+                            .map((e) => AppText.thin(controller.allBillyServices[e].name))
                             .toList(),
                       ),
                     );

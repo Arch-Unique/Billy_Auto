@@ -1,18 +1,18 @@
 class Product {
-  int id;
+  
   String name;
   double cost;
   double sellingPrice;
   int productCategoryId;
   String code;
   String image;
-  DateTime? createdAt;
-  DateTime? updatedAt;
+  
+  
   int productTypeId;
   String productCategory, productType;
 
   Product({
-    this.id = 0,
+    super.id = 0,
     required this.name,
     required this.cost,
     required this.sellingPrice,
@@ -20,14 +20,15 @@ class Product {
     this.productCategory="",
     this.code="",
     this.image="",
-    this.createdAt,
-    this.updatedAt,
+    super.createdAt,
+    super.updatedAt,
     required this.productTypeId,
     this.productType="",
   });
 
   // Convert Product object to JSON
-  Map<String, dynamic> toJson() {
+  @override
+Map<String, dynamic> toJson() {
     return {
       'name': name,
       'cost': cost,
@@ -37,6 +38,11 @@ class Product {
       'image': image,
       'productTypeId': productTypeId,
     };
+  }
+
+      @override
+List<dynamic> toTableRows(){
+    return [id,name,code,cost,sellingPrice,productType,productCategory,createdAt];
   }
 
   // Create Product object from JSON
@@ -59,27 +65,28 @@ class Product {
 }
 
 class ProductType {
-  int id;
+  
   String name;
   String code;
   String image, productCategory;
-  DateTime? createdAt;
-  DateTime? updatedAt;
+  
+  
   int productCategoryId;
 
   ProductType({
-    this.id = 0,
+    super.id = 0,
     required this.name,
     required this.code,
     required this.image,
-    this.createdAt,
-    this.updatedAt,
+    super.createdAt,
+    super.updatedAt,
     required this.productCategoryId,
     this.productCategory="",
   });
 
   // Convert ProductType object to JSON
-  Map<String, dynamic> toJson() {
+  @override
+Map<String, dynamic> toJson() {
     return {
       'name': name,
       'code': code,
@@ -88,12 +95,17 @@ class ProductType {
     };
   }
 
+      @override
+List<dynamic> toTableRows(){
+    return [id,name,code,productCategory,createdAt];
+  }
+
   // Create ProductType object from JSON
   factory ProductType.fromJson(Map<String, dynamic> json) {
     return ProductType(
       id: json['id'],
       name: json['name'],
-      code: json['code'],
+      code: json['code'] ?? "",
       image: json['image'] ?? "",
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
@@ -104,25 +116,31 @@ class ProductType {
 }
 
 class ProductCategory {
-  int id;
+  
   String name;
   String code;
   String image;
-  DateTime? createdAt;
-  DateTime? updatedAt;
+  
+  
 
   ProductCategory({
-    this.id = 0,
+    super.id = 0,
     required this.name,
     required this.code,
     required this.image,
-    this.createdAt,
-    this.updatedAt,
+    super.createdAt,
+    super.updatedAt,
   });
 
   // Convert ProductCategory object to JSON
-  Map<String, dynamic> toJson() {
+  @override
+Map<String, dynamic> toJson() {
     return {'name': name, 'code': code, 'image': image};
+  }
+
+      @override
+List<dynamic> toTableRows(){
+    return [id,name,code,createdAt];
   }
 
   // Create ProductCategory object from JSON
@@ -130,7 +148,7 @@ class ProductCategory {
     return ProductCategory(
       id: json['id'],
       name: json['name'],
-      code: json['code'],
+      code: json['code'] ?? "",
       image: json['image'] ?? "",
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),

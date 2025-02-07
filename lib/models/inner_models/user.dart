@@ -1,12 +1,12 @@
 class User {
-  int id;
+  
   String fullName;
   String username;
   String email;
   String signature;
   String role;
-  DateTime? createdAt;
-  DateTime? updatedAt;
+  
+  
 
   User({
     this.id=0,
@@ -15,12 +15,13 @@ class User {
     this.email="",
     this.signature="",
     this.role="",
-    this.createdAt,
-    this.updatedAt,
+    super.createdAt,
+    super.updatedAt,
   });
 
   // Convert User object to JSON
-  Map<String, dynamic> toJson() {
+  @override
+Map<String, dynamic> toJson() {
     return {
       'fullName': fullName,
       'username': username,
@@ -28,6 +29,11 @@ class User {
       'signature': signature,
       'role': role
     };
+  }
+
+      @override
+List<dynamic> toTableRows(){
+    return [id,fullName,username,email,role,createdAt];
   }
 
   // Create User object from JSON

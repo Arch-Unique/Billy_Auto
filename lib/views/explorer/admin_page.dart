@@ -4,10 +4,12 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:inventory/controllers/app_controller.dart';
 import 'package:inventory/models/table_repo.dart';
+import 'package:inventory/repo/app_repo.dart';
 import 'package:inventory/tools/assets.dart';
 import 'package:inventory/tools/colors.dart';
 import 'package:inventory/views/checklist/shared2.dart';
 
+import '../../models/inner_models/barrel.dart';
 import '../shared.dart';
 
 class CustomTable<T> extends StatefulWidget {
@@ -101,6 +103,17 @@ class TableModelDataSource<T> extends AsyncDataTableSource {
 
   @override
   Future<AsyncRowsResponse> getRows(int startIndex, int count) async {
+    final appRepo = Get.find<AppRepo>();
+    
+    final res = await appRepo.getAll<T>(page: startIndex+1,limit: count);
+    List<List<dynamic>> tvals;
+    switch (T) {
+      case User:
+        tvals = res.data.map((e) => (e as User).toTableRows()).toList();
+        break;
+      default:
+    }
+
     return AsyncRowsResponse(
         20,
         List.generate(count, (index) {

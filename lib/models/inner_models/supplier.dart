@@ -1,26 +1,27 @@
 class Supplier {
-  int id;
+  
   String fullName;
   String email;
   String phone;
   String address;
   String code;
-  DateTime? createdAt;
-  DateTime? updatedAt;
+  
+  
 
   Supplier({
-    this.id = 0,
+    super.id = 0,
     required this.fullName,
     required this.email,
     required this.phone,
     required this.address,
     required this.code,
-    this.createdAt,
-    this.updatedAt,
+    super.createdAt,
+    super.updatedAt,
   });
 
   // Convert Supplier object to JSON
-  Map<String, dynamic> toJson() {
+  @override
+Map<String, dynamic> toJson() {
     return {
       'fullName': fullName,
       'email': email,
@@ -28,6 +29,11 @@ class Supplier {
       'address': address,
       'code': code
     };
+  }
+
+      @override
+List<dynamic> toTableRows(){
+    return [id,fullName,email,phone,code,createdAt];
   }
 
   // Create Supplier object from JSON

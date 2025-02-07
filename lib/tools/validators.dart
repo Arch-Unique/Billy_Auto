@@ -5,9 +5,9 @@ import 'package:inventory/tools/enums.dart';
 abstract class Validators {
   static String? passwordValidator(dynamic value) {
     if (value?.isEmpty ?? true) {
-      return ('PIN is required');
-    } else if (value.length != 6) {
-      return ('PIN must be 6 digits');
+      return ('Password is required');
+    } else if (value.length < 8) {
+      return ('Password must be greater than 8 digits');
     } else {
       return null;
     }

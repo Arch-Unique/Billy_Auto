@@ -11,6 +11,7 @@ import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
 
 import '../tools/assets.dart';
 import '../tools/enums.dart';
+import '../tools/service.dart';
 import '../tools/validators.dart';
 
 class CurvedContainer extends StatefulWidget {
@@ -1414,6 +1415,26 @@ class _SignatureViewState extends State<SignatureView> {
     return SizedBox(
       width: widget.size!,
       child: content,
+    );
+  }
+}
+
+
+
+class ProfileLogo extends StatelessWidget {
+  const ProfileLogo({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.find<AppService>();
+    return CircleAvatar(
+     radius: 20,
+     backgroundColor: AppColors.white,
+     child: CircleAvatar(radius: 19,
+     backgroundColor: AppColors.green,
+     child: Center(child: AppText.thin(controller.currentUser.value.username[0].toUpperCase(),color: AppColors.white),),),
     );
   }
 }

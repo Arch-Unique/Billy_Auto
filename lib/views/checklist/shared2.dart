@@ -278,3 +278,51 @@ class CustomTextField2 extends StatelessWidget {
 double wideUi(BuildContext context){
   return Ui.width(context) < 650 ?  Ui.width(context) < 450 ? Ui.width(context)-50: Ui.width(context)-100 : Ui.width(context) - 200;
 }
+
+class BackgroundScaffold extends StatelessWidget {
+  const BackgroundScaffold({required this.child,this.hasBack=false,this.hasUser=false, super.key});
+  final Widget child;
+  final bool hasBack;
+  final bool hasUser;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: AlignmentDirectional.center,
+      children: [
+        Opacity(
+                opacity: 0.08,
+                child: Image.asset(
+                  Assets.backg,
+                  fit: BoxFit.cover,
+                  width: Ui.width(context),
+                  height: Ui.height(context),
+                )),
+            Container(
+              width: Ui.width(context),
+              height: Ui.height(context),
+              color: AppColors.white.withOpacity(0.7),
+            ),
+            child,
+            if(hasBack)
+            Positioned(
+                top: 24,
+                left: 8,
+                child: SafeArea(
+                  child: BackButton(
+                    onPressed: () {
+                      Get.back();
+                    },
+                  ),
+                )),
+                if(hasUser)
+            Positioned(
+                top: 24,
+                right: 24,
+                child: SafeArea(
+                  child: ProfileLogo()
+                ))
+      ],
+    );
+  }
+}
