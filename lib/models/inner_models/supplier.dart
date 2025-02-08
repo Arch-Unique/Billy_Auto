@@ -1,4 +1,6 @@
-class Supplier {
+import 'package:inventory/models/inner_models/base_model.dart';
+
+class Supplier extends BaseModel{
   
   String fullName;
   String email;

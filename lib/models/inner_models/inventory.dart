@@ -1,7 +1,6 @@
 import 'base_model.dart';
 
-class Inventory extends BaseModel{{
-  
+class Inventory extends BaseModel {
   int productId;
   int qty;
   String transactionType;
@@ -11,33 +10,32 @@ class Inventory extends BaseModel{{
   int productCategoryId;
   String location;
   DateTime shelfLife;
-  
-  
+
   int productTypeId;
   String productType, productCategory, product;
 
   Inventory({
     super.id = 0,
     required this.productId,
-    this.product="",
+    this.product = "",
     required this.qty,
     required this.transactionType,
     required this.status,
-    this.supplier="",
+    this.supplier = "",
     required this.supplierId,
     required this.productCategoryId,
-    this.productCategory="",
+    this.productCategory = "",
     required this.location,
     required this.shelfLife,
     super.createdAt,
     super.updatedAt,
     required this.productTypeId,
-    this.productType="",
+    this.productType = "",
   });
 
   // Convert Inventory object to JSON
   @override
-Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'productId': productId,
       'qty': qty,
@@ -51,9 +49,20 @@ Map<String, dynamic> toJson() {
     };
   }
 
-      @override
-List<dynamic> toTableRows(){
-    return [id,product,qty,status,transactionType,location,shelfLife,productType,productCategory,createdAt];
+  @override
+  List<dynamic> toTableRows() {
+    return [
+      id,
+      product,
+      qty,
+      status,
+      transactionType,
+      location,
+      shelfLife,
+      productType,
+      productCategory,
+      createdAt
+    ];
   }
 
   // Create Inventory object from JSON

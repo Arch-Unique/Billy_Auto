@@ -1,6 +1,8 @@
 import 'dart:convert';
 
-class Order {
+import 'base_model.dart';
+
+class Order extends BaseModel{
   int customerId;
   int carId;
   

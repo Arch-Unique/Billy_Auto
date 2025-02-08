@@ -1,4 +1,6 @@
-class Product {
+import 'package:inventory/models/inner_models/base_model.dart';
+
+class Product extends BaseModel{
   
   String name;
   double cost;
@@ -64,7 +66,7 @@ List<dynamic> toTableRows(){
   }
 }
 
-class ProductType {
+class ProductType extends BaseModel{
   
   String name;
   String code;
@@ -115,7 +117,7 @@ List<dynamic> toTableRows(){
   }
 }
 
-class ProductCategory {
+class ProductCategory extends BaseModel{
   
   String name;
   String code;

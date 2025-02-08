@@ -28,12 +28,66 @@ class _ExplorerPageState extends State<ExplorerPage> {
   void initState() {
     // TODO: implement initState
     screens = [
-      
       Placeholder(),
-      CustomTablePage<Inventory>([HeaderChooser([HeaderItem("Inventory"),HeaderItem("Inbound"),HeaderItem("Outbound")])],),
-      CustomTablePage<Product>( [HeaderChooser([HeaderItem("Products"),HeaderItem("Categories"),HeaderItem("Types")])],),
-      CustomTablePage<Order>([HeaderChooser([HeaderItem("Orders"),HeaderItem("Custoomers"),HeaderItem("Customer Cars")])],),
-      Placeholder(),
+      CustomTablePage(
+        [
+          HeaderItem("Inventory", vb: () {
+            controller.setCurrentTypeTable<Inventory>();
+          }),
+          HeaderItem("Inbound", vb: () {
+            // controller.setCurrentTypeTable<Inventory>();
+          }),
+          HeaderItem("Outbound", vb: () {
+            // controller.setCurrentTypeTable<Inventory>();
+          })
+        ],
+      ),
+      CustomTablePage(
+        [
+          HeaderItem("Products", vb: () {
+            controller.setCurrentTypeTable<Product>();
+          }),
+          HeaderItem("Categories", vb: () {
+            controller.setCurrentTypeTable<ProductCategory>();
+          }),
+          HeaderItem("Types", vb: () {
+            controller.setCurrentTypeTable<ProductType>();
+          }),HeaderItem("Supplier", vb: () {
+            controller.setCurrentTypeTable<Supplier>();
+          })
+        ],
+      ),
+      CustomTablePage([
+        HeaderItem("Orders", vb: () {
+          controller.setCurrentTypeTable<Order>();
+        }),
+        HeaderItem("Customers", vb: () {
+          controller.setCurrentTypeTable<Customer>();
+        }),
+        HeaderItem("Customer Cars", vb: () {
+          controller.setCurrentTypeTable<CustomerCar>();
+        })
+      ]),
+      CustomTablePage([
+        HeaderItem("Car Brands", vb: () {
+          controller.setCurrentTypeTable<CarMake>();
+        }),
+        HeaderItem("Car Models", vb: () {
+          controller.setCurrentTypeTable<CarModels>();
+        }),
+        HeaderItem("Services", vb: () {
+          controller.setCurrentTypeTable<BillyServices>();
+        }),
+        HeaderItem("Inspection Details", vb: () {
+          controller.setCurrentTypeTable<BillyConditions>();
+        }),
+        HeaderItem("Inspection Category", vb: () {
+          controller.setCurrentTypeTable<BillyConditionCategory>();
+        }),
+        HeaderItem("Users", vb: () {
+          controller.setCurrentTypeTable<User>();
+        })
+      ]),
     ];
     super.initState();
   }
@@ -44,18 +98,18 @@ class _ExplorerPageState extends State<ExplorerPage> {
       body: Stack(
         children: [
           Opacity(
-                opacity: 0.5,
-                child: Image.asset(
-                  Assets.backge,
-                  fit: BoxFit.cover,
-                  width: Ui.width(context),
-                  height: Ui.height(context),
-                )),
-                Container(
-              width: Ui.width(context),
-              height: Ui.height(context),
-              color: AppColors.white.withOpacity(0.7),
-            ),
+              opacity: 0.5,
+              child: Image.asset(
+                Assets.backge,
+                fit: BoxFit.cover,
+                width: Ui.width(context),
+                height: Ui.height(context),
+              )),
+          Container(
+            width: Ui.width(context),
+            height: Ui.height(context),
+            color: AppColors.white.withOpacity(0.7),
+          ),
           Column(
             children: [
               header(),
@@ -69,60 +123,59 @@ class _ExplorerPageState extends State<ExplorerPage> {
     );
   }
 
-  header(){
+  header() {
     return Container(
       color: AppColors.primaryColor,
       child: Row(
-              children: [
-                BackButton(),
-                Ui.boxWidth(24),
-                LogoWidget(64,isWhite:  false),
-                Spacer(),
-                ...List.generate(DashboardModes.values.length, (i) {
-                  return Obx(() {
-                    return CurvedContainer(
-                      radius: 64,
-                      onPressed: (){
-                        controller.currentDashboardMode.value =
-                                  DashboardModes.values[i];
-                      },
-                      color: controller.currentDashboardMode.value ==
-                                  DashboardModes.values[i]
-                              ? AppColors.primaryColor
-                              : AppColors.transparent,
-                      padding: EdgeInsets.symmetric(vertical: 8,horizontal: 24),
-                      border: Border.all(
-                          color: controller.currentDashboardMode.value ==
-                                  DashboardModes.values[i]
-                              ? AppColors.white
-                              : AppColors.transparent),
-                      margin: EdgeInsets.symmetric(horizontal: 8),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          AppIcon(DashboardModes.values[i].icon,
-                              color: controller.currentDashboardMode.value ==
-                                      DashboardModes.values[i]
-                                  ? AppColors.white
-                                  : AppColors.primaryColorLight),
-                          Ui.boxWidth(8),
-                          AppText.bold(DashboardModes.values[i].title,
-                          fontSize:14,
-                              color: controller.currentDashboardMode.value ==
-                                      DashboardModes.values[i]
-                                  ? AppColors.white
-                                  : AppColors.primaryColorLight)
-                        ],
-                      ),
-                    );
-                  });
-                }),
-                 Ui.boxWidth(24),
-                 ProfileLogo(),
-                 Ui.boxWidth(24),
-              ],
-            ),
+        children: [
+          BackButton(),
+          Ui.boxWidth(24),
+          LogoWidget(64, isWhite: false),
+          Spacer(),
+          ...List.generate(DashboardModes.values.length, (i) {
+            return Obx(() {
+              return CurvedContainer(
+                radius: 64,
+                onPressed: () {
+                  controller.currentDashboardMode.value =
+                      DashboardModes.values[i];
+                },
+                color: controller.currentDashboardMode.value ==
+                        DashboardModes.values[i]
+                    ? AppColors.primaryColor
+                    : AppColors.transparent,
+                padding: EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+                border: Border.all(
+                    color: controller.currentDashboardMode.value ==
+                            DashboardModes.values[i]
+                        ? AppColors.white
+                        : AppColors.transparent),
+                margin: EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AppIcon(DashboardModes.values[i].icon,
+                        color: controller.currentDashboardMode.value ==
+                                DashboardModes.values[i]
+                            ? AppColors.white
+                            : AppColors.primaryColorLight),
+                    Ui.boxWidth(8),
+                    AppText.bold(DashboardModes.values[i].title,
+                        fontSize: 14,
+                        color: controller.currentDashboardMode.value ==
+                                DashboardModes.values[i]
+                            ? AppColors.white
+                            : AppColors.primaryColorLight)
+                  ],
+                ),
+              );
+            });
+          }),
+          Ui.boxWidth(24),
+          ProfileLogo(),
+          Ui.boxWidth(24),
+        ],
+      ),
     );
   }
 }
-

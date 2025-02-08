@@ -1,4 +1,6 @@
-class User {
+import 'base_model.dart';
+
+class User extends BaseModel{
   
   String fullName;
   String username;
@@ -9,7 +11,7 @@ class User {
   
 
   User({
-    this.id=0,
+    super.id=0,
     this.fullName="",
     this.username="",
     this.email="",

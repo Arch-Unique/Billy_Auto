@@ -20,11 +20,10 @@ class JsonParser {
     final data = response.data["data"]["data"] as List<dynamic>;
     final tt = response.data["data"]["total"] ?? 0;
     List<T> dt = <T>[];
-    if (data.isNotEmpty){
-      
-    dt = data
-        .map((item) => fromJson(item as Map<String, dynamic>) as T)
-        .toList();
+    if (data.isNotEmpty) {
+      dt = data
+          .map((item) => fromJson(item as Map<String, dynamic>) as T)
+          .toList();
     }
     return TotalResponse<T>(tt, dt);
   }
@@ -41,7 +40,7 @@ class TotalResponse<T> {
   final int total;
   final List<T> data;
 
-TotalResponse(this.total,this.data);
+  TotalResponse(this.total, this.data);
 }
 
 class AppRepo extends GetxController {
@@ -67,7 +66,7 @@ class AppRepo extends GetxController {
   };
 
   final Map<Type, String> urls = {
-    User: AppUrls.user,
+    User: AppUrls.getUser,
     CarMake: AppUrls.carMake,
     CarModels: AppUrls.carModel,
     Customer: AppUrls.customer,
@@ -129,9 +128,9 @@ class AppRepo extends GetxController {
       'page': page.toString(),
       'limit': limit.toString(),
       'q': query,
-      'filter': ffm.isEmpty ? null : jsonEncode(ffm), // Convert filter to JSON string
+      'filter':
+          ffm.isEmpty ? null : jsonEncode(ffm), // Convert filter to JSON string
     };
-    
 
     // Remove null or empty values
     queryParams
@@ -229,6 +228,4 @@ class AppRepo extends GetxController {
   //     print("done ser$i");
   //   }
   // }
-
-
 }

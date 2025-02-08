@@ -1,14 +1,11 @@
 import 'base_model.dart';
 
-class Customer extends BaseModel{{
-  
+class Customer extends BaseModel {
   String email;
   String phone;
   String fullName;
   String signature;
   String customerType;
-  
-  
 
   Customer({
     super.id = 0,
@@ -23,7 +20,7 @@ class Customer extends BaseModel{{
 
   // Convert Customer object to JSON
   @override
-Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'email': email,
       'phone': phone,
@@ -33,9 +30,9 @@ Map<String, dynamic> toJson() {
     };
   }
 
-      @override
-List<dynamic> toTableRows(){
-    return [id,fullName,phone,email,customerType,createdAt];
+  @override
+  List<dynamic> toTableRows() {
+    return [id, fullName, phone, email, customerType, createdAt];
   }
 
   // Create Customer object from JSON

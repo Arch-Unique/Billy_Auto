@@ -69,7 +69,7 @@ class AllTables {
     BillyConditions: TableModel([
       "id",
       "name",
-      "conditionsCategory",
+      "category",
       "createdAt"
     ], [
       FilterModel("Conditions Category", "conditionsCategoryId", 0),
@@ -106,7 +106,7 @@ class AllTables {
       "id",
       "name",
       "code",
-      "productCategory",
+      "category",
       "createdAt"
     ], [
       FilterModel("Product Category", "productCategoryId", 0),
@@ -118,8 +118,8 @@ class AllTables {
       "code",
       "cost",
       "sellingPrice",
-      "productType",
-      "productCategory",
+      "type",
+      "category",
       "createdAt"
     ], [
       FilterModel("Product Type", "productTypeId", 0),
@@ -131,11 +131,11 @@ class AllTables {
       "product",
       "qty",
       "status",
-      "transactionType",
+      "transaction Type",
       "location",
       "shelflife",
-      "productType",
-      "productCategory",
+      "product Type",
+      "product Category",
       "createdAt"
     ], [
       FilterModel("Product", "productId", 0),
@@ -150,8 +150,8 @@ class AllTables {
       "id",
       "customer",
       "car",
-      "mileageOnReception",
-      "fuelLevel",
+      "mileage",
+      "fuel level",
       "createdAt"
     ], [
       FilterModel("Customer", "customerId", 0),

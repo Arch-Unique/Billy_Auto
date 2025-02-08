@@ -1,8 +1,11 @@
+import 'dart:nativewrappers/_internal/vm/lib/mirrors_patch.dart';
+
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:inventory/controllers/app_controller.dart';
+import 'package:inventory/models/inner_models/base_model.dart';
 import 'package:inventory/models/table_repo.dart';
 import 'package:inventory/repo/app_repo.dart';
 import 'package:inventory/tools/assets.dart';
@@ -12,47 +15,56 @@ import 'package:inventory/views/checklist/shared2.dart';
 import '../../models/inner_models/barrel.dart';
 import '../shared.dart';
 
-class CustomTable<T> extends StatefulWidget {
-  const CustomTable(this.tm, {this.fm = const [], super.key});
-  final List<String> tm;
-  final List<FilterModel> fm;
+class CustomTable extends StatefulWidget {
+  const CustomTable({super.key});
 
   @override
-  State<CustomTable<T>> createState() => _CustomTableState<T>();
+  State<CustomTable> createState() => _CustomTableState();
 }
 
-class _CustomTableState<T> extends State<CustomTable<T>> {
+class _CustomTableState extends State<CustomTable> {
+  final controller = Get.find<AppController>();
   @override
   Widget build(BuildContext context) {
     return CurvedContainer(
       width: (Ui.width(context) * 0.75) - 24,
       height: double.maxFinite,
       color: AppColors.white.withOpacity(0.6),
-      padding: EdgeInsets.only(left: 16, right: 16, bottom: 16),
-      margin: EdgeInsets.symmetric(vertical: 8),
-      child: AsyncPaginatedDataTable2(
-        minWidth: (Ui.width(context)),
-        onRowsPerPageChanged: (value) {
-          print('Row per page changed to $value');
-        },
-        columnSpacing: 0,
-        onSelectAll: (v) {
-          print(v);
-        },
-        header: AppText.medium("Records",
-            fontFamily: Assets.appFontFamily2, fontSize: 16),
-        columns: widget.tm
-            .map((e) => DataColumn2(label: AppText.bold(e), size: ColumnSize.S))
-            .toList(),
-        source: TableModelDataSource<T>(widget.tm, widget.fm),
-      ),
+      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Obx(() {
+        return AsyncPaginatedDataTable2(
+          minWidth: (Ui.width(context) * 0.75) - 56,
+          onRowsPerPageChanged: (value) {
+            print('Row per page changed to $value');
+          },
+          
+           
+          columnSpacing: 0,
+          onSelectAll: (v) {
+            print(v);
+          },
+          // controller: controller.paginatorController.value,
+          header: AppText.medium("Records",
+              fontFamily: Assets.appFontFamily2, fontSize: 16),
+              actions: [
+                AppIcon(Icons.add_circle,color: AppColors.green,size: 40,), //add new
+              ],
+              
+          columns: controller.currentHeaders
+              .map((e) =>
+                  DataColumn2(label: AppText.bold(e,fontSize: 14), size: ColumnSize.S))
+              .toList(),
+          source: controller.tmds.value,
+        );
+      }),
     );
   }
 }
 
 class CustomTableFilter extends StatelessWidget {
-  const CustomTableFilter(this.fm, {super.key});
-  final List<FilterModel> fm;
+  CustomTableFilter({super.key});
+  final controller = Get.find<AppController>();
 
   @override
   Widget build(BuildContext context) {
@@ -60,37 +72,39 @@ class CustomTableFilter extends StatelessWidget {
       width: (Ui.width(context) * 0.25) - 24,
       height: double.maxFinite,
       color: AppColors.white.withOpacity(0.6),
-      padding: EdgeInsets.all(16),
-      margin: EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: SingleChildScrollView(
-        child: Column(
-          children: [
-            AppText.medium("Filters",
-                fontFamily: Assets.appFontFamily2, fontSize: 16),
-            Ui.boxHeight(24),
-            if (fm.isEmpty) SizedBox(),
-            ...fm.map((e) {
-              if (e.filterType == 0) {
-                return MultiSelectDropdown(e.options!, e.tec!, e.title);
-              }
-              return CustomTextField(
-                e.title,
-                e.tec!,
-                readOnly: true,
-                onTap: () async {
-                  final dtr = await showDateRangePicker(
-                      context: context,
-                      firstDate: DateTime(1980),
-                      lastDate: DateTime.now());
-                  if (dtr != null) {
-                    e.tec!.text =
-                        "${DateFormat("dd/MM/yyyy").format(dtr.start)} - ${DateFormat("dd/MM/yyyy").format(dtr.end)}";
-                  }
-                },
-              );
-            })
-          ],
-        ),
+        child: Obx(() {
+          return Column(
+            children: [
+              AppText.medium("Filters",
+                  fontFamily: Assets.appFontFamily2, fontSize: 16),
+              Ui.boxHeight(24),
+              if (controller.currentFilters.isEmpty) const SizedBox(),
+              ...controller.currentFilters.map((e) {
+                if (e.filterType == 0) {
+                  return MultiSelectDropdown(e.options!, e.tec!, e.title);
+                }
+                return CustomTextField(
+                  e.title,
+                  e.tec!,
+                  readOnly: true,
+                  onTap: () async {
+                    final dtr = await showDateRangePicker(
+                        context: context,
+                        firstDate: DateTime(1980),
+                        lastDate: DateTime.now());
+                    if (dtr != null) {
+                      e.tec!.text =
+                          "${DateFormat("dd/MM/yyyy").format(dtr.start)} - ${DateFormat("dd/MM/yyyy").format(dtr.end)}";
+                    }
+                  },
+                );
+              })
+            ],
+          );
+        }),
       ),
     );
   }
@@ -104,19 +118,16 @@ class TableModelDataSource<T> extends AsyncDataTableSource {
   @override
   Future<AsyncRowsResponse> getRows(int startIndex, int count) async {
     final appRepo = Get.find<AppRepo>();
-    
-    final res = await appRepo.getAll<T>(page: startIndex+1,limit: count);
-    List<List<dynamic>> tvals;
-    switch (T) {
-      case User:
-        tvals = res.data.map((e) => (e as User).toTableRows()).toList();
-        break;
-      default:
-    }
+    int page = (startIndex ~/ count) + 1;
+
+    final res = await appRepo.getAll<T>(page: page, limit: count);
+    List<List<dynamic>> tvals =
+        res.data.map((e) => (e as BaseModel).toTableRows()).toList();
 
     return AsyncRowsResponse(
-        20,
-        List.generate(count, (index) {
+        res.total,
+        List.generate(res.data.length, (index) {
+          final tval = tvals[index];
           return DataRow2(
               onSelectChanged: (b) {},
               cells: List.generate(tm.length, (jindex) {
@@ -124,47 +135,46 @@ class TableModelDataSource<T> extends AsyncDataTableSource {
                   return DataCell(Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      AppIcon(
+                      const AppIcon(
                         Icons.remove_red_eye,
                         color: Colors.brown,
                       ),
                       Ui.boxWidth(12),
-                      AppIcon(
+                      const AppIcon(
                         Icons.edit,
                         color: AppColors.green,
                       ),
                       Ui.boxWidth(12),
-                      AppIcon(
+                      const AppIcon(
                         Icons.delete,
                         color: Colors.red,
                       ),
                     ],
                   ));
                 }
-                return DataCell(AppText.thin("${startIndex + index} $jindex"));
+                return DataCell(AppText.thin(tval[jindex].toString()));
               }));
         }));
   }
 }
 
 class CustomTableTitle extends StatelessWidget {
-  const CustomTableTitle(this.title, {this.actions = const [], super.key});
-  final String title;
+  const CustomTableTitle(this.hi, {this.actions = const [], super.key});
   final List<Widget> actions;
+  final List<HeaderItem> hi;
 
   @override
   Widget build(BuildContext context) {
     return CurvedContainer(
         width: Ui.width(context) - 24,
         color: AppColors.white.withOpacity(0.6),
-        padding: EdgeInsets.all(16),
-        margin: EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: [
-            AppText.medium(title,
-                fontFamily: Assets.appFontFamily2, fontSize: 24),
+            HeaderChooser(hi),
             if (actions.isNotEmpty) ...actions,
-            Spacer(),
+            const Spacer(),
             SizedBox(
                 width: Ui.width(context) / 4,
                 child: CustomTextField2(
@@ -185,26 +195,31 @@ class CustomTableTitle extends StatelessWidget {
   }
 }
 
-class CustomTablePage<T> extends StatefulWidget {
-  const CustomTablePage(this.actions, {super.key});
-  final List<Widget> actions;
+class CustomTablePage extends StatefulWidget {
+  const CustomTablePage(this.hi, {super.key});
+  final List<HeaderItem> hi;
 
   @override
-  State<CustomTablePage<T>> createState() => _CustomTablePageState<T>();
+  State<CustomTablePage> createState() => _CustomTablePageState();
 }
 
-class _CustomTablePageState<T> extends State<CustomTablePage<T>> {
+class _CustomTablePageState extends State<CustomTablePage> {
   final controller = Get.find<AppController>();
 
   @override
   void initState() {
-    controller.currentHeaders.value = AllTables.tablesData[T]!.headers;
-    if(!controller.currentHeaders.contains("actions")){
-
-    controller.currentHeaders.add("actions");
-    }
-    controller.currentFilters.value = AllTables.tablesData[T]!.fm;
+    widget.hi[0].vb!();
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant CustomTablePage oldWidget) {
+    // TODO: implement didUpdateWidget
+    if(oldWidget.hi != widget.hi){
+
+    widget.hi[0].vb!();
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -212,17 +227,12 @@ class _CustomTablePageState<T> extends State<CustomTablePage<T>> {
     return Column(
       children: [
         CustomTableTitle(
-          "",
-          actions: widget.actions,
+          widget.hi,
         ),
         Expanded(
             child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            CustomTableFilter(controller.currentFilters),
-            CustomTable<T>(controller.currentHeaders,
-                fm: controller.currentFilters)
-          ],
+          children: [CustomTableFilter(), CustomTable()],
         ))
       ],
     );
@@ -247,34 +257,193 @@ class HeaderChooser extends StatelessWidget {
               curHeader.value = i;
               if (hi[i].vb != null) hi[i].vb!();
             },
-            child: Obx(
-               () {
-                return Container(
-                  padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      topLeft: i == 0 ? rd : Radius.zero,
-                      topRight: i == hi.length - 1 ? rd : Radius.zero,
-                      bottomLeft: i == 0 ? rd : Radius.zero,
-                      bottomRight: i == hi.length - 1 ? rd : Radius.zero,
-                    ),
-                    color: curHeader.value == i
-                        ? AppColors.primaryColor
-                        : AppColors.white,
+            child: Obx(() {
+              return Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    topLeft: i == 0 ? rd : Radius.zero,
+                    topRight: i == hi.length - 1 ? rd : Radius.zero,
+                    bottomLeft: i == 0 ? rd : Radius.zero,
+                    bottomRight: i == hi.length - 1 ? rd : Radius.zero,
                   ),
-                  child: AppText.medium(
-                    hi[i].title,
-                    fontSize: 16,
-                    color: curHeader.value == i
-                        ? AppColors.white
-                        : AppColors.primaryColor,
-                  ),
-                );
-              }
-            ),
+                  color: curHeader.value == i
+                      ? AppColors.primaryColor
+                      : AppColors.white,
+                ),
+                child: AppText.medium(
+                  hi[i].title,
+                  fontSize: 16,
+                  color: curHeader.value == i
+                      ? AppColors.white
+                      : AppColors.primaryColor,
+                ),
+              );
+            }),
           ),
         );
       }),
     );
+  }
+}
+
+
+class DynamicFormGenerator<T extends BaseModel> extends StatefulWidget {
+  final T model;
+  final Function(Map<String, dynamic>) onSave;
+
+  const DynamicFormGenerator({
+    Key? key,
+    required this.model,
+    required this.onSave,
+  }) : super(key: key);
+
+  @override
+  State<DynamicFormGenerator> createState() => _DynamicFormGeneratorState<T>();
+}
+
+class _DynamicFormGeneratorState<T extends BaseModel> extends State<DynamicFormGenerator<T>> {
+  final _formKey = GlobalKey<FormState>();
+  final Map<String, dynamic> _formData = {};
+  final Map<String, TextEditingController> _controllers = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeControllers();
+  }
+
+  void _initializeControllers() {
+    // Get the toJson fields using mirrors
+    final mirror = reflect(widget.model);
+    Map<String, dynamic> jsonMap = widget.model.toJson();
+    
+    // Create controllers for each field
+    jsonMap.forEach((key, value) {
+      if (!['id', 'createdAt', 'updatedAt'].contains(key)) {
+        _controllers[key] = TextEditingController(
+          text: value?.toString() ?? ''
+        );
+      }
+    });
+  }
+
+  Widget _buildField(String fieldName, dynamic value) {
+    // Determine field type based on value
+    if (value is String) {
+      return TextFormField(
+        controller: _controllers[fieldName],
+        decoration: InputDecoration(
+          labelText: _formatFieldName(fieldName),
+          border: const OutlineInputBorder(),
+        ),
+        onSaved: (value) => _formData[fieldName] = value,
+      );
+    } else if (value is int) {
+      return TextFormField(
+        controller: _controllers[fieldName],
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+          labelText: _formatFieldName(fieldName),
+          border: const OutlineInputBorder(),
+        ),
+        onSaved: (value) => _formData[fieldName] = int.tryParse(value ?? ''),
+      );
+    } else if (value is double) {
+      return TextFormField(
+        controller: _controllers[fieldName],
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+          labelText: _formatFieldName(fieldName),
+          border: const OutlineInputBorder(),
+        ),
+        onSaved: (value) => _formData[fieldName] = double.tryParse(value ?? ''),
+      );
+    } else if (value is DateTime) {
+      return _buildDateTimePicker(fieldName);
+    }
+    // Add more field types as needed
+    
+    return Container(); // Default empty container for unsupported types
+  }
+
+  Widget _buildDateTimePicker(String fieldName) {
+    return InkWell(
+      onTap: () async {
+        final DateTime? picked = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2100),
+        );
+        if (picked != null) {
+          setState(() {
+            _controllers[fieldName]?.text = picked.toIso8601String();
+            _formData[fieldName] = picked;
+          });
+        }
+      },
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: _formatFieldName(fieldName),
+          border: const OutlineInputBorder(),
+        ),
+        child: Text(
+          _controllers[fieldName]?.text ?? 'Select Date',
+        ),
+      ),
+    );
+  }
+
+  String _formatFieldName(String name) {
+    return name
+        .replaceAllMapped(
+          RegExp(r'([A-Z])'),
+          (match) => ' ${match.group(1)}',
+        )
+        .capitalize();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Map<String, dynamic> jsonMap = widget.model.toJson();
+    
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          ...jsonMap.entries
+              .where((entry) => !['id', 'createdAt', 'updatedAt'].contains(entry.key))
+              .map((entry) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: _buildField(entry.key, entry.value),
+                  ))
+              .toList(),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              if (_formKey.currentState?.validate() ?? false) {
+                _formKey.currentState?.save();
+                widget.onSave(_formData);
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controllers.forEach((_, controller) => controller.dispose());
+    super.dispose();
+  }
+}
+
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${substring(1)}";
   }
 }

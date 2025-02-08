@@ -1,4 +1,6 @@
-class BillyServices {
+import 'base_model.dart';
+
+class BillyServices extends BaseModel{
   
   String name;
   String image;
