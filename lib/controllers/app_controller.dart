@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:inventory/models/inner_models/base_model.dart';
 import 'package:inventory/models/table_repo.dart';
 import 'package:inventory/tools/demo.dart';
 import 'package:inventory/tools/enums.dart';
@@ -81,6 +82,7 @@ class AppController extends GetxController {
   //TABLE
   Rx<TableModelDataSource> tmds = TableModelDataSource([], []).obs;
   Rx<PaginatorController> paginatorController = PaginatorController().obs;
+  Rx<BaseModel> currentBaseModel = User().obs;
 
   final appRepo = Get.find<AppRepo>();
 
@@ -152,20 +154,16 @@ class AppController extends GetxController {
   }
 
   //EXPLORER
-  setCurrentTypeTable<T>() {
+  setCurrentTypeTable<T extends BaseModel>() {
     currentHeaders.value = AllTables.tablesData[T]!.headers;
     if (!currentHeaders.contains("actions")) {
       currentHeaders.add("actions");
     }
     currentFilters.value = AllTables.tablesData[T]!.fm;
+    currentBaseModel = AllTables.tablesData[T]!.bm.obs;
     currentFilters.refresh();
     currentHeaders.refresh();
-    // paginatorController.value = PaginatorController();
-    // if(paginatorController.value.isAttached){
 
-    // paginatorController.value.goToFirstPage();
-    // paginatorController.value = PaginatorController();
-    // }
     tmds.value = TableModelDataSource<T>(currentHeaders, currentFilters);
   }
 }

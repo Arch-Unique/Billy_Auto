@@ -1,4 +1,4 @@
-import 'dart:nativewrappers/_internal/vm/lib/mirrors_patch.dart';
+import 'dart:io';
 
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +13,7 @@ import 'package:inventory/tools/colors.dart';
 import 'package:inventory/views/checklist/shared2.dart';
 
 import '../../models/inner_models/barrel.dart';
+import '../../tools/functions.dart';
 import '../shared.dart';
 
 class CustomTable extends StatefulWidget {
@@ -38,8 +39,7 @@ class _CustomTableState extends State<CustomTable> {
           onRowsPerPageChanged: (value) {
             print('Row per page changed to $value');
           },
-          
-           
+
           columnSpacing: 0,
           onSelectAll: (v) {
             print(v);
@@ -47,13 +47,28 @@ class _CustomTableState extends State<CustomTable> {
           // controller: controller.paginatorController.value,
           header: AppText.medium("Records",
               fontFamily: Assets.appFontFamily2, fontSize: 16),
-              actions: [
-                AppIcon(Icons.add_circle,color: AppColors.green,size: 40,), //add new
-              ],
-              
+          actions: [
+            InkWell(
+                mouseCursor: SystemMouseCursors.click,
+                onTap: () {
+                  Get.dialog(AppDialog(
+                      title: AppText.thin("Add New Record"),
+                      content: Obx(() {
+                        return DynamicFormGenerator(
+                            model: controller.currentBaseModel.value,
+                            onSave: (v) {});
+                      })));
+                },
+                child: AppIcon(
+                  Icons.add_circle,
+                  color: AppColors.green,
+                  size: 40,
+                )), //add new
+          ],
+
           columns: controller.currentHeaders
-              .map((e) =>
-                  DataColumn2(label: AppText.bold(e,fontSize: 14), size: ColumnSize.S))
+              .map((e) => DataColumn2(
+                  label: AppText.bold(e, fontSize: 14), size: ColumnSize.S))
               .toList(),
           source: controller.tmds.value,
         );
@@ -110,7 +125,7 @@ class CustomTableFilter extends StatelessWidget {
   }
 }
 
-class TableModelDataSource<T> extends AsyncDataTableSource {
+class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
   List<FilterModel> filters;
   List<String> tm;
   TableModelDataSource(this.tm, this.filters);
@@ -121,6 +136,7 @@ class TableModelDataSource<T> extends AsyncDataTableSource {
     int page = (startIndex ~/ count) + 1;
 
     final res = await appRepo.getAll<T>(page: page, limit: count);
+    List<T> bms = res.data;
     List<List<dynamic>> tvals =
         res.data.map((e) => (e as BaseModel).toTableRows()).toList();
 
@@ -128,6 +144,7 @@ class TableModelDataSource<T> extends AsyncDataTableSource {
         res.total,
         List.generate(res.data.length, (index) {
           final tval = tvals[index];
+          final bm = bms[index];
           return DataRow2(
               onSelectChanged: (b) {},
               cells: List.generate(tm.length, (jindex) {
@@ -140,9 +157,19 @@ class TableModelDataSource<T> extends AsyncDataTableSource {
                         color: Colors.brown,
                       ),
                       Ui.boxWidth(12),
-                      const AppIcon(
+                      AppIcon(
                         Icons.edit,
                         color: AppColors.green,
+                        onTap: () {
+                          Get.find<AppController>().currentBaseModel = bm.obs;
+                          Get.dialog(AppDialog(
+                      title: AppText.thin("Add New Record"),
+                      content: Obx(() {
+                        return DynamicFormGenerator(
+                            model: Get.find<AppController>().currentBaseModel.value,
+                            onSave: (v) {});
+                      })));
+                        },
                       ),
                       Ui.boxWidth(12),
                       const AppIcon(
@@ -215,9 +242,8 @@ class _CustomTablePageState extends State<CustomTablePage> {
   @override
   void didUpdateWidget(covariant CustomTablePage oldWidget) {
     // TODO: implement didUpdateWidget
-    if(oldWidget.hi != widget.hi){
-
-    widget.hi[0].vb!();
+    if (oldWidget.hi != widget.hi) {
+      widget.hi[0].vb!();
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -288,22 +314,21 @@ class HeaderChooser extends StatelessWidget {
   }
 }
 
-
-class DynamicFormGenerator<T extends BaseModel> extends StatefulWidget {
-  final T model;
+class DynamicFormGenerator extends StatefulWidget {
+  final BaseModel model;
   final Function(Map<String, dynamic>) onSave;
 
   const DynamicFormGenerator({
-    Key? key,
+    super.key,
     required this.model,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   @override
-  State<DynamicFormGenerator> createState() => _DynamicFormGeneratorState<T>();
+  State<DynamicFormGenerator> createState() => _DynamicFormGeneratorState();
 }
 
-class _DynamicFormGeneratorState<T extends BaseModel> extends State<DynamicFormGenerator<T>> {
+class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
   final _formKey = GlobalKey<FormState>();
   final Map<String, dynamic> _formData = {};
   final Map<String, TextEditingController> _controllers = {};
@@ -316,56 +341,81 @@ class _DynamicFormGeneratorState<T extends BaseModel> extends State<DynamicFormG
 
   void _initializeControllers() {
     // Get the toJson fields using mirrors
-    final mirror = reflect(widget.model);
     Map<String, dynamic> jsonMap = widget.model.toJson();
-    
+
     // Create controllers for each field
     jsonMap.forEach((key, value) {
       if (!['id', 'createdAt', 'updatedAt'].contains(key)) {
-        _controllers[key] = TextEditingController(
-          text: value?.toString() ?? ''
-        );
+        _controllers[key] =
+            TextEditingController(text: value?.toString() ?? '');
       }
     });
   }
 
   Widget _buildField(String fieldName, dynamic value) {
     // Determine field type based on value
-    if (value is String) {
-      return TextFormField(
-        controller: _controllers[fieldName],
-        decoration: InputDecoration(
-          labelText: _formatFieldName(fieldName),
-          border: const OutlineInputBorder(),
-        ),
-        onSaved: (value) => _formData[fieldName] = value,
-      );
-    } else if (value is int) {
-      return TextFormField(
-        controller: _controllers[fieldName],
-        keyboardType: TextInputType.number,
-        decoration: InputDecoration(
-          labelText: _formatFieldName(fieldName),
-          border: const OutlineInputBorder(),
-        ),
-        onSaved: (value) => _formData[fieldName] = int.tryParse(value ?? ''),
-      );
-    } else if (value is double) {
-      return TextFormField(
-        controller: _controllers[fieldName],
-        keyboardType: TextInputType.number,
-        decoration: InputDecoration(
-          labelText: _formatFieldName(fieldName),
-          border: const OutlineInputBorder(),
-        ),
-        onSaved: (value) => _formData[fieldName] = double.tryParse(value ?? ''),
-      );
-    } else if (value is DateTime) {
-      return _buildDateTimePicker(fieldName);
+    if (fieldName.endsWith("Id") || fieldName.endsWith("Type")) {
+      return CustomTextField.dropdown(["None"], _controllers[fieldName]!,
+          "Select ${_formatFieldName(fieldName).replaceAll(" id", "")}");
     }
-    // Add more field types as needed
-    
-    return Container(); // Default empty container for unsupported types
+
+    if (fieldName == "image") {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Align(
+              alignment: Alignment.centerLeft,
+              child: AppText.thin("Pick an Image")),
+          Builder(builder: (_) {
+            final cc = CurvedContainer(
+                border: Border.all(color: AppColors.grey),
+                onPressed: () async {
+                  final img = await UtilFunctions.showCamera();
+                  if (img != null) {
+                    _controllers[fieldName]!.text = img;
+                    setState(() {});
+                  }
+                },
+                height: 120,
+                padding: EdgeInsets.all(
+                    _controllers[fieldName]!.text.isNotEmpty ? 0 : 24),
+                margin: EdgeInsets.all(24),
+                child: _controllers[fieldName]!.text.isNotEmpty
+                    ? Image.file(
+                        File(_controllers[fieldName]!.text),
+                        fit: BoxFit.cover,
+                      )
+                    : Center(
+                        child: AppIcon(
+                        Icons.add_a_photo,
+                        size: Ui.width(context) < 750 ? 24 : 48,
+                      )));
+            if (_controllers[fieldName]!.text.isNotEmpty) {
+              return Stack(
+                children: [
+                  cc,
+                  Positioned(
+                      top: 0,
+                      right: 0,
+                      child: AppIcon(
+                        Icons.remove_circle_rounded,
+                        color: Colors.red,
+                        onTap: () {
+                          _controllers[fieldName]!.text = "";
+                          setState(() {});
+                        },
+                      ))
+                ],
+              );
+            }
+            return cc;
+          }),
+        ],
+      );
+    }
+
+    return CustomTextField(
+        _formatFieldName(fieldName), _controllers[fieldName]!);
   }
 
   Widget _buildDateTimePicker(String fieldName) {
@@ -402,35 +452,34 @@ class _DynamicFormGeneratorState<T extends BaseModel> extends State<DynamicFormG
           RegExp(r'([A-Z])'),
           (match) => ' ${match.group(1)}',
         )
-        .capitalize();
+        .capitalizeFirst!;
   }
 
   @override
   Widget build(BuildContext context) {
     Map<String, dynamic> jsonMap = widget.model.toJson();
-    
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          ...jsonMap.entries
-              .where((entry) => !['id', 'createdAt', 'updatedAt'].contains(entry.key))
-              .map((entry) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: _buildField(entry.key, entry.value),
-                  ))
-              .toList(),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              if (_formKey.currentState?.validate() ?? false) {
-                _formKey.currentState?.save();
-                widget.onSave(_formData);
-              }
-            },
-            child: const Text('Save'),
-          ),
-        ],
+
+    return SingleChildScrollView(
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            ...jsonMap.entries
+                .where((entry) =>
+                    !['id', 'createdAt', 'updatedAt'].contains(entry.key))
+                .map((entry) => _buildField(entry.key, entry.value)),
+            Ui.boxHeight(24),
+            AppButton(
+              onPressed: () {
+                if (_formKey.currentState?.validate() ?? false) {
+                  _formKey.currentState?.save();
+                  widget.onSave(_formData);
+                }
+              },
+              text: "Save",
+            )
+          ],
+        ),
       ),
     );
   }
@@ -439,11 +488,5 @@ class _DynamicFormGeneratorState<T extends BaseModel> extends State<DynamicFormG
   void dispose() {
     _controllers.forEach((_, controller) => controller.dispose());
     super.dispose();
-  }
-}
-
-extension StringExtension on String {
-  String capitalize() {
-    return "${this[0].toUpperCase()}${substring(1)}";
   }
 }

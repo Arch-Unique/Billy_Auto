@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:inventory/models/inner_models/base_model.dart';
 
 import 'inner_models/barrel.dart';
 
 class TableModel {
   List<String> headers;
   List<FilterModel> fm;
+  BaseModel bm;
 
-  TableModel(this.headers, this.fm);
+  TableModel(this.headers, this.fm,this.bm);
 }
 
 class HeaderItem {
@@ -47,14 +49,14 @@ class AllTables {
     ], [
       FilterModel("Role", "role", 0),
       FilterModel("Created At", "createdAt", 1)
-    ]),
+    ],User()),
     Supplier: TableModel(
         ["id", "fullName", "email", "phone", "code", "createdAt"],
-        [FilterModel("Created At", "createdAt", 1)]),
+        [FilterModel("Created At", "createdAt", 1)],Supplier(fullName: "", email: "", phone: "", address: "", code: "")),
     BillyServices: TableModel(["id", "name", "createdAt"],
-        [FilterModel("Created At", "createdAt", 1)]),
+        [FilterModel("Created At", "createdAt", 1)],BillyServices(name: "", image: "")),
     CarMake: TableModel(["id", "make", "createdAt"],
-        [FilterModel("Created At", "createdAt", 1)]),
+        [FilterModel("Created At", "createdAt", 1)],CarMake(make: "")),
     CarModels: TableModel([
       "id",
       "make",
@@ -63,9 +65,9 @@ class AllTables {
     ], [
       FilterModel("Car Brand", "makeId", 0),
       FilterModel("Created At", "createdAt", 1)
-    ]),
+    ],CarModels(makeId: 0, model: "")),
     BillyConditionCategory: TableModel(["id", "name", "createdAt"],
-        [FilterModel("Created At", "createdAt", 1)]),
+        [FilterModel("Created At", "createdAt", 1)],BillyConditionCategory(name: "")),
     BillyConditions: TableModel([
       "id",
       "name",
@@ -74,7 +76,7 @@ class AllTables {
     ], [
       FilterModel("Conditions Category", "conditionsCategoryId", 0),
       FilterModel("Created At", "createdAt", 1)
-    ]),
+    ],BillyConditions(name: "", conditionsCategoryId: 0)),
     Customer: TableModel([
       "id",
       "fullName",
@@ -85,7 +87,7 @@ class AllTables {
     ], [
       FilterModel("Customer Type", "customerType", 0),
       FilterModel("Created At", "createdAt", 1)
-    ]),
+    ],Customer(email: "", phone: "", fullName: "", signature: "", customerType: "")),
     CustomerCar: TableModel([
       "id",
       "make",
@@ -99,9 +101,9 @@ class AllTables {
       FilterModel("Car Model", "modelId", 0),
       FilterModel("Customer", "customerId", 0),
       FilterModel("Created At", "createdAt", 1)
-    ]),
+    ],CustomerCar(makeId: 0, modelId: 0, year: "", licenseNo: "", customerId: 0)),
     ProductCategory: TableModel(["id", "name", "code", "createdAt"],
-        [FilterModel("Created At", "createdAt", 1)]),
+        [FilterModel("Created At", "createdAt", 1)],ProductCategory(name: "", code: "", image: "")),
     ProductType: TableModel([
       "id",
       "name",
@@ -111,7 +113,7 @@ class AllTables {
     ], [
       FilterModel("Product Category", "productCategoryId", 0),
       FilterModel("Created At", "createdAt", 1)
-    ]),
+    ],ProductType(name: "", code: "", image: "", productCategoryId: 0)),
     Product: TableModel([
       "id",
       "name",
@@ -125,7 +127,7 @@ class AllTables {
       FilterModel("Product Type", "productTypeId", 0),
       FilterModel("Product Category", "productCategoryId", 0),
       FilterModel("Created At", "createdAt", 1)
-    ]),
+    ],Product(name: "", cost: 0, sellingPrice: 0, productCategoryId: 0, productTypeId: 0)),
     Inventory: TableModel([
       "id",
       "product",
@@ -145,7 +147,7 @@ class AllTables {
       FilterModel("Product Category", "productCategoryId", 0),
       FilterModel("Shelf Life", "shelfLife", 1),
       FilterModel("Created At", "createdAt", 1)
-    ]),
+    ],Inventory(productId: 0, qty: 0, transactionType: "", status: "", supplierId: 0, productCategoryId: 0, location: "", shelfLife: DateTime.now(), productTypeId: 0)),
     Order: TableModel([
       "id",
       "customer",
@@ -157,6 +159,6 @@ class AllTables {
       FilterModel("Customer", "customerId", 0),
       FilterModel("Customer Car", "carId", 0),
       FilterModel("Created At", "createdAt", 1)
-    ]),
+    ],Order(customerId: 0)),
   };
 }
