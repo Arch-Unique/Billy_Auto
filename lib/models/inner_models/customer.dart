@@ -6,6 +6,7 @@ class Customer extends BaseModel {
   String fullName;
   String signature;
   String customerType;
+  String image;
 
   Customer({
     super.id = 0,
@@ -14,6 +15,7 @@ class Customer extends BaseModel {
     required this.fullName,
     required this.signature,
     required this.customerType,
+    this.image = "",
     super.createdAt,
     super.updatedAt,
   });
@@ -27,6 +29,7 @@ class Customer extends BaseModel {
       'fullName': fullName,
       'signature': signature,
       'customerType': customerType,
+      'image': image,
     };
   }
 
@@ -43,6 +46,7 @@ class Customer extends BaseModel {
       phone: json['phone'],
       fullName: json['fullName'],
       signature: json['signature'] ?? "",
+      image: json['image'] ?? "",
       customerType: json['customerType'] ?? "Individual",
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),

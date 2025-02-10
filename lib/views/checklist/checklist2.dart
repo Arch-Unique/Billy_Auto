@@ -134,6 +134,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
   }
 
   List<Widget> customerDetails() {
+    RxString curImg = "".obs;
     return [
       CustomTextField2.dropdown(
           ["None"], controller.tecs[5], "Select Customer"),
@@ -157,6 +158,55 @@ class _CheckList2PageState extends State<CheckList2Page> {
       Builder(builder: (context) {
         return SignatureView(controller.userSig, "Customer Signature",
             size: wideUi(context));
+      }),
+      Ui.boxHeight(24),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 8.0,bottom: 8),
+          child: AppText.thin("Choose Image of Customer/Driver"),
+        )),
+      Obx(() {
+        final cc = CurvedContainer(
+            border: Border.all(color: AppColors.grey),
+            height: 128,
+            width: wideUi(context),
+            onPressed: () async {
+              final img = await UtilFunctions.showCamera();
+              if (img != null) {
+                curImg.value = img;
+              }
+            },
+            padding: EdgeInsets.all(curImg.value.isNotEmpty ? 0 : 24),
+            margin: EdgeInsets.symmetric(horizontal: 8),
+            child: curImg.value.isNotEmpty
+                ? Image.file(
+                    File(curImg.value),
+                    fit: BoxFit.cover,
+                  )
+                : Center(
+                    child: AppIcon(
+                    Icons.add_a_photo,
+                    size: Ui.width(context) < 750 ? 24 : 48,
+                  )));
+        if (curImg.value.isNotEmpty) {
+          return Stack(
+            children: [
+              cc,
+              Positioned(
+                  top: 0,
+                  right: 0,
+                  child: AppIcon(
+                    Icons.remove_circle_rounded,
+                    color: Colors.red,
+                    onTap: () {
+                      curImg.value = "";
+                    },
+                  ))
+            ],
+          );
+        }
+        return cc;
       })
     ];
   }
@@ -184,6 +234,8 @@ class _CheckList2PageState extends State<CheckList2Page> {
           controller.tecs[8],
           "Car Year"),
       CustomTextField2("License Plate No", controller.tecs[9],
+          prefix: Icons.web_asset_rounded),
+CustomTextField2("Chassis No", controller.tecs[9],
           prefix: Icons.web_asset_rounded),
     ];
   }
