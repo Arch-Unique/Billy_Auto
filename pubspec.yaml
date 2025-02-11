@@ -47,6 +47,10 @@ flutter:
           weight: 500
         - asset: assets/fonts/Raleway-Bold.ttf
           weight: 700  
+    - family: SegoeUI
+      fonts:
+        - asset: assets/fonts/SegoeUI.ttf
+          weight: 400
     - family: Inter
       fonts:
         - asset: assets/fonts/Inter-Regular.ttf

@@ -23,6 +23,7 @@ class ExplorerPage extends StatefulWidget {
 class _ExplorerPageState extends State<ExplorerPage> {
   List<Widget> screens = [];
   final controller = Get.find<AppController>();
+  
 
   @override
   void initState() {
@@ -37,9 +38,16 @@ class _ExplorerPageState extends State<ExplorerPage> {
           HeaderItem("Inbound", vb: () {
             // controller.setCurrentTypeTable<Inventory>();
           }),
+          HeaderItem("Transfer", vb: () {
+            // controller.setCurrentTypeTable<Inventory>();
+          }),
+
           HeaderItem("Outbound", vb: () {
             // controller.setCurrentTypeTable<Inventory>();
-          })
+          }),
+          HeaderItem("Location", vb: () {
+            // controller.setCurrentTypeTable<Inventory>();
+          }),
         ],
       ),
       CustomTablePage(

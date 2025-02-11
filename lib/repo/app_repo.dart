@@ -8,6 +8,7 @@ import '../models/table_repo.dart';
 import '../tools/demo.dart';
 import '../tools/service.dart';
 import '../tools/urls.dart';
+import 'package:dio/dio.dart' as dio;
 
 typedef FromJsonFactory<T> = T Function(Map<String, dynamic>);
 
@@ -91,14 +92,14 @@ class AppRepo extends GetxController {
   }
 
   Future<int> create<T>(Map<String, dynamic> data) async {
-    final res = await apiService.post(urls[T]!, data: data);
+    final res = await apiService.post("${urls[T]!}/add", data: data);
     if (!res.statusCode!.isSuccess()) {
       throw res.data["error"];
     }
     return res.data["data"];
   }
 
-  Future<String> patch<T>(String id, Map<String, dynamic> data) async {
+  Future<String> patch<T>(int id, Map<String, dynamic> data) async {
     final res = await apiService.patch("${urls[T]!}/$id", data: data);
     if (!res.statusCode!.isSuccess()) {
       throw res.data["error"];
@@ -107,7 +108,7 @@ class AppRepo extends GetxController {
   }
 
   Future<T?> getOne<T>(String id) async {
-    final res = await apiService.get("${urls[T]!}/$id");
+    final res = await apiService.post("${urls[T]!}/$id/get",data: {"filter":{}});
     return getOf<T>(res);
   }
 
@@ -128,8 +129,6 @@ class AppRepo extends GetxController {
       'page': page.toString(),
       'limit': limit.toString(),
       'q': query,
-      'filter':
-          ffm.isEmpty ? null : jsonEncode(ffm), // Convert filter to JSON string
     };
 
     // Remove null or empty values
@@ -140,9 +139,9 @@ class AppRepo extends GetxController {
     String queryString = Uri(queryParameters: queryParams).query;
 
     // Construct full URL
-    final url = '${urls[T]!}?$queryString';
+    final url = '${urls[T]!}/get?$queryString';
 
-    final res = await apiService.get(url);
+    final res = await apiService.post(url,data: {"filter":ffm});
     return getListOf<T>(res);
   }
 
@@ -162,6 +161,21 @@ class AppRepo extends GetxController {
     } else {
       throw res.data["error"];
     }
+  }
+
+  Future<String?> uploadPhoto(String imagePath) async {
+    final res = await apiService.post(AppUrls.upload,
+        data: dio.FormData.fromMap({
+          'file': await dio.MultipartFile.fromFile(
+            imagePath,
+            filename: imagePath.split('/').last,
+          ),
+        }));
+
+    if (res.statusCode!.isSuccess()) {
+      return res.data["data"];
+    }
+    return null;
   }
 
   // sendDemoToBackend() async {

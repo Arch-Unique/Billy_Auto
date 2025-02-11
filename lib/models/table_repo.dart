@@ -135,7 +135,6 @@ class AllTables {
       "status",
       "transaction Type",
       "location",
-      "shelflife",
       "product Type",
       "product Category",
       "createdAt"
@@ -145,7 +144,6 @@ class AllTables {
       FilterModel("Transaction Type", "transactionType", 0),
       FilterModel("Product Type", "productTypeId", 0),
       FilterModel("Product Category", "productCategoryId", 0),
-      FilterModel("Shelf Life", "shelfLife", 1),
       FilterModel("Created At", "createdAt", 1)
     ],Inventory(productId: 0, qty: 0, transactionType: "", status: "", supplierId: 0, productCategoryId: 0, location: "", shelfLife: DateTime.now(), productTypeId: 0)),
     Order: TableModel([

@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 ///file for all #resusable functions
 ///Guideline: strongly type all variables and functions
@@ -63,4 +66,37 @@ abstract class UtilFunctions {
     final img = await picker.pickImage(source: ImageSource.gallery);
     return img?.path;
   }
+
+  static Future<File> saveToTempFile(Uint8List uint8list, {String? filename}) async {
+    try {
+      // Get the system's temporary directory
+      final tempDir = await getTemporaryDirectory();
+      
+      // Generate a unique filename if none provided
+      final uniqueFileName = filename ?? '${DateTime.now().millisecondsSinceEpoch}.png';
+      
+      // Create the file path
+      final filePath = '${tempDir.path}/$uniqueFileName';
+      
+      // Write the Uint8List to a file
+      final file = File(filePath);
+      await file.writeAsBytes(uint8list);
+      
+      return file;
+    } catch (e) {
+      throw Exception('Failed to convert Uint8List to File: $e');
+    }
+  }
+
+  static Future<Uint8List> fileToUint8List(File file) async {
+    try {
+      // Read the file as bytes
+      final Uint8List bytes = await file.readAsBytes();
+      return bytes;
+    } catch (e) {
+      throw Exception('Failed to convert File to Uint8List: $e');
+    }
+  }
+
+
 }

@@ -14,6 +14,7 @@ import 'prefs.dart';
 
 abstract class ApiService {
   Future<Response> get(String url);
+  Future<Response> on(String url,String option, {dynamic data});
   Future<Response> post(String url, {dynamic data});
   Future<Response> patch(String url, {dynamic data});
   Future<Response> delete(String url, {dynamic data});
@@ -100,6 +101,17 @@ class DioApiService extends GetxService implements ApiService {
     return response;
   }
 
+    @override
+  Future<Response> on(String url, String method ,{data,bool hasToken = true}) async {
+    final response = await _dio.request(url,
+        cancelToken: _cancelToken,
+        data: data,
+        options: Options(headers: _getHeader(hasToken),method: method,));
+    _lastRequestOptions = response.requestOptions;
+
+    return response;
+  }
+
   @override
   Future<Response> patch(String url, {data, bool hasToken = true}) async {
     final response = await _dio.patch(url,
@@ -162,6 +174,7 @@ class DioApiService extends GetxService implements ApiService {
           }
         : {};
   }
+  
 }
 
 
@@ -196,7 +209,7 @@ class AppService extends GetxService {
   }
 
   logout() async {
-    await apiService.post(AppUrls.logout);
+    //await apiService.post(AppUrls.logout);
     await _logout();
   }
 
@@ -225,13 +238,13 @@ class AppService extends GetxService {
 
 
   _setCurrentUser() async {
-    final res = await apiService.get("${AppUrls.getUser}/${prefService.get(MyPrefs.mpUserID)}");
+    final res = await apiService.post("${AppUrls.getUser}/get/${prefService.get(MyPrefs.mpUserID)}", data: {"filter":{}});
     print(res.data);
     currentUser.value = User.fromJson(res.data["data"]);
   }
 
   refreshUser() async {
-    final res = await apiService.get("${AppUrls.getUser}/${prefService.get(MyPrefs.mpUserID)}");
+    final res = await apiService.post("${AppUrls.getUser}/get/${prefService.get(MyPrefs.mpUserID)}",data: {"filter":{}});
     currentUser.value = User.fromJson(res.data["data"]);
     currentUser.refresh();
   }

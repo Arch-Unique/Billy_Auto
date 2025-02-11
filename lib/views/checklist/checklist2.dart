@@ -36,7 +36,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
       carConditonDetails(),
       freeInspectionDetails(),
       servicePlanDetails(),
-      maintenanceDetails()
+      // maintenanceDetails()
     ];
     super.initState();
   }
@@ -160,12 +160,19 @@ class _CheckList2PageState extends State<CheckList2Page> {
             size: wideUi(context));
       }),
       Ui.boxHeight(24),
-      Align(
-        alignment: Alignment.centerLeft,
-        child: Padding(
-          padding: const EdgeInsets.only(left: 8.0,bottom: 8),
-          child: AppText.thin("Choose Image of Customer/Driver"),
-        )),
+      Builder(
+        builder: (context) {
+          return SizedBox(
+            width: wideUi(context),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 0.0,bottom: 8),
+                child: AppText.thin("Choose Image of Customer/Driver"),
+              )),
+          );
+        }
+      ),
       Obx(() {
         final cc = CurvedContainer(
             border: Border.all(color: AppColors.grey),

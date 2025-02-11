@@ -7,8 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:inventory/controllers/app_controller.dart';
 import 'package:inventory/tools/assets.dart';
 import 'package:inventory/tools/colors.dart';
+import 'package:inventory/views/checklist/profile.dart';
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
 
 import '../../tools/enums.dart';
@@ -280,9 +282,9 @@ double wideUi(BuildContext context){
 }
 
 class BackgroundScaffold extends StatelessWidget {
-  const BackgroundScaffold({required this.child,this.hasBack=false,this.hasUser=false, super.key});
+  const BackgroundScaffold({required this.child,this.hasBack=false,this.hasEdit=false,this.hasUser=false, super.key});
   final Widget child;
-  final bool hasBack;
+  final bool hasBack,hasEdit;
   final bool hasUser;
 
   @override
@@ -320,9 +322,46 @@ class BackgroundScaffold extends StatelessWidget {
                 top: 24,
                 right: 24,
                 child: SafeArea(
-                  child: ProfileLogo()
+                  child: InkWell(
+                    onTap: (){
+                      Get.find<AppController>().editOn.value = false;
+                      Get.to(ProfilePage());
+                    },
+                    child: ProfileLogo())
+                )),
+                if(!hasUser && hasEdit)
+            Positioned(
+                top: 24,
+                right: 24,
+                child: SafeArea(
+                  child: EditUnlockWidget()
                 ))
       ],
+    );
+  }
+}
+
+class EditUnlockWidget extends StatelessWidget {
+  const EditUnlockWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    
+    final controller = Get.find<AppController>();
+    return InkWell(
+      onTap: (){
+controller.editOn.value = !controller.editOn.value;
+      },
+      child: CircleAvatar(
+        backgroundColor: AppColors.primaryColor,
+      radius: 20,
+      child: Center(child: Obx(
+         () {
+          return Icon(controller.editOn.value ? Icons.edit_off_outlined : Icons.mode_edit_outlined,color: AppColors.white,);
+        }
+      ),),
+      
+      ),
     );
   }
 }

@@ -11,7 +11,8 @@ class Assets {
   static const String appFontFamily2 = "SharpGrotesk";
 
   //for pdf
-  static const String appFontFamilyRegular = "assets/fonts/Raleway-Regular.ttf";
+  static const String appFontFamilyRegular = "assets/fonts/Inter-Regular.ttf";
   static const String appFontFamilyMedium = "assets/fonts/Raleway-Medium.ttf";
   static const String appFontFamilyBold = "assets/fonts/Raleway-Bold.ttf";
+  static const String appFontFamilySegoe = "assets/fonts/SegoeUI.ttf";
 }

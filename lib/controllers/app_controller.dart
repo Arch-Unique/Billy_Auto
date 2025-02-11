@@ -78,27 +78,30 @@ class AppController extends GetxController {
   RxList<ProductType> allProductType = <ProductType>[].obs;
   RxList<CarMake> allCarMakes = <CarMake>[].obs;
   RxList<CarModels> allCarModels = <CarModels>[].obs;
+  RxList<String> userRoles =
+      ["admin", "user", "technician", "special advisor"].obs;
+  RxList<String> customerTypes = ["Individual", "Corporate"].obs;
+  RxList<String> inventoryStatus = ["Inbound", "Outbound", "Transfer"].obs;
+  RxList<String> inventoryTransactionTypes = ["a", "b"].obs;
 
   //TABLE
   Rx<TableModelDataSource> tmds = TableModelDataSource([], []).obs;
   Rx<PaginatorController> paginatorController = PaginatorController().obs;
   Rx<BaseModel> currentBaseModel = User().obs;
 
+  //PROFILE
+  RxBool editOn = false.obs;
+
   final appRepo = Get.find<AppRepo>();
 
   initApp() async {
-    allBillyServices.value =
-        (await appRepo.getAll<BillyServices>(limit: 10000)).data;
-    allBillyConditionCategories.value =
-        (await appRepo.getAll<BillyConditionCategory>(limit: 10000)).data;
-    allBillyConditions.value =
-        (await appRepo.getAll<BillyConditions>(limit: 10000)).data;
-    allProductCategory.value =
-        (await appRepo.getAll<ProductCategory>(limit: 10000)).data;
-    allProductType.value =
-        (await appRepo.getAll<ProductType>(limit: 10000)).data;
-    allCarMakes.value = (await appRepo.getAll<CarMake>(limit: 10000)).data;
-    allCarModels.value = (await appRepo.getAll<CarModels>(limit: 10000)).data;
+    allBillyServices.value = await _getAll<BillyServices>();
+    allBillyConditionCategories.value = await _getAll<BillyConditionCategory>();
+    allBillyConditions.value = await _getAll<BillyConditions>();
+    allProductCategory.value = await _getAll<ProductCategory>();
+    allProductType.value = await _getAll<ProductType>();
+    allCarMakes.value = await _getAll<CarMake>();
+    allCarModels.value = await _getAll<CarModels>();
 
     totalConditionsHeaders =
         allBillyConditionCategories.map((element) => element.name).toList();
@@ -129,6 +132,11 @@ class AppController extends GetxController {
     }
   }
 
+  Future<List<T>> _getAll<T>() async {
+    final g = (await appRepo.getAll<T>(limit: 10000)).data;
+    return g;
+  }
+
   Future<void> saveFile(Uint8List document, String name) async {
     final Directory dir = await getApplicationDocumentsDirectory();
     final File file = File('${dir.path}/$name.png');
@@ -150,6 +158,20 @@ class AppController extends GetxController {
     } catch (e) {
       Ui.showError(e.toString());
       return false;
+    }
+  }
+
+  updateUser(String path) async {
+    try {
+      final s = await appRepo.uploadPhoto(path);
+      appRepo.appService.currentUser.value.signature = s ?? "";
+      await appRepo.patch<User>(appRepo.appService.currentUser.value.id,
+          appRepo.appService.currentUser.value.toJson());
+      await appRepo.appService.refreshUser();
+      Ui.showInfo("Updated successfully");
+    } catch (e) {
+      print(e);
+      Ui.showError(e.toString());
     }
   }
 

@@ -24,6 +24,7 @@ abstract class AppUrls {
   static const String conditionCategory = "/condition/category";
   static const String carMake = "/car/makes";
   static const String carModel = "/car/models";
+  static const String upload = "/upload";
 
   //auth repo
   static const String login = "$user/auth/login";

@@ -1302,7 +1302,7 @@ class _SignatureViewState extends State<SignatureView> {
   @override
   Widget build(BuildContext context) {
     final content = Padding(
-      padding: const EdgeInsets.only(left: 8.0),
+      padding: const EdgeInsets.only(left: 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1319,7 +1319,7 @@ class _SignatureViewState extends State<SignatureView> {
                   height: 84,
                   clipBehavior: Clip.hardEdge,
                   width: Ui.width(context) - 48,
-                  child: isCaptured && bytes != null
+                  child: bytes != null
                       ? Image.memory(bytes!)
                       : SfSignaturePad(
                           key: signaturePadKey,
@@ -1361,6 +1361,7 @@ class _SignatureViewState extends State<SignatureView> {
                       border: Border.all(color: AppColors.lightTextColor),
                       onPressed: () {
                         if (isCaptured) {
+                          widget.tec.value = Uint8List(0);
                           setState(() {
                             isCaptured = false;
                             bytes = null;
@@ -1423,16 +1424,18 @@ class _SignatureViewState extends State<SignatureView> {
 
 class ProfileLogo extends StatelessWidget {
   const ProfileLogo({
+    this.size=20,
     super.key,
   });
+  final double size;
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<AppService>();
     return CircleAvatar(
-     radius: 20,
+     radius: size,
      backgroundColor: AppColors.white,
-     child: CircleAvatar(radius: 19,
+     child: CircleAvatar(radius: size-1,
      backgroundColor: AppColors.green,
      child: Center(child: AppText.thin(controller.currentUser.value.username[0].toUpperCase(),color: AppColors.white),),),
     );
