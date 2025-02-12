@@ -61,7 +61,7 @@ class ProfilePage extends StatelessWidget {
                   tecs[1],
                   readOnly: !controller.editOn.value,
                 ),
-                CustomTextField2.dropdown(controller.userRoles, tecs[2], "Role",
+                CustomTextField2.dropdown(controller.userRoles,controller.userRoles, tecs[2], "Role",
                     initOption: tecs[2].text),
                 CustomTextField2(
                   "Email",
@@ -72,34 +72,7 @@ class ProfilePage extends StatelessWidget {
                 controller.editOn.value
                     ? SignatureView(cuserSig, "My Signature",
                         size: wideUi(context))
-                    : SizedBox(
-                        width: wideUi(context),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            AppText.thin("My Signature"),
-                            Ui.boxHeight(8),
-                            Container(
-                              decoration: BoxDecoration(
-                                  border: Border.all(
-                                      color: AppColors.lightTextColor
-                                          .withOpacity(0.3),
-                                      width: 1)),
-                              height: 84,
-                              clipBehavior: Clip.hardEdge,
-                              width: Ui.width(context) - 48,
-                              child: controller.appRepo.appService.currentUser
-                                      .value.signature.isEmpty
-                                  ? SizedBox()
-                                  : Image.network(
-                                      "${AppUrls.baseURL}${AppUrls.upload}/all/${controller.appRepo.appService.currentUser
-                                          .value.signature}",
-                                      fit: BoxFit.contain,
-                                    ),
-                            ),
-                          ],
-                        )),
+                    : LockedSignatureWidget(title: "My Signature",signature: controller.appRepo.appService.currentUser.value.signature,),
                 Ui.boxHeight(8),
                 if (controller.editOn.value)
                   SizedBox(
@@ -141,3 +114,4 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
+

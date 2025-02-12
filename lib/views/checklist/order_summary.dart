@@ -14,17 +14,21 @@ import 'package:widgets_to_image/widgets_to_image.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+import '../../models/inner_models/barrel.dart';
 import '../../tools/assets.dart';
 
 class OrderSummary extends StatefulWidget {
-  const OrderSummary({super.key});
+  const OrderSummary(this.title,this.order,{this.sig,super.key});
+  final String title;
+  final Order order;
+  final Uint8List? sig;
 
   @override
   State<OrderSummary> createState() => _OrderSummaryState();
 }
 
 class _OrderSummaryState extends State<OrderSummary> {
-  final controller = Get.find<AppController>();
+  // final controller = Get.find<AppController>();
   final imageController = WidgetsToImageController();
   final frameId = "archpage";
   bool isSaving = false;
@@ -103,7 +107,7 @@ class _OrderSummaryState extends State<OrderSummary> {
             final toreturn = Column(
               children: [
                 LogoWidget(144),
-                AppText.medium("Service Order Summary",
+                AppText.medium(widget.title,
                     fontSize: 32,
                     alignment: TextAlign.center,
                     fontFamily: Assets.appFontFamily2),
@@ -139,7 +143,7 @@ class _OrderSummaryState extends State<OrderSummary> {
                     Ui.boxWidth(16),
                     InkWell(
                         onTap: () {
-                          Get.to(CustomOrderPDFPage());
+                          Get.to(CustomOrderPDFPage(widget.title,DateTime.now(),order: widget.order,sigUint: widget.sig,));
                         },
                         child: CircleAvatar(
                             backgroundColor: AppColors.primaryColor,
@@ -152,7 +156,7 @@ class _OrderSummaryState extends State<OrderSummary> {
                     Ui.boxWidth(16),
                     InkWell(
                         onTap: () {
-                          Get.to(CustomOrderPDFPage());
+                          Get.to(CustomOrderPDFPage(widget.title,DateTime.now(),order: widget.order,sigUint: widget.sig,));
                         },
                         child: CircleAvatar(
                             backgroundColor: AppColors.primaryColor,
@@ -171,11 +175,11 @@ class _OrderSummaryState extends State<OrderSummary> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        titleValueText("Full Name", controller.tecs[0].text),
-                        titleValueText("Email", controller.tecs[1].text),
-                        titleValueText("Phone Number", controller.tecs[2].text),
+                        titleValueText("Full Name", widget.order.customerDetails?.fullName),
+                        titleValueText("Email", widget.order.customerDetails?.email),
+                        titleValueText("Phone Number", widget.order.customerDetails?.phone),
                         titleValueText(
-                            "Customer Type", controller.tecs[3].text),
+                            "Customer Type", widget.order.customerDetails?.customerType),
                       ],
                     )),
                 serviceItem(
@@ -184,11 +188,13 @@ class _OrderSummaryState extends State<OrderSummary> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        titleValueText("Make", controller.tecs[6].text),
-                        titleValueText("Mode", controller.tecs[7].text),
-                        titleValueText("Year", controller.tecs[8].text),
+                        titleValueText("Make", widget.order.customerCar?.make),
+                        titleValueText("Model", widget.order.customerCar?.model),
+                        titleValueText("Year", widget.order.customerCar?.year),
                         titleValueText(
-                            "License Plate No", controller.tecs[9].text),
+                            "License Plate No", widget.order.customerCar?.licenseNo),
+                            titleValueText(
+                            "Chassis No", widget.order.customerCar?.chassisNo),
                       ],
                     )),
                 serviceItem(
@@ -196,7 +202,7 @@ class _OrderSummaryState extends State<OrderSummary> {
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [AppText.thin(controller.tecs[11].text)],
+                      children: [AppText.thin(widget.order.customerConcerns ?? "")],
                     )),
                 serviceItem(
                     "VEHICLE CONDTION",
@@ -205,36 +211,28 @@ class _OrderSummaryState extends State<OrderSummary> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         titleValueText(
-                            "Mileage At Reception", controller.tecs[12].text),
+                            "Mileage At Reception", widget.order.mileageOnReception.toString()),
                         titleValueText("Fuel Level At Reception",
-                            controller.tecs[13].text),
+                            widget.order.fuelLevel),
                         titleValueText(
-                            "Visible Damage ", controller.tecs[14].text),
+                            "Visible Damage ", widget.order.bodyCheck),
                         titleValueText(
-                            "Additonal Observations", controller.tecs[15].text),
+                            "Additonal Observations", widget.order.observations),
                       ],
                     )),
-                serviceItem("SERVICE PLAN", Builder(builder: (context) {
-                  List<int> goodService = [];
-                  for (var i = 0; i < controller.allServicesItems.length; i++) {
-                    if (controller.allServicesItems[i]) {
-                      goodService.add(i);
-                    }
-                  }
-                  return SizedBox(
-                    height: 100,
-                    child: Wrap(
-                      direction: Axis.vertical,
-                      children: goodService
-                          .map((e) =>
-                              AppText.thin(controller.allBillyServices[e].name))
-                          .toList(),
-                    ),
-                  );
-                })),
+                serviceItem("SERVICE PLAN", SizedBox(
+                  height: 100,
+                  child: Wrap(
+                    direction: Axis.vertical,
+                    children: widget.order.allServices
+                        .map((e) =>
+                            AppText.thin(e.name))
+                        .toList(),
+                  ),
+                )),
                 serviceItem("CONTROL CHECKS", Builder(builder: (context) {
                   List<Widget> controlChecks = [];
-                  controller.inspectionNo.forEach((key, value) {
+                  Get.find<AppController>().inspectionNo.forEach((key,value) {
                     controlChecks.add(Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,7 +245,7 @@ class _OrderSummaryState extends State<OrderSummary> {
                                   children: [
                                     AppText.thin(value[index].title),
                                     Ui.boxWidth(4),
-                                    value[index].isChecked
+                                    widget.order.conditions[value[index].rawId] == 1
                                         ? AppIcon(
                                             Icons.check,
                                             color: AppColors.green,
@@ -339,7 +337,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     );
   }
 
-  titleValueText(String key, String value) {
+  titleValueText(String key, String? value) {
     // if(value.isEmpty) return const SizedBox();
     return Text.rich(TextSpan(
         text: "$key : ",
@@ -350,7 +348,7 @@ class _OrderSummaryState extends State<OrderSummary> {
             fontFamily: Assets.appFontFamily),
         children: [
           TextSpan(
-            text: value,
+            text: value ?? "",
             style: TextStyle(
                 color: AppColors.black,
                 fontWeight: FontWeight.w400,
@@ -365,7 +363,13 @@ class _OrderSummaryState extends State<OrderSummary> {
 }
 
 class CustomOrderPDFPage extends StatefulWidget {
-  const CustomOrderPDFPage({super.key});
+  const CustomOrderPDFPage(this.title, this.orderDate,
+      {this.orderFinished, required this.order,this.sigUint, super.key});
+  final DateTime orderDate;
+  final DateTime? orderFinished;
+  final String title;
+  final Order order;
+  final Uint8List? sigUint;
 
   @override
   State<CustomOrderPDFPage> createState() => _CustomOrderPDFPageState();
@@ -374,6 +378,7 @@ class CustomOrderPDFPage extends StatefulWidget {
 class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
   late pw.Font defFontReg, defFontMedium, defFontBold, segoe;
   late pw.ImageProvider logo, bg;
+  pw.ImageProvider? sig;
   pw.Document? cpdf;
 
   @override
@@ -389,6 +394,12 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
     defFontBold = await fontFromAssetBundle(Assets.appFontFamilyBold);
     defFontMedium = await fontFromAssetBundle(Assets.appFontFamilyMedium);
     segoe = await fontFromAssetBundle(Assets.appFontFamilySegoe);
+    if (widget.order.customerDetails?.signature.isNotEmpty ?? false) {
+      sig = await networkImage(widget.order.customerDetails!.signature);
+    }
+    if(widget.sigUint != null && widget.sigUint != Uint8List(0)){
+      sig = pw.MemoryImage(widget.sigUint!);
+    }
     await doPDFPage();
   }
 
@@ -399,14 +410,15 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
         body: cpdf == null
             ? Center(child: LoadingIndicator())
             : PdfPreview(
-              actionBarTheme: PdfActionBarTheme(backgroundColor: AppColors.primaryColor),
-              pdfFileName: "ServiceOrderSummary.pdf"
-              ,build: (f) => cpdf!.save()));
+                actionBarTheme:
+                    PdfActionBarTheme(backgroundColor: AppColors.primaryColor),
+                pdfFileName: "ServiceOrderSummary.pdf",
+                build: (f) => cpdf!.save()));
   }
 
   doPDFPage() {
     final pdf = pw.Document();
-    final controller = Get.find<AppController>();
+    // final controller = Get.find<AppController>();
 
     pdf.addPage(pw.Page(
       pageFormat: PdfPageFormat.a4,
@@ -443,38 +455,64 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
             pw.Expanded(
               child: pw.Align(
                   alignment: pw.Alignment.centerRight,
-                  child: pw.Text(
-                      DateFormat("dd/MM/yyyy hh:mm:aa").format(DateTime.now()),
-                      style: pw.TextStyle(
-                        font: defFontMedium,
-                        fontSize: 8,
-                      ))),
+                  child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      mainAxisSize: pw.MainAxisSize.min,
+                      children: [
+                        pw.Text(
+                            "Generated On : " +
+                                DateFormat("dd/MM/yyyy hh:mm:aa")
+                                    .format(DateTime.now()),
+                            style: pw.TextStyle(
+                              font: defFontMedium,
+                              fontSize: 8,
+                            )),
+                        pw.SizedBox(height: 4),
+                        pw.Text(
+                            "Order Created On : " +
+                                DateFormat("dd/MM/yyyy hh:mm:aa")
+                                    .format(widget.orderDate),
+                            style: pw.TextStyle(
+                              font: defFontMedium,
+                              fontSize: 8,
+                            )),
+                        pw.SizedBox(height: 4),
+                        if (widget.orderFinished != null)
+                          pw.Text(
+                              "Order Finished On : " +
+                                  DateFormat("dd/MM/yyyy hh:mm:aa")
+                                      .format(widget.orderFinished!),
+                              style: pw.TextStyle(
+                                font: defFontMedium,
+                                fontSize: 8,
+                              ))
+                      ])),
             )
           ]),
 
           // REGISTRATION SUMMARY
           ...descText("Registration Summary", {
-            "Full Name": controller.tecs[1].text,
-            "Email": controller.tecs[2].text,
-            "Phone Number": controller.tecs[3].text,
-            "Customer Type": controller.tecs[4].text,
+            "Full Name": widget.order.customerDetails?.fullName,
+            "Email": widget.order.customerDetails?.email,
+            "Phone Number": widget.order.customerDetails?.phone,
+            "Customer Type": widget.order.customerDetails?.customerType,
             "Car Details":
-                "${controller.tecs[6].text} ${controller.tecs[7].text} ${controller.tecs[8].text}",
-            "License Plate No": controller.tecs[9].text,
-            "Chassis No": controller.tecs[9].text
+                "${widget.order.customerCar?.make} ${widget.order.customerCar?.model} ${widget.order.customerCar?.year}",
+            "License Plate No": widget.order.customerCar?.licenseNo,
+            "Chassis No": widget.order.customerCar?.chassisNo
           }),
 
           // CUSTOMER CONCERNS
           ...descText(
-              "Customer Concerns", {"Concerns": controller.tecs[11].text},
+              "Customer Concerns", {"Concerns": widget.order.customerConcerns},
               useMaxSize: [true]),
 
           // VEHICLE CONDITIONS
           ...descText("Vehicle Condtions", {
-            "Mileage": controller.tecs[12].text,
-            "Fuel Level": controller.tecs[13].text,
-            "Body Check": controller.tecs[14].text,
-            "Additional Observations": controller.tecs[15].text,
+            "Mileage": widget.order.mileageOnReception.toString(),
+            "Fuel Level": widget.order.fuelLevel,
+            "Body Check": widget.order.bodyCheck,
+            "Additional Observations": widget.order.observations,
           }, useMaxSize: [
             false,
             false,
@@ -487,7 +525,7 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
           titleText("Control Checks", hasBottomMargin: true),
           pw.Builder(builder: (context) {
             List<pw.Widget> controlChecks = [];
-            controller.inspectionNo.forEach((key, value) {
+            Get.find<AppController>().inspectionNo.forEach((key, value) {
               controlChecks.add(pw.Column(
                 mainAxisSize: pw.MainAxisSize.min,
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -499,7 +537,9 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
                       )),
                   ...List.generate(
                       value.length,
-                      (index) => pw.Row(
+                      (index) {
+                        final ls = widget.order.conditions[value[index].rawId] == 1;
+                        return pw.Row(
                             mainAxisSize: pw.MainAxisSize.min,
                             children: [
                               pw.Text(value[index].title,
@@ -509,8 +549,8 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
                                       color: PdfColor.fromInt(0xFF777777))),
                               pw.SizedBox(width: 4),
                               // pw.Icon(pw.IconData(value[index].isChecked ? Icons.check.codePoint : Icons.close.codePoint),size: 8,font: pw.Font.symbol(),color: value[index].isChecked ?PdfColors.green:PdfColors.red)
-                              pw.Text(value[index].isChecked ? "+" : "x",
-                                  style: value[index].isChecked
+                              pw.Text(ls ? "+" : "x",
+                                  style: ls
                                       ? pw.TextStyle(
                                           font: segoe,
                                           fontSize: 8,
@@ -520,7 +560,8 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
                                           fontSize: 8,
                                           color: PdfColors.red))
                             ],
-                          ))
+                          );
+                      })
                 ],
               ));
             });
@@ -543,35 +584,24 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   titleText("Service Plans", hasBottomMargin: true, width: 200),
-                  pw.Builder(builder: (context) {
-                    List<int> goodService = [];
-                    for (var i = 0;
-                        i < controller.allServicesItems.length;
-                        i++) {
-                      if (controller.allServicesItems[i]) {
-                        goodService.add(i);
-                      }
-                    }
-
-                    return pw.ConstrainedBox(
-                      constraints: pw.BoxConstraints(maxHeight: 100),
-                      child: pw.Wrap(
-                        direction: pw.Axis.vertical,
-                        spacing: 4,
-                        runSpacing: 16,
-                        children: goodService
-                            .map(
-                              (e) => pw.Text(
-                                  "- ${controller.allBillyServices[e].name}",
-                                  style: pw.TextStyle(
-                                      font: defFontReg,
-                                      fontSize: 8,
-                                      color: PdfColor.fromInt(0xFF1E1E1E))),
-                            )
-                            .toList(),
-                      ),
-                    );
-                  }),
+                  pw.ConstrainedBox(
+                    constraints: pw.BoxConstraints(maxHeight: 100),
+                    child: pw.Wrap(
+                      direction: pw.Axis.vertical,
+                      spacing: 4,
+                      runSpacing: 16,
+                      children: widget.order.allServices
+                          .map(
+                            (e) => pw.Text(
+                                "- ${e.name}",
+                                style: pw.TextStyle(
+                                    font: defFontReg,
+                                    fontSize: 8,
+                                    color: PdfColor.fromInt(0xFF1E1E1E))),
+                          )
+                          .toList(),
+                    ),
+                  ),
                 ]),
             pw.Spacer(),
             pw.Column(
@@ -586,14 +616,17 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
                       padding: pw.EdgeInsets.only(bottom: 4),
                       decoration: pw.BoxDecoration(
                           border: pw.Border(bottom: pw.BorderSide())),
-                      child: pw.SizedBox(height: 50, width: 200)),
+                      child: pw.SizedBox(
+                          height: 50,
+                          width: 200,
+                          child: sig == null ? pw.SizedBox() : pw.Image(sig!))),
                   pw.SizedBox(height: 8),
-                  pw.Text("Inspected By:  ${controller.tecs[17].text}",
+                  pw.Text("Inspected By:  ${widget.order.technician}",
                       style: pw.TextStyle(
                           font: defFontReg,
                           fontSize: 8,
                           color: PdfColor.fromInt(0xFF1E1E1E))),
-                  pw.Text("Service Advisor:  ${controller.tecs[16].text}",
+                  pw.Text("Service Advisor:  ${widget.order.serviceAdvisor}",
                       style: pw.TextStyle(
                           font: defFontReg,
                           fontSize: 8,
@@ -640,7 +673,7 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
         child: pf);
   }
 
-  List<pw.Widget> descText(String title, Map<String, String> mp,
+  List<pw.Widget> descText(String title, Map<String, String?> mp,
       {List<bool> useMaxSize = const []}) {
     final mapEntry = mp.entries.toList();
     if (useMaxSize.isEmpty) {
@@ -675,7 +708,7 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
             decoration: pw.BoxDecoration(
                 border: pw.Border(
                     left: pw.BorderSide(color: PdfColor.fromInt(0xFF777777)))),
-            child: pw.Text(map.value,
+            child: pw.Text(map.value ?? "",
                 style: pw.TextStyle(
                     font: defFontReg, fontSize: 8, color: PdfColors.black)),
           ),

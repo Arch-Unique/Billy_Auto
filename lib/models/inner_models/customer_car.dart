@@ -5,7 +5,7 @@ class CustomerCar extends BaseModel{
   int makeId;
   int modelId;
   String desc, customer;
-  String licenseNo, make, model, year;
+  String licenseNo, make, model, year,chassisNo;
   
   
   int customerId;
@@ -20,6 +20,7 @@ class CustomerCar extends BaseModel{
     required this.year,
     this.customer = "",
     required this.licenseNo,
+    this.chassisNo = "",
     super.createdAt,
     super.updatedAt,
     required this.customerId,
@@ -35,6 +36,7 @@ Map<String, dynamic> toJson() {
       'year': year,
       'licenseNo': licenseNo,
       'customerId': customerId,
+      'chassisNo': chassisNo,
     };
   }
 
@@ -54,6 +56,7 @@ List<dynamic> toTableRows(){
       model: json['model'],
       year: json['year'] ?? "",
       licenseNo: json['licenseNo'] ?? "",
+      chassisNo: json['chassisNo'] ?? "",
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
       customerId: json['customerId'],

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:inventory/models/inner_models/barrel.dart';
+
 import 'base_model.dart';
 
 class Order extends BaseModel{
@@ -10,8 +12,7 @@ class Order extends BaseModel{
   String? customerConcerns;
   String? observations;
   List<String> maintenanceType;
-  String? fuelLevel;
-  String? bodyCheck;
+  String? fuelLevel, bodyCheck,technician,serviceAdvisor;
   List<int> servicesPerformed; //id of services
   
   
@@ -20,12 +21,18 @@ class Order extends BaseModel{
   double cost;
   String customer, car;
 
+  Customer? customerDetails;
+  CustomerCar? customerCar;
+  List<BillyServices> allServices = [];
+
   Order({
     required this.customerId,
     this.customer = "",
     super.id = 0,
     this.carId = 0,
     this.car = "",
+    this.technician = "",
+    this.serviceAdvisor = "",
     this.mileageOnReception = 0,
     this.customerConcerns,
     this.observations,
@@ -56,6 +63,8 @@ Map<String, dynamic> toJson() {
       'conditions': jsonEncode(conditions),
       'lostSales': lostSales,
       'cost': cost,
+      'technician': technician,
+      'serviceAdvisor': serviceAdvisor,
     };
   }
 
@@ -72,6 +81,8 @@ List<dynamic> toTableRows(){
       id: json['id'],
       carId: json['carId'] ?? 0,
       car: json['car'] ?? "",
+      technician: json['technician'] ?? "",
+      serviceAdvisor: json['serviceAdvisor'] ?? "",
       mileageOnReception: json['mileageOnReception'] ?? "",
       customerConcerns: json['customerConcerns'] ?? "",
       observations: json['observations'] ?? "",

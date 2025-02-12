@@ -78,6 +78,10 @@ class AppController extends GetxController {
   RxList<ProductType> allProductType = <ProductType>[].obs;
   RxList<CarMake> allCarMakes = <CarMake>[].obs;
   RxList<CarModels> allCarModels = <CarModels>[].obs;
+  RxList<Customer> allCustomer = <Customer>[].obs;
+  RxList<CustomerCar> allCustomerCar = <CustomerCar>[].obs;
+  RxList<User> allServiceAdvisor = <User>[].obs;
+  RxList<User> allTechnicians = <User>[].obs;
   RxList<String> userRoles =
       ["admin", "user", "technician", "special advisor"].obs;
   RxList<String> customerTypes = ["Individual", "Corporate"].obs;
@@ -88,6 +92,7 @@ class AppController extends GetxController {
   Rx<TableModelDataSource> tmds = TableModelDataSource([], []).obs;
   Rx<PaginatorController> paginatorController = PaginatorController().obs;
   Rx<BaseModel> currentBaseModel = User().obs;
+  Rx<Order> currentOrder = Order(customerId: 0).obs;
 
   //PROFILE
   RxBool editOn = false.obs;
@@ -102,6 +107,14 @@ class AppController extends GetxController {
     allProductType.value = await _getAll<ProductType>();
     allCarMakes.value = await _getAll<CarMake>();
     allCarModels.value = await _getAll<CarModels>();
+    allCustomer.value = await _getAll<Customer>();
+    allCustomerCar.value = await _getAll<CustomerCar>();
+    allTechnicians.value = await _getAll<User>(fm: [
+      FilterModel("", "role", 0, tec: TextEditingController(text: userRoles[2]))
+    ]);
+    allServiceAdvisor.value = await _getAll<User>(fm: [
+      FilterModel("", "role", 0, tec: TextEditingController(text: userRoles[3]))
+    ]);
 
     totalConditionsHeaders =
         allBillyConditionCategories.map((element) => element.name).toList();
@@ -124,7 +137,7 @@ class AppController extends GetxController {
           .map((e) => e.name)
           .toList();
       for (var i = 0; i < condItem[totalConditionsHeaders[j]]!; i++) {
-        allStepItem.add(CStep(22 + k + i + 1, vc[i]));
+        allStepItem.add(CStep(22 + k + i + 1, k, vc[i]));
         k++;
       }
       allSteps.addAll(allStepItem);
@@ -132,8 +145,8 @@ class AppController extends GetxController {
     }
   }
 
-  Future<List<T>> _getAll<T>() async {
-    final g = (await appRepo.getAll<T>(limit: 10000)).data;
+  Future<List<T>> _getAll<T>({List<FilterModel> fm = const []}) async {
+    final g = (await appRepo.getAll<T>(limit: 10000, fm: fm)).data;
     return g;
   }
 
@@ -145,11 +158,51 @@ class AppController extends GetxController {
     Ui.showInfo('Saved exported Image at: ${file.path}');
   }
 
-  // createOrderForm() async{
-  //   Customer customer = Customer(id: 0, email: tecs[1].text, phone: tecs[2].text, fullName: tecs[0].text, signature: "", customerType: tecs[3].text, createdAt: DateTime.now(), updatedAt: DateTime.now());
-  //   CustomerCar car = CustomerCar(id: 0, makeId: makeId, modelId: modelId, desc: tecs[4].text, year: tecs[8].text, licenseNo: tecs[9].text, createdAt: createdAt, updatedAt: updatedAt, customerId: customerId)
-  //   Order order = Order(customerId: customerId, createdAt: createdAt, updatedAt: updatedAt)
-  // }
+  createOrderForm() {
+    Customer customer = Customer(
+      email: tecs[1].text,
+      phone: tecs[2].text,
+      fullName: tecs[0].text,
+      signature: "",
+      customerType: tecs[3].text,
+    );
+    CustomerCar car = CustomerCar(
+        makeId: int.parse(tecs[6].text),
+        make: int.tryParse(tecs[6].text) == null ||
+                int.tryParse(tecs[6].text) == 0
+            ? "None"
+            : allCarMakes
+                .firstWhere((element) => element.id == int.parse(tecs[6].text))
+                .make,
+        model: int.tryParse(tecs[7].text) == null ||
+                int.tryParse(tecs[7].text) == 0
+            ? "None"
+            : allCarModels
+                .firstWhere((element) => element.id == int.parse(tecs[7].text))
+                .model,
+        modelId: int.parse(tecs[7].text),
+        desc: "",
+        year: tecs[8].text,
+        licenseNo: tecs[9].text,
+        customerId: customer.id);
+
+    Order order = Order(
+        customerId: customer.id,
+        customerConcerns: tecs[11].text,
+        mileageOnReception: int.tryParse(tecs[12].text) ?? 0,
+        fuelLevel: tecs[13].text,
+        bodyCheck: tecs[14].text,
+        observations: tecs[15].text,
+        servicesPerformed: allSteps.map((element) => element.rawId).toList(),
+        technician: tecs[16].text,
+        serviceAdvisor: tecs[17].text,
+        conditions: allSteps.map((element) => element.isChecked ? 1 : 0).toList(),
+        lostSales: tecs[18].text);
+        order.customerCar = car;
+        order.customerDetails = customer;
+        order.allServices = allBillyServices.where((p0) => order.servicesPerformed.contains(p0.id)).toList();
+        currentOrder.value = order;
+  }
 
   Future<bool> loginUser(String username, String password) async {
     try {

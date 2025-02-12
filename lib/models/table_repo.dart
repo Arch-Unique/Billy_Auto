@@ -30,10 +30,10 @@ class FilterModel {
 
   FilterModel(this.title, this.tableTitle, this.filterType,
       {this.options, this.dtr, this.tec, this.id}) {
-    dtr = DateTimeRange(start: DateTime(2000), end: DateTime.now());
-    tec = TextEditingController();
-    options = [];
-    id = 0;
+    dtr = dtr ?? DateTimeRange(start: DateTime(2000), end: DateTime.now());
+    tec = tec ?? TextEditingController();
+    options = options ?? [];
+    id = id ?? 0;
   }
 }
 

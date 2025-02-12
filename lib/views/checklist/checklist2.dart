@@ -10,9 +10,11 @@ import 'package:inventory/tools/colors.dart';
 import 'package:inventory/tools/demo.dart';
 import 'package:inventory/tools/enums.dart';
 import 'package:inventory/tools/functions.dart';
+import 'package:inventory/views/checklist/profile.dart';
 import 'package:inventory/views/shared.dart';
 
 import '../../controllers/app_controller.dart';
+import '../../models/inner_models/barrel.dart';
 import 'order_summary.dart';
 import 'shared2.dart';
 
@@ -100,7 +102,8 @@ class _CheckList2PageState extends State<CheckList2Page> {
                                     if (controller
                                             .currentChecklistMode.value.index ==
                                         ChecklistModes.values.length - 1) {
-                                      Get.to(OrderSummary());
+                                          controller.createOrderForm();
+                                      Get.to(OrderSummary("Service Order Summary",controller.currentOrder.value,sig: controller.userSig.value,));
                                     } else {
                                       controller.currentChecklistMode.value =
                                           ChecklistModes.values[controller
@@ -137,7 +140,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
     RxString curImg = "".obs;
     return [
       CustomTextField2.dropdown(
-          ["None"], controller.tecs[5], "Select Customer"),
+          controller.allCustomer.map((element) => element.fullName).toList(),controller.allCustomer.map((element) => element.id).toList(), controller.tecs[5], "Select Customer"),
 
       Align(
           alignment: Alignment.center,
@@ -153,26 +156,24 @@ class _CheckList2PageState extends State<CheckList2Page> {
       CustomTextField2("Phone", controller.tecs[2],
           varl: FPL.phone, prefix: Icons.phone_iphone_rounded),
       CustomTextField2.dropdown(
-          ["Individual", "Corporate"], controller.tecs[3], "Customer Type"),
+          ["Individual", "Corporate"],["Individual", "Corporate"], controller.tecs[3], "Customer Type"),
       //Signature
       Builder(builder: (context) {
         return SignatureView(controller.userSig, "Customer Signature",
             size: wideUi(context));
       }),
       Ui.boxHeight(24),
-      Builder(
-        builder: (context) {
-          return SizedBox(
-            width: wideUi(context),
-            child: Align(
+      Builder(builder: (context) {
+        return SizedBox(
+          width: wideUi(context),
+          child: Align(
               alignment: Alignment.centerLeft,
               child: Padding(
-                padding: const EdgeInsets.only(left: 0.0,bottom: 8),
+                padding: const EdgeInsets.only(left: 0.0, bottom: 8),
                 child: AppText.thin("Choose Image of Customer/Driver"),
               )),
-          );
-        }
-      ),
+        );
+      }),
       Obx(() {
         final cc = CurvedContainer(
             border: Border.all(color: AppColors.grey),
@@ -222,27 +223,43 @@ class _CheckList2PageState extends State<CheckList2Page> {
     RxString carBrand = "Seat".obs;
     return [
       CustomTextField2.dropdown(
-          ["None"], controller.tecs[10], "Select Customer Car"),
+          controller.allCustomerCar.map((element) => element.desc).toList(),controller.allCustomerCar.map((element) => element.id).toList(), controller.tecs[10], "Select Customer Car"),
       Align(
           alignment: Alignment.center,
           child: AppText.thin("Or register a new customer car")),
       Ui.boxHeight(32),
       CustomTextField2.dropdown(
-          controller.allCarMakes.map((element) => element.make).toList(), controller.tecs[6], "Car Brand", onChanged: (_) {
-        carBrand.value = controller.tecs[6].text;
+          controller.allCarMakes.map((element) => element.make).toList(),
+          controller.allCarMakes.map((element) => element.id).toList(),
+          controller.tecs[6],
+          "Car Brand",initOption: carBrand.value,onChanged: (_) {
+        carBrand.value =
+            controller.allCarMakes[int.parse(controller.tecs[6].text)-1].make;
       }),
       Obx(
-        () => CustomTextField2.dropdown(
-            controller.allCarModels.where((p0) => p0.make == carBrand.value).map((e) => e.model).toList(), controller.tecs[7], "Car Model"),
+        () => 
+        CustomTextField2.dropdown(
+            controller.allCarModels
+                .where((p0) => p0.make == carBrand.value)
+                .map((e) => e.model)
+                .toList(),
+            controller.allCarModels
+                .where((p0) => p0.make == carBrand.value)
+                .map((e) => e.id)
+                .toList(),
+            controller.tecs[7],
+            "Car Model"),
       ),
       CustomTextField2.dropdown(
+          List.generate(DateTime.now().year - 1980,
+              (index) => (DateTime.now().year - index).toString()),
           List.generate(DateTime.now().year - 1980,
               (index) => (DateTime.now().year - index).toString()),
           controller.tecs[8],
           "Car Year"),
       CustomTextField2("License Plate No", controller.tecs[9],
           prefix: Icons.web_asset_rounded),
-CustomTextField2("Chassis No", controller.tecs[9],
+      CustomTextField2("Chassis No", controller.tecs[9],
           prefix: Icons.web_asset_rounded),
     ];
   }
@@ -340,9 +357,9 @@ CustomTextField2("Chassis No", controller.tecs[9],
   List<Widget> freeInspectionDetails() {
     return [
       CustomTextField2.dropdown(
-          ["Ade", "Harry"], controller.tecs[16], "Select Service Advisor"),
+          controller.allServiceAdvisor.map((element) => element.fullName).toList(),controller.allServiceAdvisor.map((element) => element.id).toList(), controller.tecs[16], "Select Service Advisor"),
       CustomTextField2.dropdown(
-          ["Ade", "Tunde"], controller.tecs[17], "Select Technician"),
+         controller.allTechnicians.map((element) => element.fullName).toList(),controller.allTechnicians.map((element) => element.id).toList(), controller.tecs[17], "Select Technician"),
       Ui.align(child: Builder(builder: (context) {
         return Padding(
           padding: EdgeInsets.only(left: Ui.width(context) < 650 ? 42 : 84.0),
@@ -373,8 +390,10 @@ CustomTextField2("Chassis No", controller.tecs[9],
                     canTapOnHeader: true,
                     body: Column(
                       children: List.generate(
-                          controller.condItem[controller.totalConditionsHeaders[index]]!, (jindex) {
-                        final cstep = controller.inspectionNo[controller.totalConditionsHeaders[index]]![jindex];
+                          controller.condItem[controller
+                              .totalConditionsHeaders[index]]!, (jindex) {
+                        final cstep = controller.inspectionNo[
+                            controller.totalConditionsHeaders[index]]![jindex];
                         return Row(
                           children: [
                             Expanded(
@@ -412,18 +431,19 @@ CustomTextField2("Chassis No", controller.tecs[9],
           "Lost Sales (Share with us items requested that we don't have in stock)",
           controller.tecs[18],
           varl: FPL.multi),
-      Builder(builder: (context) {
-        return SignatureView(
-          controller.advSig,
-          "Service Advisor Signature",
-          size: wideUi(context),
-        );
-      }),
+      Builder(
+        builder: (context) {
+          List<User> sas = controller.allServiceAdvisor.where((p0) => p0.id == int.parse(controller.tecs[16].text)).toList();
+          return LockedSignatureWidget(title: "Service Advisor Signature", signature: sas.isEmpty ? "" :  sas.first.signature);
+        }
+      ),
       Ui.boxHeight(24),
-      Builder(builder: (context) {
-        return SignatureView(controller.techSig, "Technician Signature",
-            size: wideUi(context));
-      }),
+      Builder(
+        builder: (context) {
+          List<User> sas = controller.allTechnicians.where((p0) => p0.id == int.parse(controller.tecs[17].text)).toList();
+          return LockedSignatureWidget(title: "Technician Signature", signature: sas.isEmpty ? "" :  sas.first.signature);
+        }
+      ),
     ];
   }
 
@@ -447,7 +467,8 @@ CustomTextField2("Chassis No", controller.tecs[9],
                       },
                       // activeColor: AppColors.primaryColorLight,
                       // tileColor: AppColors.primaryColorLight,
-                      title: AppText.thin(controller.allBillyServices[index].name),
+                      title:
+                          AppText.thin(controller.allBillyServices[index].name),
                     );
                   }),
                 );
