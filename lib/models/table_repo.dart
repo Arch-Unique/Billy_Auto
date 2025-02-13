@@ -127,7 +127,7 @@ class AllTables {
       FilterModel("Product Type", "productTypeId", 0),
       FilterModel("Product Category", "productCategoryId", 0),
       FilterModel("Created At", "createdAt", 1)
-    ],Product(name: "", cost: 0, sellingPrice: 0, productCategoryId: 0, productTypeId: 0)),
+    ],Product(name: "", cost: 0, sellingPrice: 0, productCategoryId: 0, productTypeId: 0,supplierId: 0)),
     Inventory: TableModel([
       "id",
       "product",

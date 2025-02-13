@@ -26,11 +26,16 @@ List<dynamic> toTableRows(){
   // Create CarMake object from JSON
   factory CarMake.fromJson(Map<String, dynamic> json) {
     return CarMake(
-      id: json['id'],
+      id: json['id'] ?? 0,
       make: json['make'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.tryParse(json['createdAt']),
+      updatedAt: DateTime.tryParse(json['updatedAt']),
     );
+  }
+  
+  @override
+  bool validate() {
+    return make.isNotEmpty;
   }
 }
 
@@ -61,15 +66,20 @@ List<dynamic> toTableRows(){
     return [id,make,model,createdAt];
   }
 
+  @override
+  bool validate() {
+    return makeId != 0 && model.isNotEmpty;
+  }
+
   // Create CarModels object from JSON
   factory CarModels.fromJson(Map<String, dynamic> json) {
     return CarModels(
-      id: json['id'],
+      id: json['id'] ?? 0,
       makeId: json['makeId'],
       make: json['make'],
       model: json['model'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.tryParse(json['createdAt']),
+      updatedAt: DateTime.tryParse(json['updatedAt']),
     );
   }
 }

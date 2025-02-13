@@ -56,7 +56,9 @@ class _CustomTableState extends State<CustomTable> {
                       content: Obx(() {
                         return DynamicFormGenerator(
                             model: controller.currentBaseModel.value,
-                            onSave: (v) {});
+                            onSave: (v) async{
+                              await controller.saveNewRecord(v);
+                            });
                       })));
                 },
                 child: AppIcon(
@@ -163,7 +165,7 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                         onTap: () {
                           Get.find<AppController>().currentBaseModel = bm.obs;
                           Get.dialog(AppDialog(
-                      title: AppText.thin("Add New Record"),
+                      title: AppText.thin("Edit Record"),
                       content: Obx(() {
                         return DynamicFormGenerator(
                             model: Get.find<AppController>().currentBaseModel.value,
@@ -344,6 +346,9 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
     Map<String, dynamic> jsonMap = widget.model.toJson();
 
     // Create controllers for each field
+    _formData['id'] = widget.model.id;
+    _formData['createdAt'] = DateTime.now().toIso8601String();
+    _formData['updatedAt'] = DateTime.now().toIso8601String();
     jsonMap.forEach((key, value) {
       if (!['id', 'createdAt', 'updatedAt'].contains(key)) {
         _controllers[key] =
@@ -470,10 +475,13 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
                 .map((entry) => _buildField(entry.key, entry.value)),
             Ui.boxHeight(24),
             AppButton(
-              onPressed: () {
+              onPressed: () async {
                 if (_formKey.currentState?.validate() ?? false) {
                   _formKey.currentState?.save();
-                  widget.onSave(_formData);
+                  _controllers.forEach((key, value) {
+                    _formData[key] = value.text;
+                  });
+                  await widget.onSave(_formData);
                 }
               },
               text: "Save",

@@ -10,7 +10,7 @@ class Product extends BaseModel{
   String image;
   
   
-  int productTypeId;
+  int productTypeId,supplierId;
   String productCategory, productType;
 
   Product({
@@ -19,6 +19,7 @@ class Product extends BaseModel{
     required this.cost,
     required this.sellingPrice,
     required this.productCategoryId,
+    required this.supplierId,
     this.productCategory="",
     this.code="",
     this.image="",
@@ -38,6 +39,7 @@ Map<String, dynamic> toJson() {
       'productCategoryId': productCategoryId,
       'code': code,
       'image': image,
+      'supplierId': supplierId,
       'productTypeId': productTypeId,
     };
   }
@@ -47,21 +49,27 @@ List<dynamic> toTableRows(){
     return [id,name,code,cost,sellingPrice,productType,productCategory,createdAt];
   }
 
+  @override
+  bool validate() {
+    return name.isNotEmpty && productCategoryId != 0 && productTypeId != 0 ;
+  }
+
   // Create Product object from JSON
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['id'],
+      id: json['id'] ?? 0,
       name: json['name'],
       cost: json['cost'],
       sellingPrice: json['sellingPrice'],
       productCategoryId: json['productCategoryId'],
-      productCategory: json['productCategory'],
+      productCategory: json['productCategory'] ?? "",
       code: json['code'] ?? "",
       image: json['image'] ?? "",
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.tryParse(json['createdAt']),
+      updatedAt: DateTime.tryParse(json['updatedAt']),
       productTypeId: json['productTypeId'],
-      productType: json['productType'],
+      supplierId: json['supplierId'],
+      productType: json['productType'] ?? "",
     );
   }
 }
@@ -97,6 +105,11 @@ Map<String, dynamic> toJson() {
     };
   }
 
+  @override
+  bool validate() {
+    return name.isNotEmpty && productCategoryId != 0;
+  }
+
       @override
 List<dynamic> toTableRows(){
     return [id,name,code,productCategory,createdAt];
@@ -105,14 +118,14 @@ List<dynamic> toTableRows(){
   // Create ProductType object from JSON
   factory ProductType.fromJson(Map<String, dynamic> json) {
     return ProductType(
-      id: json['id'],
+      id: json['id'] ?? 0,
       name: json['name'],
       code: json['code'] ?? "",
       image: json['image'] ?? "",
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.tryParse(json['createdAt']),
+      updatedAt: DateTime.tryParse(json['updatedAt']),
       productCategoryId: json['productCategoryId'],
-      productCategory: json['productCategory'],
+      productCategory: json['productCategory'] ?? "",
     );
   }
 }
@@ -145,15 +158,20 @@ List<dynamic> toTableRows(){
     return [id,name,code,createdAt];
   }
 
+  @override
+  bool validate() {
+    return name.isNotEmpty;
+  }
+
   // Create ProductCategory object from JSON
   factory ProductCategory.fromJson(Map<String, dynamic> json) {
     return ProductCategory(
-      id: json['id'],
+      id: json['id'] ?? 0,
       name: json['name'],
       code: json['code'] ?? "",
       image: json['image'] ?? "",
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.tryParse(json['createdAt']),
+      updatedAt: DateTime.tryParse(json['updatedAt']),
     );
   }
 }

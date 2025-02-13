@@ -6,7 +6,6 @@ class Customer extends BaseModel {
   String fullName;
   String signature;
   String customerType;
-  String image;
 
   Customer({
     super.id = 0,
@@ -15,7 +14,7 @@ class Customer extends BaseModel {
     required this.fullName,
     required this.signature,
     required this.customerType,
-    this.image = "",
+    
     super.createdAt,
     super.updatedAt,
   });
@@ -28,9 +27,13 @@ class Customer extends BaseModel {
       'phone': phone,
       'fullName': fullName,
       'signature': signature,
-      'customerType': customerType,
-      'image': image,
+      'customerType': customerType
     };
+  }
+
+     @override
+  bool validate() {
+    return fullName.isNotEmpty && customerType.isNotEmpty;
   }
 
   @override
@@ -41,15 +44,15 @@ class Customer extends BaseModel {
   // Create Customer object from JSON
   factory Customer.fromJson(Map<String, dynamic> json) {
     return Customer(
-      id: json['id'],
+      id: json['id'] ?? 0,
       email: json['email'],
       phone: json['phone'],
       fullName: json['fullName'],
       signature: json['signature'] ?? "",
-      image: json['image'] ?? "",
+      
       customerType: json['customerType'] ?? "Individual",
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.tryParse(json['createdAt']),
+      updatedAt: DateTime.tryParse(json['updatedAt']),
     );
   }
 }

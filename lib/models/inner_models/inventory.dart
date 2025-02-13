@@ -50,6 +50,11 @@ class Inventory extends BaseModel {
   }
 
   @override
+  bool validate() {
+    return productId != 0 && productCategoryId != 0 && qty != 0 && productTypeId != 0 && transactionType.isNotEmpty && status.isNotEmpty && location.isNotEmpty;
+  }
+
+  @override
   List<dynamic> toTableRows() {
     return [
       id,
@@ -67,22 +72,22 @@ class Inventory extends BaseModel {
   // Create Inventory object from JSON
   factory Inventory.fromJson(Map<String, dynamic> json) {
     return Inventory(
-      id: json['id'],
+      id: json['id'] ?? 0,
       productId: json['productId'],
-      product: json['product'],
+      product: json['product'] ?? "",
       qty: json['qty'],
       transactionType: json['transactionType'],
       status: json['status'],
       supplierId: json['supplierId'],
-      supplier: json['supplier'],
+      supplier: json['supplier'] ?? "",
       productCategoryId: json['productCategoryId'],
-      productCategory: json['productCategory'],
+      productCategory: json['productCategory'] ?? "",
       location: json['location'],
       shelfLife: DateTime.parse(json['shelfLife']),
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.tryParse(json['createdAt']),
+      updatedAt: DateTime.tryParse(json['updatedAt']),
       productTypeId: json['productTypeId'],
-      productType: json['productType'],
+      productType: json['productType'] ?? "",
     );
   }
 }

@@ -212,18 +212,31 @@ class CustomTextField2 extends StatelessWidget {
     );
   }
 
-  static dropdown(List<String> options, List<dynamic> values,
+  static dropdown<T>(List<String> optionss, List<T> valuess,
       TextEditingController cont, String label,
       {Function(String)? onChanged, String? initOption, double? w}) {
-    options.insert(0, "None");
-    
-    try {
-  values.insert(0, 0);
-}  catch (e) {
-  values.insert(0,"");
-}
+        final options = List.from(optionss);
+        final values = List.from(valuess);
+    if (options.isEmpty || options[0] != "None") {
+      options.insert(0, "None");
+      T defaultValue = (T == int) ? 0 as T : "" as T;
+      values.insert(0, defaultValue);
+    }
+
+    if (cont.text.isNotEmpty) {
+      if (T == int) {
+        initOption = options[!values.contains(int.parse(cont.text))
+            ? 0
+            : values.indexOf(int.parse(cont.text) as T)];
+      } else {
+        initOption = options[
+            !values.contains(cont.text) ? 0 : values.indexOf(cont.text as T)];
+      }
+    }
+
     String curOption =
         (initOption == null || initOption.isEmpty) ? options[0] : initOption;
+    
     cont.text = values[options.indexOf(curOption)].toString();
     return StatefulBuilder(builder: (context, setState) {
       return SizedBox(
@@ -304,10 +317,12 @@ class BackgroundScaffold extends StatelessWidget {
   const BackgroundScaffold(
       {required this.child,
       this.hasBack = false,
+      this.action,
       this.hasEdit = false,
       this.hasUser = false,
       super.key});
   final Widget child;
+  final Widget? action;
   final bool hasBack, hasEdit;
   final bool hasUser;
 
@@ -341,6 +356,8 @@ class BackgroundScaffold extends StatelessWidget {
                   },
                 ),
               )),
+        if (action != null)
+          Positioned(top: 24, right: 24, child: SafeArea(child: action!)),
         if (hasUser)
           Positioned(
               top: 24,
@@ -388,8 +405,6 @@ class EditUnlockWidget extends StatelessWidget {
   }
 }
 
-
-
 class LockedSignatureWidget extends StatelessWidget {
   const LockedSignatureWidget({
     super.key,
@@ -397,7 +412,7 @@ class LockedSignatureWidget extends StatelessWidget {
     required this.signature,
   });
 
-  final String title,signature;
+  final String title, signature;
 
   @override
   Widget build(BuildContext context) {
@@ -412,8 +427,7 @@ class LockedSignatureWidget extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                   border: Border.all(
-                      color: AppColors.lightTextColor
-                          .withOpacity(0.3),
+                      color: AppColors.lightTextColor.withOpacity(0.3),
                       width: 1)),
               height: 84,
               clipBehavior: Clip.hardEdge,

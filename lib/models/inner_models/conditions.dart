@@ -30,15 +30,20 @@ List<dynamic> toTableRows(){
     return [id,name,conditionsCategory,createdAt];
   }
 
+    @override
+  bool validate() {
+    return conditionsCategoryId != 0 && name.isNotEmpty;
+  }
+
   // Create BillyConditions object from JSON
   factory BillyConditions.fromJson(Map<String, dynamic> json) {
     return BillyConditions(
-      id: json['id'],
+      id: json['id'] ?? 0,
       name: json['name'],
       conditionsCategoryId: json['conditionsCategoryId'],
-      conditionsCategory: json['conditionsCategory'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      conditionsCategory: json['conditionsCategory'] ?? "",
+      createdAt: DateTime.tryParse(json['createdAt']),
+      updatedAt: DateTime.tryParse(json['updatedAt']),
     );
   }
 }
@@ -69,13 +74,18 @@ List<dynamic> toTableRows(){
     return [id,name,createdAt];
   }
 
+   @override
+  bool validate() {
+    return name.isNotEmpty;
+  }
+
   // Create BillyConditionCategory object from JSON
   factory BillyConditionCategory.fromJson(Map<String, dynamic> json) {
     return BillyConditionCategory(
-      id: json['id'],
+      id: json['id'] ?? 0,
       name: json['name'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.tryParse(json['createdAt']),
+      updatedAt: DateTime.tryParse(json['updatedAt']),
     );
   }
 }

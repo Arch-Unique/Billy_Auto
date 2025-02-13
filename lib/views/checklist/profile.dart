@@ -61,7 +61,7 @@ class ProfilePage extends StatelessWidget {
                   tecs[1],
                   readOnly: !controller.editOn.value,
                 ),
-                CustomTextField2.dropdown(controller.userRoles,controller.userRoles, tecs[2], "Role",
+                CustomTextField2.dropdown<String>(controller.userRoles,controller.userRoles, tecs[2], "Role",
                     initOption: tecs[2].text),
                 CustomTextField2(
                   "Email",
@@ -80,7 +80,7 @@ class ProfilePage extends StatelessWidget {
                     child: AppButton(
                       onPressed: () async {
                         String sp = "";
-                        if (cuserSig.value != Uint8List(0)) {
+                        if (cuserSig.value.isNotEmpty) {
                           final ssp = await UtilFunctions.saveToTempFile(cuserSig.value);
                           sp = ssp.path;
                         }

@@ -7,6 +7,7 @@ import 'package:inventory/tools/assets.dart';
 import 'package:inventory/tools/enums.dart';
 import 'package:inventory/tools/validators.dart';
 import 'package:inventory/views/checklist/checklist2.dart';
+import 'package:inventory/views/checklist/history.dart';
 import 'package:inventory/views/checklist/shared2.dart';
 import 'package:inventory/views/explorer/explorer.dart';
 import 'package:inventory/views/shared.dart';
@@ -101,9 +102,11 @@ class ChoosePage extends StatelessWidget {
                   fontFamily: Assets.appFontFamily1,
                   color: AppColors.lightTextColor),
               Ui.boxHeight(24),
-              actionBody("Service Order", "Dispatch Order", () {
+              actionBody("Service Order", "Order History", () {
                 Get.to(CheckList2Page());
-              }, () {}),
+              }, () {
+                Get.to(OrderHistoryPage());
+              }),
               Ui.boxHeight(24),
               actionBody("Inbound", "Outbound", () {}, () {
                 Get.to(ExplorerPage());

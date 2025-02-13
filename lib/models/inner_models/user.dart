@@ -38,17 +38,22 @@ List<dynamic> toTableRows(){
     return [id,fullName,username,email,role,createdAt];
   }
 
+  @override
+  bool validate() {
+    return fullName.isNotEmpty && role.isNotEmpty && username.isNotEmpty;
+  }
+
   // Create User object from JSON
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'],
+      id: json['id'] ?? 0,
       fullName: json['fullName'],
       username: json['username'],
       email: json['email'] ?? "",
       signature: json['signature'] ?? "",
       role: json['role'] ?? "user", //admin,technician,customer-support,service-advisor,user
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.tryParse(json['createdAt']),
+      updatedAt: DateTime.tryParse(json['updatedAt']),
     );
   }
 }

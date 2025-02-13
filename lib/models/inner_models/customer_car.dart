@@ -6,9 +6,9 @@ class CustomerCar extends BaseModel{
   int modelId;
   String desc, customer;
   String licenseNo, make, model, year,chassisNo;
-  
-  
   int customerId;
+
+  String get descRaw => "$make $model $year";
 
   CustomerCar({
     super.id = 0,
@@ -40,6 +40,11 @@ Map<String, dynamic> toJson() {
     };
   }
 
+   @override
+  bool validate() {
+    return makeId != 0 && modelId != 0 && licenseNo.isNotEmpty && customerId != 0;
+  }
+
       @override
 List<dynamic> toTableRows(){
     return [id,make,model,year,licenseNo,customer,createdAt];
@@ -48,17 +53,17 @@ List<dynamic> toTableRows(){
   // Create CustomerCar object from JSON
   factory CustomerCar.fromJson(Map<String, dynamic> json) {
     return CustomerCar(
-      id: json['id'],
+      id: json['id'] ?? 0,
       makeId: json['makeId'],
       modelId: json['modelId'],
-      make: json['make'],
+      make: json['make'] ?? "",
       desc: json['description'],
-      model: json['model'],
-      year: json['year'] ?? "",
+      model: json['model'] ?? "",
+      year: (json['year'] ?? "").toString(),
       licenseNo: json['licenseNo'] ?? "",
       chassisNo: json['chassisNo'] ?? "",
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.tryParse(json['createdAt']),
+      updatedAt: DateTime.tryParse(json['updatedAt']),
       customerId: json['customerId'],
       customer: json['customer'] ?? "",
     );

@@ -10,6 +10,7 @@ import 'package:inventory/tools/colors.dart';
 import 'package:inventory/tools/demo.dart';
 import 'package:inventory/tools/enums.dart';
 import 'package:inventory/tools/functions.dart';
+import 'package:inventory/views/checklist/history.dart';
 import 'package:inventory/views/checklist/profile.dart';
 import 'package:inventory/views/shared.dart';
 
@@ -59,6 +60,18 @@ class _CheckList2PageState extends State<CheckList2Page> {
       child: Scaffold(
         body: BackgroundScaffold(
           hasBack: true,
+          action: InkWell(
+            onTap: () {
+              Get.to(OrderHistoryPage());
+            },
+            child: CircleAvatar(
+              backgroundColor: AppColors.primaryColor,
+              child: AppIcon(
+                Icons.history,
+                color: AppColors.white,
+              ),
+            ),
+          ),
           child: Column(
             children: [
               Ui.boxWidth(Ui.width(context)),
@@ -102,8 +115,11 @@ class _CheckList2PageState extends State<CheckList2Page> {
                                     if (controller
                                             .currentChecklistMode.value.index ==
                                         ChecklistModes.values.length - 1) {
-                                          controller.createOrderForm();
-                                      Get.to(OrderSummary("Service Order Summary",controller.currentOrder.value,sig: controller.userSig.value,));
+                                      controller.createOrderForm();
+                                      Get.to(OrderSummary(
+                                        controller.currentOrder.value,
+                                        sig: controller.userSig.value,
+                                      ));
                                     } else {
                                       controller.currentChecklistMode.value =
                                           ChecklistModes.values[controller
@@ -139,8 +155,11 @@ class _CheckList2PageState extends State<CheckList2Page> {
   List<Widget> customerDetails() {
     RxString curImg = "".obs;
     return [
-      CustomTextField2.dropdown(
-          controller.allCustomer.map((element) => element.fullName).toList(),controller.allCustomer.map((element) => element.id).toList(), controller.tecs[5], "Select Customer"),
+      CustomTextField2.dropdown<int>(
+          controller.allCustomer.map((element) => element.fullName).toList(),
+          controller.allCustomer.map((element) => element.id).toList(),
+          controller.tecs[5],
+          "Select Customer"),
 
       Align(
           alignment: Alignment.center,
@@ -155,8 +174,8 @@ class _CheckList2PageState extends State<CheckList2Page> {
           varl: FPL.email, prefix: Icons.email_rounded),
       CustomTextField2("Phone", controller.tecs[2],
           varl: FPL.phone, prefix: Icons.phone_iphone_rounded),
-      CustomTextField2.dropdown(
-          ["Individual", "Corporate"],["Individual", "Corporate"], controller.tecs[3], "Customer Type"),
+      CustomTextField2.dropdown<String>(controller.customerTypes,
+          controller.customerTypes, controller.tecs[3], "Customer Type"),
       //Signature
       Builder(builder: (context) {
         return SignatureView(controller.userSig, "Customer Signature",
@@ -220,25 +239,31 @@ class _CheckList2PageState extends State<CheckList2Page> {
   }
 
   List<Widget> carDetails() {
-    RxString carBrand = "Seat".obs;
+    RxString carBrand = controller.tecs[6].text.isEmpty && controller.tecs[6].text != "0"
+        ? "Seat".obs
+        : controller
+            .allCarMakes.firstWhere((p0) => p0.id == int.parse(controller.tecs[6].text)).make.obs;
     return [
-      CustomTextField2.dropdown(
-          controller.allCustomerCar.map((element) => element.desc).toList(),controller.allCustomerCar.map((element) => element.id).toList(), controller.tecs[10], "Select Customer Car"),
+      CustomTextField2.dropdown<int>(
+          controller.allCustomerCar.map((element) => element.desc).toList(),
+          controller.allCustomerCar.map((element) => element.id).toList(),
+          controller.tecs[10],
+          "Select Customer Car"),
       Align(
           alignment: Alignment.center,
           child: AppText.thin("Or register a new customer car")),
       Ui.boxHeight(32),
-      CustomTextField2.dropdown(
+      CustomTextField2.dropdown<int>(
           controller.allCarMakes.map((element) => element.make).toList(),
           controller.allCarMakes.map((element) => element.id).toList(),
           controller.tecs[6],
-          "Car Brand",initOption: carBrand.value,onChanged: (_) {
+          "Car Brand",
+          initOption: carBrand.value, onChanged: (_) {
         carBrand.value =
-            controller.allCarMakes[int.parse(controller.tecs[6].text)-1].make;
+            controller.allCarMakes.firstWhere((p0) => p0.id == int.parse(controller.tecs[6].text)).make;
       }),
       Obx(
-        () => 
-        CustomTextField2.dropdown(
+        () => CustomTextField2.dropdown<int>(
             controller.allCarModels
                 .where((p0) => p0.make == carBrand.value)
                 .map((e) => e.model)
@@ -250,7 +275,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
             controller.tecs[7],
             "Car Model"),
       ),
-      CustomTextField2.dropdown(
+      CustomTextField2.dropdown<String>(
           List.generate(DateTime.now().year - 1980,
               (index) => (DateTime.now().year - index).toString()),
           List.generate(DateTime.now().year - 1980,
@@ -355,11 +380,27 @@ class _CheckList2PageState extends State<CheckList2Page> {
   }
 
   List<Widget> freeInspectionDetails() {
+    RxString technician = "0".obs;
+    RxString serviceAdvisor = "0".obs;
     return [
-      CustomTextField2.dropdown(
-          controller.allServiceAdvisor.map((element) => element.fullName).toList(),controller.allServiceAdvisor.map((element) => element.id).toList(), controller.tecs[16], "Select Service Advisor"),
-      CustomTextField2.dropdown(
-         controller.allTechnicians.map((element) => element.fullName).toList(),controller.allTechnicians.map((element) => element.id).toList(), controller.tecs[17], "Select Technician"),
+      CustomTextField2.dropdown<int>(
+          controller.allServiceAdvisor
+              .map((element) => element.fullName)
+              .toList(),
+          controller.allServiceAdvisor.map((element) => element.id).toList(),
+          controller.tecs[16],
+          "Select Service Advisor", onChanged: (v) {
+        serviceAdvisor.value = controller.tecs[16].text;
+        controller.allServiceAdvisor.refresh();
+      }),
+      CustomTextField2.dropdown<int>(
+          controller.allTechnicians.map((element) => element.fullName).toList(),
+          controller.allTechnicians.map((element) => element.id).toList(),
+          controller.tecs[17],
+          "Select Technician", onChanged: (v) {
+        technician.value = controller.tecs[17].text;
+        controller.allTechnicians.refresh();
+      }),
       Ui.align(child: Builder(builder: (context) {
         return Padding(
           padding: EdgeInsets.only(left: Ui.width(context) < 650 ? 42 : 84.0),
@@ -431,19 +472,23 @@ class _CheckList2PageState extends State<CheckList2Page> {
           "Lost Sales (Share with us items requested that we don't have in stock)",
           controller.tecs[18],
           varl: FPL.multi),
-      Builder(
-        builder: (context) {
-          List<User> sas = controller.allServiceAdvisor.where((p0) => p0.id == int.parse(controller.tecs[16].text)).toList();
-          return LockedSignatureWidget(title: "Service Advisor Signature", signature: sas.isEmpty ? "" :  sas.first.signature);
-        }
-      ),
+      Obx(() {
+        List<User> sas = controller.allServiceAdvisor
+            .where((p0) => p0.id == int.parse(serviceAdvisor.value))
+            .toList();
+        return LockedSignatureWidget(
+            title: "Service Advisor Signature",
+            signature: sas.isEmpty ? "" : sas.first.signature);
+      }),
       Ui.boxHeight(24),
-      Builder(
-        builder: (context) {
-          List<User> sas = controller.allTechnicians.where((p0) => p0.id == int.parse(controller.tecs[17].text)).toList();
-          return LockedSignatureWidget(title: "Technician Signature", signature: sas.isEmpty ? "" :  sas.first.signature);
-        }
-      ),
+      Obx(() {
+        List<User> sas = controller.allTechnicians
+            .where((p0) => p0.id == int.parse(technician.value))
+            .toList();
+        return LockedSignatureWidget(
+            title: "Technician Signature",
+            signature: sas.isEmpty ? "" : sas.first.signature);
+      }),
     ];
   }
 
@@ -461,9 +506,10 @@ class _CheckList2PageState extends State<CheckList2Page> {
                       color: AppColors.lightTextColor.withOpacity(0.5)),
                   child: Obx(() {
                     return CheckboxListTile(
-                      value: controller.allServicesItems[index],
+                      value: controller.allServicesItems[index].isChecked,
                       onChanged: (b) {
-                        controller.allServicesItems[index] = b ?? false;
+                        controller.allServicesItems[index].isChecked = b ?? false;
+                        controller.allServicesItems.refresh();
                       },
                       // activeColor: AppColors.primaryColorLight,
                       // tileColor: AppColors.primaryColorLight,

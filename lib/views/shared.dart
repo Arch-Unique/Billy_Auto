@@ -682,11 +682,11 @@ abstract class Ui {
     Get.closeAllSnackbars();
     Get.showSnackbar(GetSnackBar(
       messageText: AppText.thin(message,
-          fontSize: 14, color: Colors.black, alignment: TextAlign.center),
+          fontSize: 14, color: Colors.white, alignment: TextAlign.center),
       boxShadows: [
         BoxShadow(offset: Offset(0, -4), blurRadius: 40, color: Colors.white)
       ],
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.green,
       borderRadius: 16,
       forwardAnimationCurve: Curves.elasticInOut,
       snackPosition: SnackPosition.TOP,
@@ -1298,6 +1298,16 @@ class _SignatureViewState extends State<SignatureView> {
   Uint8List? bytes;
 
   GlobalKey<SfSignaturePadState> signaturePadKey = GlobalKey();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    if(widget.tec.value.isNotEmpty){
+      isCaptured = true;
+      bytes = widget.tec.value;
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

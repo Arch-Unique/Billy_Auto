@@ -38,17 +38,22 @@ List<dynamic> toTableRows(){
     return [id,fullName,email,phone,code,createdAt];
   }
 
+  @override
+  bool validate() {
+    return fullName.isNotEmpty;
+  }
+
   // Create Supplier object from JSON
   factory Supplier.fromJson(Map<String, dynamic> json) {
     return Supplier(
-      id: json['id'],
+      id: json['id'] ?? 0,
       fullName: json['fullName'],
       email: json['email'] ?? "",
       phone: json['phone'] ?? "",
       address: json['address'] ?? "",
       code: json['code'] ?? "",
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.tryParse(json['createdAt']),
+      updatedAt: DateTime.tryParse(json['updatedAt']),
     );
   }
 }

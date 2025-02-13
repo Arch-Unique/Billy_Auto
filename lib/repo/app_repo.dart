@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:inventory/tools/extensions.dart';
 
 import '../models/inner_models/barrel.dart';
+import '../models/inner_models/base_model.dart';
 import '../models/table_repo.dart';
 import '../tools/demo.dart';
 import '../tools/service.dart';
@@ -91,16 +92,16 @@ class AppRepo extends GetxController {
     return JsonParser.parse<T>(res, factories[T]!);
   }
 
-  Future<int> create<T>(Map<String, dynamic> data) async {
-    final res = await apiService.post("${urls[T]!}/add", data: data);
+  Future<int> create<T extends BaseModel>(T data) async {
+    final res = await apiService.post("${urls[data.runtimeType]!}/add", data: data.toJson());
     if (!res.statusCode!.isSuccess()) {
       throw res.data["error"];
     }
     return res.data["data"];
   }
 
-  Future<String> patch<T>(int id, Map<String, dynamic> data) async {
-    final res = await apiService.patch("${urls[T]!}/$id", data: data);
+  Future<String> patch<T extends BaseModel>(T data) async {
+    final res = await apiService.patch("${urls[data.runtimeType]!}/${data.id}", data: data.toJson());
     if (!res.statusCode!.isSuccess()) {
       throw res.data["error"];
     }
@@ -163,7 +164,9 @@ class AppRepo extends GetxController {
     }
   }
 
-  Future<String?> uploadPhoto(String imagePath) async {
+  Future<String?> uploadPhoto(String? imagePath) async {
+    if(imagePath == null) return null;
+    if(imagePath.isEmpty) return null;
     final res = await apiService.post(AppUrls.upload,
         data: dio.FormData.fromMap({
           'file': await dio.MultipartFile.fromFile(

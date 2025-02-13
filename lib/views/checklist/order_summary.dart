@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:inventory/controllers/app_controller.dart';
 import 'package:inventory/tools/colors.dart';
 import 'package:inventory/views/auth/auth_page.dart';
+import 'package:inventory/views/checklist/shared2.dart';
 import 'package:inventory/views/explorer/explorer.dart';
 import 'package:inventory/views/shared.dart';
 import 'package:printing/printing.dart';
@@ -16,10 +17,10 @@ import 'package:pdf/widgets.dart' as pw;
 
 import '../../models/inner_models/barrel.dart';
 import '../../tools/assets.dart';
+import '../../tools/urls.dart';
 
 class OrderSummary extends StatefulWidget {
-  const OrderSummary(this.title,this.order,{this.sig,super.key});
-  final String title;
+  const OrderSummary(this.order, {this.sig, super.key});
   final Order order;
   final Uint8List? sig;
 
@@ -104,10 +105,13 @@ class _OrderSummaryState extends State<OrderSummary> {
         child: WidgetsToImage(
           controller: imageController,
           child: Builder(builder: (context) {
+            final title = widget.order.isDispatched
+                ? "Dispatch Order Summary"
+                : "Service Order Summary";
             final toreturn = Column(
               children: [
                 LogoWidget(144),
-                AppText.medium(widget.title,
+                AppText.medium(title,
                     fontSize: 32,
                     alignment: TextAlign.center,
                     fontFamily: Assets.appFontFamily2),
@@ -127,7 +131,9 @@ class _OrderSummaryState extends State<OrderSummary> {
                               Icons.home_outlined,
                               color: AppColors.white,
                             )))),
+                    if(widget.order.id == 0)
                     Ui.boxWidth(16),
+                    if(widget.order.id == 0)
                     InkWell(
                         onTap: () {
                           Get.back();
@@ -143,7 +149,12 @@ class _OrderSummaryState extends State<OrderSummary> {
                     Ui.boxWidth(16),
                     InkWell(
                         onTap: () {
-                          Get.to(CustomOrderPDFPage(widget.title,DateTime.now(),order: widget.order,sigUint: widget.sig,));
+                          Get.to(CustomOrderPDFPage(
+                            title,
+                            DateTime.now(),
+                            order: widget.order,
+                            sigUint: widget.sig,
+                          ));
                         },
                         child: CircleAvatar(
                             backgroundColor: AppColors.primaryColor,
@@ -156,7 +167,12 @@ class _OrderSummaryState extends State<OrderSummary> {
                     Ui.boxWidth(16),
                     InkWell(
                         onTap: () {
-                          Get.to(CustomOrderPDFPage(widget.title,DateTime.now(),order: widget.order,sigUint: widget.sig,));
+                          Get.to(CustomOrderPDFPage(
+                            title,
+                            DateTime.now(),
+                            order: widget.order,
+                            sigUint: widget.sig,
+                          ));
                         },
                         child: CircleAvatar(
                             backgroundColor: AppColors.primaryColor,
@@ -175,11 +191,14 @@ class _OrderSummaryState extends State<OrderSummary> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        titleValueText("Full Name", widget.order.customerDetails?.fullName),
-                        titleValueText("Email", widget.order.customerDetails?.email),
-                        titleValueText("Phone Number", widget.order.customerDetails?.phone),
+                        titleValueText("Full Name",
+                            widget.order.customerDetails?.fullName),
                         titleValueText(
-                            "Customer Type", widget.order.customerDetails?.customerType),
+                            "Email", widget.order.customerDetails?.email),
+                        titleValueText("Phone Number",
+                            widget.order.customerDetails?.phone),
+                        titleValueText("Customer Type",
+                            widget.order.customerDetails?.customerType),
                       ],
                     )),
                 serviceItem(
@@ -189,11 +208,12 @@ class _OrderSummaryState extends State<OrderSummary> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         titleValueText("Make", widget.order.customerCar?.make),
-                        titleValueText("Model", widget.order.customerCar?.model),
-                        titleValueText("Year", widget.order.customerCar?.year),
                         titleValueText(
-                            "License Plate No", widget.order.customerCar?.licenseNo),
-                            titleValueText(
+                            "Model", widget.order.customerCar?.model),
+                        titleValueText("Year", widget.order.customerCar?.year),
+                        titleValueText("License Plate No",
+                            widget.order.customerCar?.licenseNo),
+                        titleValueText(
                             "Chassis No", widget.order.customerCar?.chassisNo),
                       ],
                     )),
@@ -202,7 +222,9 @@ class _OrderSummaryState extends State<OrderSummary> {
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [AppText.thin(widget.order.customerConcerns ?? "")],
+                      children: [
+                        AppText.thin(widget.order.customerConcerns ?? "")
+                      ],
                     )),
                 serviceItem(
                     "VEHICLE CONDTION",
@@ -210,29 +232,30 @@ class _OrderSummaryState extends State<OrderSummary> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        titleValueText("Mileage At Reception",
+                            widget.order.mileageOnReception.toString()),
                         titleValueText(
-                            "Mileage At Reception", widget.order.mileageOnReception.toString()),
-                        titleValueText("Fuel Level At Reception",
-                            widget.order.fuelLevel),
+                            "Fuel Level At Reception", widget.order.fuelLevel),
                         titleValueText(
                             "Visible Damage ", widget.order.bodyCheck),
-                        titleValueText(
-                            "Additonal Observations", widget.order.observations),
+                        titleValueText("Additonal Observations",
+                            widget.order.observations),
                       ],
                     )),
-                serviceItem("SERVICE PLAN", SizedBox(
-                  height: 100,
-                  child: Wrap(
-                    direction: Axis.vertical,
-                    children: widget.order.allServices
-                        .map((e) =>
-                            AppText.thin(e.name))
-                        .toList(),
-                  ),
-                )),
+                serviceItem(
+                    "SERVICE PLAN",
+                    SizedBox(
+                      height: 100,
+                      child: Wrap(
+                        direction: Axis.vertical,
+                        children: widget.order.allServices
+                            .map((e) => AppText.thin(e.name))
+                            .toList(),
+                      ),
+                    )),
                 serviceItem("CONTROL CHECKS", Builder(builder: (context) {
                   List<Widget> controlChecks = [];
-                  Get.find<AppController>().inspectionNo.forEach((key,value) {
+                  Get.find<AppController>().inspectionNo.forEach((key, value) {
                     controlChecks.add(Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,7 +268,9 @@ class _OrderSummaryState extends State<OrderSummary> {
                                   children: [
                                     AppText.thin(value[index].title),
                                     Ui.boxWidth(4),
-                                    widget.order.conditions[value[index].rawId] == 1
+                                    widget.order.conditions[
+                                                value[index].rawId] ==
+                                            1
                                         ? AppIcon(
                                             Icons.check,
                                             color: AppColors.green,
@@ -268,6 +293,23 @@ class _OrderSummaryState extends State<OrderSummary> {
                     children: controlChecks,
                   );
                 })),
+                Ui.boxHeight(24),
+                if(widget.order.id == 0)
+                SizedBox(
+                  width: wideUi(context),
+                  child: AppButton(
+                    onPressed: () {
+                      Get.dialog(AppDialog.normal("Submit Service Order",
+                          "Are youy sure you want to submit this service order ?, NB: this will send an email to the customer if any email was provided.",
+                          titleA: "Yes", titleB: "No", onPressedA: () async {
+                        await Get.find<AppController>().submitServiceOrder();
+                      }, onPressedB: () {
+                        Get.back();
+                      }));
+                    },
+                    text: "Submit",
+                  ),
+                )
                 // serviceItem(
                 //     "MAINTENANCE",
                 //     Column(
@@ -364,7 +406,7 @@ class _OrderSummaryState extends State<OrderSummary> {
 
 class CustomOrderPDFPage extends StatefulWidget {
   const CustomOrderPDFPage(this.title, this.orderDate,
-      {this.orderFinished, required this.order,this.sigUint, super.key});
+      {this.orderFinished, required this.order, this.sigUint, super.key});
   final DateTime orderDate;
   final DateTime? orderFinished;
   final String title;
@@ -395,9 +437,9 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
     defFontMedium = await fontFromAssetBundle(Assets.appFontFamilyMedium);
     segoe = await fontFromAssetBundle(Assets.appFontFamilySegoe);
     if (widget.order.customerDetails?.signature.isNotEmpty ?? false) {
-      sig = await networkImage(widget.order.customerDetails!.signature);
+      sig = await networkImage("${AppUrls.baseURL}${AppUrls.upload}/all/${widget.order.customerDetails!.signature}");
     }
-    if(widget.sigUint != null && widget.sigUint != Uint8List(0)){
+    if (widget.sigUint != null && (widget.sigUint?.isNotEmpty ?? false)) {
       sig = pw.MemoryImage(widget.sigUint!);
     }
     await doPDFPage();
@@ -535,33 +577,31 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
                         font: defFontMedium,
                         fontSize: 8,
                       )),
-                  ...List.generate(
-                      value.length,
-                      (index) {
-                        final ls = widget.order.conditions[value[index].rawId] == 1;
-                        return pw.Row(
-                            mainAxisSize: pw.MainAxisSize.min,
-                            children: [
-                              pw.Text(value[index].title,
-                                  style: pw.TextStyle(
-                                      font: defFontMedium,
-                                      fontSize: 8,
-                                      color: PdfColor.fromInt(0xFF777777))),
-                              pw.SizedBox(width: 4),
-                              // pw.Icon(pw.IconData(value[index].isChecked ? Icons.check.codePoint : Icons.close.codePoint),size: 8,font: pw.Font.symbol(),color: value[index].isChecked ?PdfColors.green:PdfColors.red)
-                              pw.Text(ls ? "+" : "x",
-                                  style: ls
-                                      ? pw.TextStyle(
-                                          font: segoe,
-                                          fontSize: 8,
-                                          color: PdfColors.green)
-                                      : pw.TextStyle(
-                                          font: segoe,
-                                          fontSize: 8,
-                                          color: PdfColors.red))
-                            ],
-                          );
-                      })
+                  ...List.generate(value.length, (index) {
+                    final ls = widget.order.conditions[value[index].rawId] == 1;
+                    return pw.Row(
+                      mainAxisSize: pw.MainAxisSize.min,
+                      children: [
+                        pw.Text(value[index].title,
+                            style: pw.TextStyle(
+                                font: defFontMedium,
+                                fontSize: 8,
+                                color: PdfColor.fromInt(0xFF777777))),
+                        pw.SizedBox(width: 4),
+                        // pw.Icon(pw.IconData(value[index].isChecked ? Icons.check.codePoint : Icons.close.codePoint),size: 8,font: pw.Font.symbol(),color: value[index].isChecked ?PdfColors.green:PdfColors.red)
+                        pw.Text(ls ? "+" : "x",
+                            style: ls
+                                ? pw.TextStyle(
+                                    font: segoe,
+                                    fontSize: 8,
+                                    color: PdfColors.green)
+                                : pw.TextStyle(
+                                    font: segoe,
+                                    fontSize: 8,
+                                    color: PdfColors.red))
+                      ],
+                    );
+                  })
                 ],
               ));
             });
@@ -592,8 +632,7 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
                       runSpacing: 16,
                       children: widget.order.allServices
                           .map(
-                            (e) => pw.Text(
-                                "- ${e.name}",
+                            (e) => pw.Text("- ${e.name}",
                                 style: pw.TextStyle(
                                     font: defFontReg,
                                     fontSize: 8,

@@ -11,8 +11,10 @@ class Order extends BaseModel{
   int mileageOnReception;
   String? customerConcerns;
   String? observations;
+  DateTime? dispatchedAt;
   List<String> maintenanceType;
-  String? fuelLevel, bodyCheck,technician,serviceAdvisor;
+  String? fuelLevel, bodyCheck;
+  int technicianId,serviceAdvisorId;
   List<int> servicesPerformed; //id of services
   
   
@@ -23,7 +25,13 @@ class Order extends BaseModel{
 
   Customer? customerDetails;
   CustomerCar? customerCar;
+  String? technician,serviceAdvisor;
   List<BillyServices> allServices = [];
+
+  bool get isDispatched => dispatchedAt != null;
+  String get rdesc => "Vehicle:  $car\nConcern:  $customerConcerns";
+  String get desc => "${rdesc.substring(0,rdesc.length > 64 ? 64 : rdesc.length)}...";
+  String get title => "$customer-Order-$id";
 
   Order({
     required this.customerId,
@@ -31,13 +39,14 @@ class Order extends BaseModel{
     super.id = 0,
     this.carId = 0,
     this.car = "",
-    this.technician = "",
-    this.serviceAdvisor = "",
+    this.technicianId = 0,
+    this.serviceAdvisorId = 0,
     this.mileageOnReception = 0,
     this.customerConcerns,
     this.observations,
     this.maintenanceType = const [],
     this.fuelLevel,
+    this.dispatchedAt,
     this.bodyCheck,
     this.servicesPerformed = const [],
     super.createdAt,
@@ -53,7 +62,7 @@ Map<String, dynamic> toJson() {
     return {
       'customerId': customerId,
       'carId': carId,
-      'mileageOnReception': mileageOnReception,
+      'mileageOnReception': mileageOnReception.toString(),
       'customerConcerns': customerConcerns,
       'observations': observations,
       'maintenanceType': jsonEncode(maintenanceType),
@@ -62,9 +71,10 @@ Map<String, dynamic> toJson() {
       'servicesPerformed': jsonEncode(servicesPerformed),
       'conditions': jsonEncode(conditions),
       'lostSales': lostSales,
+      'dispatchedAt': dispatchedAt?.toString(),
       'cost': cost,
-      'technician': technician,
-      'serviceAdvisor': serviceAdvisor,
+      'technicianId': technicianId,
+      'serviceAdvisorId': serviceAdvisorId,
     };
   }
 
@@ -73,28 +83,34 @@ List<dynamic> toTableRows(){
     return [id,customer,car,mileageOnReception,fuelLevel,createdAt];
   }
 
+  @override
+  bool validate() {
+    return customerId != 0 && serviceAdvisorId != 0 && technicianId != 0;
+  }
+
   // Create Order object from JSON
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
       customerId: json['customerId'],
       customer: json['customer'],
-      id: json['id'],
+      id: json['id'] ?? 0,
       carId: json['carId'] ?? 0,
       car: json['car'] ?? "",
-      technician: json['technician'] ?? "",
-      serviceAdvisor: json['serviceAdvisor'] ?? "",
-      mileageOnReception: json['mileageOnReception'] ?? "",
+      technicianId: json['technicianId'] ?? "",
+      serviceAdvisorId: json['serviceAdvisorId'] ?? "",
+      mileageOnReception: int.tryParse(json['mileageOnReception'] ?? "0") ?? 0,
       customerConcerns: json['customerConcerns'] ?? "",
       observations: json['observations'] ?? "",
       maintenanceType: List<String>.from(json['maintenanceType'] ?? []),
       fuelLevel: json['fuelLevel'] ?? "",
       bodyCheck: json['bodyCheck'] ?? "",
+      dispatchedAt: DateTime.tryParse(json['dispatchedAt'] ?? ""),
       servicesPerformed: List<int>.from(json['servicesPerformed'] ?? []),
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.tryParse(json['createdAt']),
+      updatedAt: DateTime.tryParse(json['updatedAt']),
       conditions: List<int>.from(json['conditions'] ?? []),
       lostSales: json['lostSales'] ?? "",
-      cost: json['cost'] ?? 0,
+      cost: double.parse((json['cost'] ?? 0).toString()),
     );
   }
 }

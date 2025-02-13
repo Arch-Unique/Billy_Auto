@@ -26,14 +26,19 @@ List<dynamic> toTableRows(){
     return [id,name,createdAt];
   }
 
+  @override
+  bool validate() {
+    return name.isNotEmpty;
+  }
+
   // Create Services object from JSON
   factory BillyServices.fromJson(Map<String, dynamic> json) {
     return BillyServices(
-      id: json['id'],
+      id: json['id'] ?? 0,
       name: json['name'],
       image: json['image'] ?? "",
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.tryParse(json['createdAt']),
+      updatedAt: DateTime.tryParse(json['updatedAt']),
     );
   }
 }

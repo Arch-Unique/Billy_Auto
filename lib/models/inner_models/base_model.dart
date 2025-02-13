@@ -11,6 +11,7 @@ abstract class BaseModel {
 
   Map<String, dynamic> toJson();
   List<dynamic> toTableRows();
+  bool validate();
 
   factory BaseModel.fromJson(Map<String, dynamic> json) {
     throw UnimplementedError();
