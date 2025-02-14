@@ -215,8 +215,8 @@ class CustomTextField2 extends StatelessWidget {
   static dropdown<T>(List<String> optionss, List<T> valuess,
       TextEditingController cont, String label,
       {Function(String)? onChanged, String? initOption, double? w}) {
-        final options = List.from(optionss);
-        final values = List.from(valuess);
+    final options = List.from(optionss);
+    final values = List.from(valuess);
     if (options.isEmpty || options[0] != "None") {
       options.insert(0, "None");
       T defaultValue = (T == int) ? 0 as T : "" as T;
@@ -236,7 +236,7 @@ class CustomTextField2 extends StatelessWidget {
 
     String curOption =
         (initOption == null || initOption.isEmpty) ? options[0] : initOption;
-    
+
     cont.text = values[options.indexOf(curOption)].toString();
     return StatefulBuilder(builder: (context, setState) {
       return SizedBox(

@@ -41,7 +41,12 @@ class _AuthPageState extends State<AuthPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                LogoWidget(w / 2),
+                LogoWidget(w / 3),
+                Ui.boxWidth(24),
+                Image.asset(
+                  Assets.s5,
+                  width: w,
+                ),
                 Ui.boxWidth(24),
                 CustomTextField("Username", username),
                 CustomTextField(
@@ -61,7 +66,7 @@ class _AuthPageState extends State<AuthPage> {
                       if (f) {
                         Get.offAll(ChoosePage());
                       }
-                    }else{
+                    } else {
                       Ui.showError(msgU ?? msgP ?? "An error occured");
                     }
                   },
@@ -102,16 +107,17 @@ class ChoosePage extends StatelessWidget {
                   fontFamily: Assets.appFontFamily1,
                   color: AppColors.lightTextColor),
               Ui.boxHeight(24),
-              actionBody("Service Order", "Order History", () {
+              actionBody("Service Order", "Order History", Assets.s1, Assets.s2,
+                  () {
                 Get.to(CheckList2Page());
               }, () {
                 Get.to(OrderHistoryPage());
               }),
               Ui.boxHeight(24),
-              actionBody("Inbound", "Outbound", () {}, () {
-                Get.to(ExplorerPage());
-                // await Get.find<AppRepo>().sendDemoToBackend();
-              }),
+              if (!GetPlatform.isMobile)
+                actionItem("Inventory", Assets.s3, () {
+                  Get.to(ExplorerPage());
+                }),
               Ui.boxHeight(24),
             ],
           ),
@@ -120,29 +126,51 @@ class ChoosePage extends StatelessWidget {
     );
   }
 
-  actionBody(String titleA, String titleB, VoidCallback vba, VoidCallback vbb) {
+  actionBody(String titleA, String titleB, String assetA, String assetB,
+      VoidCallback vba, VoidCallback vbb) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        actionItem(titleA, vba),
-        Ui.boxWidth(48),
-        actionItem(titleB, vbb),
+        actionItem(titleA, assetA, vba),
+        Ui.boxWidth(32),
+        actionItem(titleB, assetB, vbb),
       ],
     );
   }
 
-  actionItem(String title, VoidCallback vb) {
-    return CurvedContainer(
-      color: AppColors.primaryColorLight,
-      radius: 24,
-      width: 200,
-      height: 200,
-      onPressed: vb,
-      child: Stack(
-        alignment: AlignmentDirectional.center,
-        children: [
-          Positioned(bottom: 12, child: AppText.medium(title, fontSize: 16))
-        ],
+  actionItem(String title, String asset, VoidCallback vb) {
+    double w = Ui.width(Get.context!) < 500 ? 150 : 200;
+    double f = w == 200 ? 24 : 18;
+    return InkWell(
+      onTap: vb,
+      child: Container(
+        width: w,
+        height: w,
+        decoration: BoxDecoration(
+            color: AppColors.white,
+            border: Border.all(color: AppColors.primaryColor),
+            borderRadius: BorderRadius.circular(24),
+            image:
+                DecorationImage(image: AssetImage(asset), fit: BoxFit.cover)),
+        child: Stack(
+          alignment: AlignmentDirectional.center,
+          children: [
+            Positioned(
+                bottom: 0,
+                child: Container(
+                  width: w,
+                  height: w / 2,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    gradient: LinearGradient(colors: [
+                      AppColors.white.withOpacity(0.1),
+                      AppColors.white.withOpacity(0.7)
+                    ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
+                  ),
+                )),
+            Positioned(bottom: 6, child: AppText.bold(title, fontSize: f)),
+          ],
+        ),
       ),
     );
   }

@@ -45,7 +45,7 @@ class AppController extends GetxController {
   /// 17 - select technicians
   /// 18 - lost sales
 
-  /// 19 - urgent
+  /// 19 - chassisNo
   /// 20 - before next visit
   /// 21 - during maintenance
   /// 22 - delivery hour
@@ -57,6 +57,8 @@ class AppController extends GetxController {
   Rx<Uint8List> userSig = Uint8List(0).obs;
   Rx<Uint8List> advSig = Uint8List(0).obs;
   Rx<Uint8List> techSig = Uint8List(0).obs;
+  Rx<String> mileageImagePath = "".obs;
+  Rx<String> customerImagePath = "".obs;
   RxList<CStep> allSteps = <CStep>[].obs;
 
   List<String> totalConditionsHeaders = [];
@@ -102,6 +104,13 @@ class AppController extends GetxController {
   final appRepo = Get.find<AppRepo>();
 
   initApp() async {
+    UtilFunctions.clearTextEditingControllers(tecs);
+    userSig.value = Uint8List(0);
+    advSig.value = Uint8List(0);
+    techSig.value = Uint8List(0);
+    mileageImagePath.value = "";
+    customerImagePath.value = "";
+
     userRoles.value = ["admin", "user", "technician", "service-advisor"];
     customerTypes.value = ["Individual", "Corporate"];
     inventoryStatus.value = ["Inbound", "Outbound", "Transfer"];
@@ -116,7 +125,7 @@ class AppController extends GetxController {
     allCustomer.value = await _getAll<Customer>();
     allCustomerCar.value = await _getAll<CustomerCar>();
     allOrders.value = await _getAll<Order>();
-    
+
     allTechnicians.value = await _getAll<User>(fm: [
       FilterModel("", "role", 0, tec: TextEditingController(text: userRoles[2]))
     ]);
@@ -206,6 +215,7 @@ class AppController extends GetxController {
           id: int.tryParse(tecs[10].text) ?? currentOrder.value.carId,
           year: tecs[8].text,
           licenseNo: tecs[9].text,
+          chassisNo: tecs[19].text,
           customerId: customer.id);
       car.desc = car.descRaw;
     } else {
@@ -249,12 +259,18 @@ class AppController extends GetxController {
   updateOrderWithInfo() {
     for (var i = 0; i < allOrders.length; i++) {
       final element = allOrders[i];
-      element.customerDetails = allCustomer.firstWhere((e) => e.id == element.customerId);
+      element.customerDetails =
+          allCustomer.firstWhere((e) => e.id == element.customerId);
       if (element.carId > 0) {
-        element.customerCar = allCustomerCar.firstWhere((e) => e.id == element.carId);
+        element.customerCar =
+            allCustomerCar.firstWhere((e) => e.id == element.carId);
       }
-      element.serviceAdvisor = allServiceAdvisor.firstWhere((e) => e.id == element.serviceAdvisorId).fullName;
-      element.technician = allTechnicians.firstWhere((e) => e.id == element.technicianId).fullName;
+      element.serviceAdvisor = allServiceAdvisor
+          .firstWhere((e) => e.id == element.serviceAdvisorId)
+          .fullName;
+      element.technician = allTechnicians
+          .firstWhere((e) => e.id == element.technicianId)
+          .fullName;
       element.allServices = allBillyServices
           .where((p0) => element.servicesPerformed.contains(p0.id))
           .toList();
@@ -288,13 +304,31 @@ class AppController extends GetxController {
       if (!currentOrder.value.validate()) {
         throw "Order Details incomplete";
       }
+      currentOrder.value.mileageImage =
+          await appRepo.uploadPhoto(mileageImagePath.value) ?? "";
+      currentOrder.value.customerImage =
+          await appRepo.uploadPhoto(customerImagePath.value) ?? "";
       await appRepo.create<Order>(currentOrder.value);
+      Ui.showInfo("Successfully created order");
+
+      await initApp();
       return true;
     } catch (e) {
       Ui.showError(e.toString());
       return false;
-    } finally {
+    }
+  }
+
+  Future<bool> dispatchOrder(Order order) async {
+    try {
+      order.dispatchedAt = DateTime.now();
+      await appRepo.patch(order);
+      Ui.showInfo("Successfully Dispatched Order");
       await initApp();
+      return true;
+    } catch (e) {
+      Ui.showInfo(e.toString());
+      return false;
     }
   }
 

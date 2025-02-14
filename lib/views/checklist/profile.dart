@@ -37,78 +37,81 @@ class ProfilePage extends StatelessWidget {
         hasEdit: true,
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: 850),
-          child: Obx(() {
-            return Column(
-              children: [
-                LogoWidget(120),
-                AppText.medium("Profile",
-                    fontSize: 32,
-                    fontFamily: Assets.appFontFamily2,
-                    alignment: TextAlign.center,
-                    color: AppColors.textColor),
-                Ui.boxHeight(24),
-                ProfileLogo(
-                  size: 36,
-                ),
-                Ui.boxHeight(24),
-                CustomTextField2(
-                  "Full Name",
-                  tecs[0],
-                  readOnly: !controller.editOn.value,
-                ),
-                CustomTextField2(
-                  "Username",
-                  tecs[1],
-                  readOnly: !controller.editOn.value,
-                ),
-                CustomTextField2.dropdown<String>(controller.userRoles,controller.userRoles, tecs[2], "Role",
-                    initOption: tecs[2].text),
-                CustomTextField2(
-                  "Email",
-                  tecs[3],
-                  readOnly: !controller.editOn.value,
-                ),
-                Ui.boxHeight(8),
-                controller.editOn.value
-                    ? SignatureView(cuserSig, "My Signature",
-                        size: wideUi(context))
-                    : LockedSignatureWidget(title: "My Signature",signature: controller.appRepo.appService.currentUser.value.signature,),
-                Ui.boxHeight(8),
-                if (controller.editOn.value)
+          child: SingleChildScrollView(
+            child: Obx(() {
+              return Column(
+                children: [
+                  LogoWidget(120),
+                  AppText.medium("Profile",
+                      fontSize: 32,
+                      fontFamily: Assets.appFontFamily2,
+                      alignment: TextAlign.center,
+                      color: AppColors.textColor),
+                  Ui.boxHeight(24),
+                  ProfileLogo(
+                    size: 36,
+                  ),
+                  Ui.boxHeight(24),
+                  CustomTextField2(
+                    "Full Name",
+                    tecs[0],
+                    readOnly: !controller.editOn.value,
+                  ),
+                  CustomTextField2(
+                    "Username",
+                    tecs[1],
+                    readOnly: !controller.editOn.value,
+                  ),
+                  CustomTextField2.dropdown<String>(controller.userRoles,controller.userRoles, tecs[2], "Role",
+                      initOption: tecs[2].text),
+                  CustomTextField2(
+                    "Email",
+                    tecs[3],
+                    readOnly: !controller.editOn.value,
+                  ),
+                  Ui.boxHeight(8),
+                  controller.editOn.value
+                      ? SignatureView(cuserSig, "My Signature",
+                          size: wideUi(context))
+                      : LockedSignatureWidget(title: "My Signature",signature: controller.appRepo.appService.currentUser.value.signature,),
+                  Ui.boxHeight(8),
+                  if (controller.editOn.value)
+                    SizedBox(
+                      width: wideUi(context) / 3,
+                      child: AppButton(
+                        onPressed: () async {
+                          String sp = "";
+                          if (cuserSig.value.isNotEmpty) {
+                            final ssp = await UtilFunctions.saveToTempFile(cuserSig.value);
+                            sp = ssp.path;
+                          }
+                          controller.appRepo.appService.currentUser.value.fullName = tecs[0].text;
+                          controller.appRepo.appService.currentUser.value.username = tecs[1].text;
+                          controller.appRepo.appService.currentUser.value.role = tecs[2].text;
+                          controller.appRepo.appService.currentUser.value.email = tecs[3].text;
+            
+                          await controller.updateUser(sp);
+                        },
+                        text: "Save",
+                      ),
+                    ),
+                  
+                  Ui.boxHeight(48),
                   SizedBox(
                     width: wideUi(context) / 3,
-                    child: AppButton(
-                      onPressed: () async {
-                        String sp = "";
-                        if (cuserSig.value.isNotEmpty) {
-                          final ssp = await UtilFunctions.saveToTempFile(cuserSig.value);
-                          sp = ssp.path;
-                        }
-                        controller.appRepo.appService.currentUser.value.fullName = tecs[0].text;
-                        controller.appRepo.appService.currentUser.value.username = tecs[1].text;
-                        controller.appRepo.appService.currentUser.value.role = tecs[2].text;
-                        controller.appRepo.appService.currentUser.value.email = tecs[3].text;
-
-                        await controller.updateUser(sp);
+                    child: AppButton.outline(
+                      () async {
+                        await controller.appRepo.appService.logout();
+                        Get.offAll(AuthPage());
                       },
-                      text: "Save",
+                      "Log Out",
                     ),
                   ),
-                Ui.spacer(),
-                SizedBox(
-                  width: wideUi(context) / 3,
-                  child: AppButton.outline(
-                    () async {
-                      await controller.appRepo.appService.logout();
-                      Get.offAll(AuthPage());
-                    },
-                    "Log Out",
-                  ),
-                ),
-                Ui.boxHeight(24)
-              ],
-            );
-          }),
+                  Ui.boxHeight(24)
+                ],
+              );
+            }),
+          ),
         ),
       ),
     );

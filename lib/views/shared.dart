@@ -691,7 +691,7 @@ abstract class Ui {
       forwardAnimationCurve: Curves.elasticInOut,
       snackPosition: SnackPosition.TOP,
       animationDuration: Duration(milliseconds: 1500),
-      duration: Duration(seconds: 5),
+      duration: Duration(seconds: 3),
       padding: EdgeInsets.all(24),
       isDismissible: true,
       margin: EdgeInsets.only(left: 24, right: 24, top: 24),
@@ -713,7 +713,7 @@ abstract class Ui {
       ),
       backgroundColor: Colors.red,
       borderRadius: 16,
-      duration: Duration(seconds: 5),
+      duration: Duration(seconds: 3),
       margin: EdgeInsets.only(left: 24, right: 24, top: 24),
     ));
   }

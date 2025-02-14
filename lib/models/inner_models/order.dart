@@ -13,7 +13,7 @@ class Order extends BaseModel{
   String? observations;
   DateTime? dispatchedAt;
   List<String> maintenanceType;
-  String? fuelLevel, bodyCheck;
+  String? fuelLevel, bodyCheck,customerImage,mileageImage;
   int technicianId,serviceAdvisorId;
   List<int> servicesPerformed; //id of services
   
@@ -42,6 +42,8 @@ class Order extends BaseModel{
     this.technicianId = 0,
     this.serviceAdvisorId = 0,
     this.mileageOnReception = 0,
+    this.customerImage,
+    this.mileageImage,
     this.customerConcerns,
     this.observations,
     this.maintenanceType = const [],
@@ -73,6 +75,8 @@ Map<String, dynamic> toJson() {
       'lostSales': lostSales,
       'dispatchedAt': dispatchedAt?.toString(),
       'cost': cost,
+      'mileageImage': mileageImage,
+      'customerImage': customerImage,
       'technicianId': technicianId,
       'serviceAdvisorId': serviceAdvisorId,
     };
@@ -104,6 +108,8 @@ List<dynamic> toTableRows(){
       maintenanceType: List<String>.from(json['maintenanceType'] ?? []),
       fuelLevel: json['fuelLevel'] ?? "",
       bodyCheck: json['bodyCheck'] ?? "",
+      customerImage: json['customerImage'] ?? "",
+      mileageImage: json['mileageImage'] ?? "",
       dispatchedAt: DateTime.tryParse(json['dispatchedAt'] ?? ""),
       servicesPerformed: List<int>.from(json['servicesPerformed'] ?? []),
       createdAt: DateTime.tryParse(json['createdAt']),

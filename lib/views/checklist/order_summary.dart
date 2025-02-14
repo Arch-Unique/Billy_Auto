@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -101,39 +103,36 @@ class _OrderSummaryState extends State<OrderSummary> {
       //   ],
       // ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(24),
-        child: WidgetsToImage(
-          controller: imageController,
-          child: Builder(builder: (context) {
-            final title = widget.order.isDispatched
-                ? "Dispatch Order Summary"
-                : "Service Order Summary";
-            final toreturn = Column(
-              children: [
-                LogoWidget(144),
-                AppText.medium(title,
-                    fontSize: 32,
-                    alignment: TextAlign.center,
-                    fontFamily: Assets.appFontFamily2),
-                Ui.boxHeight(16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    InkWell(
-                        onTap: () {
-                          Get.off(ChoosePage());
-                        },
-                        child: CircleAvatar(
-                            backgroundColor: AppColors.primaryColor,
-                            radius: 24,
-                            child: Center(
-                                child: AppIcon(
-                              Icons.home_outlined,
-                              color: AppColors.white,
-                            )))),
-                    if(widget.order.id == 0)
-                    Ui.boxWidth(16),
-                    if(widget.order.id == 0)
+        // padding: EdgeInsets.all(24),
+        child: Builder(builder: (context) {
+          final title = widget.order.isDispatched
+              ? "Dispatch Order Summary"
+              : "Service Order Summary";
+          final toreturn = Column(
+            children: [
+              LogoWidget(144),
+              AppText.medium(title,
+                  fontSize: 32,
+                  alignment: TextAlign.center,
+                  fontFamily: Assets.appFontFamily2),
+              Ui.boxHeight(16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  InkWell(
+                      onTap: () {
+                        Get.off(ChoosePage());
+                      },
+                      child: CircleAvatar(
+                          backgroundColor: AppColors.primaryColor,
+                          radius: 24,
+                          child: Center(
+                              child: AppIcon(
+                            Icons.home_outlined,
+                            color: AppColors.white,
+                          )))),
+                  if (widget.order.id == 0) Ui.boxWidth(16),
+                  if (widget.order.id == 0)
                     InkWell(
                         onTap: () {
                           Get.back();
@@ -146,155 +145,138 @@ class _OrderSummaryState extends State<OrderSummary> {
                               Icons.mode_edit_outlined,
                               color: AppColors.white,
                             )))),
-                    Ui.boxWidth(16),
-                    InkWell(
-                        onTap: () {
-                          Get.to(CustomOrderPDFPage(
-                            title,
-                            DateTime.now(),
-                            order: widget.order,
-                            sigUint: widget.sig,
-                          ));
-                        },
-                        child: CircleAvatar(
-                            backgroundColor: AppColors.primaryColor,
-                            radius: 24,
-                            child: Center(
-                                child: AppIcon(
-                              Icons.download_rounded,
-                              color: AppColors.white,
-                            )))),
-                    Ui.boxWidth(16),
-                    InkWell(
-                        onTap: () {
-                          Get.to(CustomOrderPDFPage(
-                            title,
-                            DateTime.now(),
-                            order: widget.order,
-                            sigUint: widget.sig,
-                          ));
-                        },
-                        child: CircleAvatar(
-                            backgroundColor: AppColors.primaryColor,
-                            radius: 24,
-                            child: Center(
-                                child: AppIcon(
-                              Icons.print_outlined,
-                              color: AppColors.white,
-                            )))),
-                  ],
-                ),
-                Ui.boxHeight(24),
-                serviceItem(
-                    "CUSTOMER",
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        titleValueText("Full Name",
-                            widget.order.customerDetails?.fullName),
-                        titleValueText(
-                            "Email", widget.order.customerDetails?.email),
-                        titleValueText("Phone Number",
-                            widget.order.customerDetails?.phone),
-                        titleValueText("Customer Type",
-                            widget.order.customerDetails?.customerType),
-                      ],
-                    )),
-                serviceItem(
-                    "VEHICLE",
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        titleValueText("Make", widget.order.customerCar?.make),
-                        titleValueText(
-                            "Model", widget.order.customerCar?.model),
-                        titleValueText("Year", widget.order.customerCar?.year),
-                        titleValueText("License Plate No",
-                            widget.order.customerCar?.licenseNo),
-                        titleValueText(
-                            "Chassis No", widget.order.customerCar?.chassisNo),
-                      ],
-                    )),
-                serviceItem(
-                    "CONCERNS",
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AppText.thin(widget.order.customerConcerns ?? "")
-                      ],
-                    )),
-                serviceItem(
-                    "VEHICLE CONDTION",
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        titleValueText("Mileage At Reception",
-                            widget.order.mileageOnReception.toString()),
-                        titleValueText(
-                            "Fuel Level At Reception", widget.order.fuelLevel),
-                        titleValueText(
-                            "Visible Damage ", widget.order.bodyCheck),
-                        titleValueText("Additonal Observations",
-                            widget.order.observations),
-                      ],
-                    )),
-                serviceItem(
-                    "SERVICE PLAN",
-                    SizedBox(
-                      height: 100,
-                      child: Wrap(
-                        direction: Axis.vertical,
-                        children: widget.order.allServices
-                            .map((e) => AppText.thin(e.name))
-                            .toList(),
-                      ),
-                    )),
-                serviceItem("CONTROL CHECKS", Builder(builder: (context) {
-                  List<Widget> controlChecks = [];
-                  Get.find<AppController>().inspectionNo.forEach((key, value) {
-                    controlChecks.add(Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AppText.bold(key),
-                        ...List.generate(
-                            value.length,
-                            (index) => Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    AppText.thin(value[index].title),
-                                    Ui.boxWidth(4),
-                                    widget.order.conditions[
-                                                value[index].rawId] ==
-                                            1
-                                        ? AppIcon(
-                                            Icons.check,
-                                            color: AppColors.green,
-                                            size: 16,
-                                          )
-                                        : AppIcon(
-                                            Icons.close,
-                                            color: AppColors.primaryColor,
-                                            size: 16,
-                                          )
-                                  ],
-                                ))
-                      ],
-                    ));
-                  });
+                  Ui.boxWidth(16),
+                  InkWell(
+                      onTap: () {
+                        Get.to(CustomOrderPDFPage(
+                          title,
+                          widget.order.createdAt ?? DateTime.now(),
+                          order: widget.order,
+                          orderFinished: widget.order.dispatchedAt,
+                          sigUint: widget.sig,
+                        ));
+                      },
+                      child: CircleAvatar(
+                          backgroundColor: AppColors.primaryColor,
+                          radius: 24,
+                          child: Center(
+                              child: AppIcon(
+                            Icons.print_outlined,
+                            color: AppColors.white,
+                          )))),
+                ],
+              ),
+              Ui.boxHeight(24),
+              serviceItem(
+                  "CUSTOMER",
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      titleValueText(
+                          "Full Name", widget.order.customerDetails?.fullName),
+                      titleValueText(
+                          "Email", widget.order.customerDetails?.email),
+                      titleValueText(
+                          "Phone Number", widget.order.customerDetails?.phone),
+                      titleValueText("Customer Type",
+                          widget.order.customerDetails?.customerType),
+                    ],
+                  )),
+                  imageContainer(true),
+              serviceItem(
+                  "VEHICLE",
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      titleValueText("Make", widget.order.customerCar?.make),
+                      titleValueText("Model", widget.order.customerCar?.model),
+                      titleValueText("Year", widget.order.customerCar?.year),
+                      titleValueText("License Plate No",
+                          widget.order.customerCar?.licenseNo),
+                      titleValueText(
+                          "Chassis No", widget.order.customerCar?.chassisNo),
+                    ],
+                  )),
+              serviceItem(
+                  "CONCERNS",
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AppText.thin(widget.order.customerConcerns ?? "")
+                    ],
+                  )),
+              serviceItem(
+                  "VEHICLE CONDTION",
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      titleValueText("Mileage At Reception",
+                          widget.order.mileageOnReception.toString()),
+                      titleValueText(
+                          "Fuel Level At Reception", widget.order.fuelLevel),
+                      titleValueText("Visible Damage ", widget.order.bodyCheck),
+                      titleValueText(
+                          "Additonal Observations", widget.order.observations),
+                    ],
+                  )),
+                  imageContainer(false),
 
-                  return Wrap(
-                    spacing: 16,
-                    runSpacing: 16,
-                    children: controlChecks,
-                  );
-                })),
-                Ui.boxHeight(24),
-                if(widget.order.id == 0)
+              serviceItem(
+                  "SERVICE PLAN",
+                  SizedBox(
+                    height: 100,
+                    child: Wrap(
+                      direction: Axis.vertical,
+                      children: widget.order.allServices
+                          .map((e) => AppText.thin(e.name))
+                          .toList(),
+                    ),
+                  )),
+              serviceItem("CONTROL CHECKS", Builder(builder: (context) {
+                List<Widget> controlChecks = [];
+                Get.find<AppController>().inspectionNo.forEach((key, value) {
+                  controlChecks.add(Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AppText.bold(key),
+                      ...List.generate(
+                          value.length,
+                          (index) => Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  AppText.thin(value[index].title),
+                                  Ui.boxWidth(4),
+                                  widget.order.conditions[value[index].rawId] ==
+                                          1
+                                      ? AppIcon(
+                                          Icons.check,
+                                          color: AppColors.green,
+                                          size: 16,
+                                        )
+                                      : AppIcon(
+                                          Icons.close,
+                                          color: AppColors.primaryColor,
+                                          size: 16,
+                                        )
+                                ],
+                              ))
+                    ],
+                  ));
+                });
+
+                return Wrap(
+                  spacing: 16,
+                  runSpacing: 16,
+                  children: controlChecks,
+                );
+              })),
+              Ui.boxHeight(24),
+              if (widget.order.id == 0)
                 SizedBox(
                   width: wideUi(context),
                   child: AppButton(
@@ -303,52 +285,143 @@ class _OrderSummaryState extends State<OrderSummary> {
                           "Are youy sure you want to submit this service order ?, NB: this will send an email to the customer if any email was provided.",
                           titleA: "Yes", titleB: "No", onPressedA: () async {
                         await Get.find<AppController>().submitServiceOrder();
+                        Get.offAll(ChoosePage());
                       }, onPressedB: () {
                         Get.back();
                       }));
                     },
                     text: "Submit",
                   ),
+                ),
+              if (widget.order.id != 0 && !widget.order.isDispatched)
+                SizedBox(
+                  width: wideUi(context),
+                  child: AppButton(
+                    onPressed: () {
+                      Get.dialog(AppDialog.normal("Dispatch Order",
+                          "Are youy sure you want to dispatch this service order ?, NB: this will send an email to the customer if any email was provided.",
+                          titleA: "Yes", titleB: "No", onPressedA: () async {
+                        final f = await Get.find<AppController>()
+                            .dispatchOrder(widget.order);
+                        if (f) {
+                          Get.offAll(ChoosePage());
+                        }
+                      }, onPressedB: () {
+                        Get.back();
+                      }));
+                    },
+                    text: "Dispatch",
+                  ),
                 )
-                // serviceItem(
-                //     "MAINTENANCE",
-                //     Column(
-                //       mainAxisSize: MainAxisSize.min,
-                //       crossAxisAlignment: CrossAxisAlignment.start,
-                //       children: [
-                //         titleValueText(
-                //             "Urgent Maintenance", controller.tecs[19].text),
-                //         titleValueText(
-                //             "Before Next Visit", controller.tecs[20].text),
-                //         titleValueText("During Next Maintenance Service ",
-                //             controller.tecs[21].text),
-                //         titleValueText(
-                //             "Delivery hour Forecast", controller.tecs[21].text),
-                //       ],
-                //     )),
-              ],
-            );
+              // serviceItem(
+              //     "MAINTENANCE",
+              //     Column(
+              //       mainAxisSize: MainAxisSize.min,
+              //       crossAxisAlignment: CrossAxisAlignment.start,
+              //       children: [
+              //         titleValueText(
+              //             "Urgent Maintenance", controller.tecs[19].text),
+              //         titleValueText(
+              //             "Before Next Visit", controller.tecs[20].text),
+              //         titleValueText("During Next Maintenance Service ",
+              //             controller.tecs[21].text),
+              //         titleValueText(
+              //             "Delivery hour Forecast", controller.tecs[21].text),
+              //       ],
+              //     )),
+            ],
+          );
 
-            // if(isSaving){
-            return Container(
-              decoration: BoxDecoration(
-                  color: AppColors.white,
-                  image: DecorationImage(
-                    image: AssetImage(Assets.backg),
-                    repeat: ImageRepeat.repeat,
-                    opacity: 0.08,
-                  )),
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: toreturn,
+          // if(isSaving){
+          return Container(
+            decoration: BoxDecoration(
+                color: AppColors.white,
+                image: DecorationImage(
+                  image: AssetImage(Assets.backg),
+                  repeat: ImageRepeat.repeat,
+                  opacity: 0.08,
+                )),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Stack(
+                children: [
+                  Container(
+                    color: AppColors.white.withOpacity(0.7),
+                    width: Ui.width(context),
+                    height: Ui.height(context),
+                  ),
+                  toreturn,
+                  if (widget.order.id != 0)
+                    Positioned(
+                        top: 24,
+                        left: 8,
+                        child: SafeArea(
+                          child: BackButton(
+                            onPressed: () {
+                              Get.back();
+                            },
+                          ),
+                        )),
+                ],
               ),
-            );
-            // }
-            // return toreturn;
-          }),
-        ),
+            ),
+          );
+          // }
+          // return toreturn;
+        }),
       ),
     );
+  }
+
+  imageContainer(bool g) {
+    String img = "";
+    final controller = Get.find<AppController>();
+    if (g) {
+      img = (widget.order.id == 0
+              ? controller.customerImagePath.value
+              : widget.order.customerImage) ??
+          "";
+    } else {
+      img = (widget.order.id == 0
+              ? controller.mileageImagePath.value
+              : widget.order.mileageImage) ??
+          "";
+    }
+    if (img.isEmpty) return SizedBox();
+    return Column(children: [
+      Builder(builder: (context) {
+        return SizedBox(
+          width: wideUi(context),
+          child: Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 0.0, bottom: 8),
+                child: AppText.thin(g ? "Image of Customer/Driver" : "Vehicle Dashbpard Image"),
+              )),
+        );
+      }),
+      ConstrainedBox(
+            constraints: BoxConstraints(
+                minWidth: wideUi(context),
+                maxWidth: wideUi(context),
+                minHeight: 128),
+            child: CurvedContainer(
+                border: Border.all(color: AppColors.grey),
+                
+                margin: EdgeInsets.symmetric(horizontal: 8),
+                child: widget.order.id == 0
+                    ? Image.file(
+                        File(img),
+                        fit: BoxFit.cover,
+                      )
+                    : Image.network(
+                      "${AppUrls.baseURL}${AppUrls.upload}/all/$img",
+                      fit: BoxFit.contain,
+                    ),),
+          ),
+
+      Ui.boxHeight(24),
+    ]);
   }
 
   serviceItem(String title, Widget item) {
@@ -437,7 +510,8 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
     defFontMedium = await fontFromAssetBundle(Assets.appFontFamilyMedium);
     segoe = await fontFromAssetBundle(Assets.appFontFamilySegoe);
     if (widget.order.customerDetails?.signature.isNotEmpty ?? false) {
-      sig = await networkImage("${AppUrls.baseURL}${AppUrls.upload}/all/${widget.order.customerDetails!.signature}");
+      sig = await networkImage(
+          "${AppUrls.baseURL}${AppUrls.upload}/all/${widget.order.customerDetails!.signature}");
     }
     if (widget.sigUint != null && (widget.sigUint?.isNotEmpty ?? false)) {
       sig = pw.MemoryImage(widget.sigUint!);

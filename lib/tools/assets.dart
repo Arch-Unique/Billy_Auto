@@ -15,4 +15,11 @@ class Assets {
   static const String appFontFamilyMedium = "assets/fonts/Raleway-Medium.ttf";
   static const String appFontFamilyBold = "assets/fonts/Raleway-Bold.ttf";
   static const String appFontFamilySegoe = "assets/fonts/SegoeUI.ttf";
+
+  //images
+  static const String s1 = "assets/images/checklist.png";
+  static const String s2 = "assets/images/dispatch.png";
+  static const String s3 = "assets/images/inventory.png";
+  static const String s4 = "assets/images/home.jpg";
+  static const String s5 = "assets/images/home2.png";
 }

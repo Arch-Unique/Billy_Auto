@@ -37,7 +37,7 @@ class OrderHistoryPage extends StatelessWidget {
           return SizedBox(
             width: wideUi(context),
             child: Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.symmetric(vertical: 12,horizontal: 24),
               child: ListTile(
               selectedTileColor: order.isDispatched ? AppColors.green: AppColors.primaryColor,
               selected: true,

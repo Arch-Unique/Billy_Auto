@@ -3,7 +3,10 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:inventory/tools/colors.dart';
+import 'package:inventory/views/shared.dart';
 import 'package:path_provider/path_provider.dart';
 
 ///file for all #resusable functions
@@ -62,26 +65,61 @@ abstract class UtilFunctions {
   }
 
   static Future<String?> showCamera() async {
-    final ImagePicker picker = ImagePicker();
-    final img = await picker.pickImage(source: ImageSource.gallery);
-    return img?.path;
+    final fg = await Get.dialog<String?>(AppDialog(
+        title: AppText.thin("Select Image Source"),
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CurvedContainer(
+              color: AppColors.primaryColor,
+              padding: EdgeInsets.all(16),
+              onPressed: () async {
+                final ImagePicker picker = ImagePicker();
+                final img = await picker.pickImage(source: ImageSource.camera);
+                Get.back<String?>(result: img?.path);
+              },
+              child: AppIcon(
+                Icons.camera_alt_rounded,
+                color: AppColors.white,
+              ),
+            ),
+            Ui.boxWidth(24),
+            CurvedContainer(
+              color: AppColors.primaryColor,
+              padding: EdgeInsets.all(16),
+              onPressed: () async {
+                final ImagePicker picker = ImagePicker();
+                final img = await picker.pickImage(source: ImageSource.gallery);
+                Get.back<String?>(result: img?.path);
+              },
+              child: AppIcon(
+                Icons.photo,
+                color: AppColors.white,
+              ),
+            )
+          ],
+        )));
+    return fg;
   }
 
-  static Future<File> saveToTempFile(Uint8List uint8list, {String? filename}) async {
+  static Future<File> saveToTempFile(Uint8List uint8list,
+      {String? filename}) async {
     try {
       // Get the system's temporary directory
       final tempDir = await getTemporaryDirectory();
-      
+
       // Generate a unique filename if none provided
-      final uniqueFileName = filename ?? '${DateTime.now().millisecondsSinceEpoch}.png';
-      
+      final uniqueFileName =
+          filename ?? '${DateTime.now().millisecondsSinceEpoch}.png';
+
       // Create the file path
       final filePath = '${tempDir.path}/$uniqueFileName';
-      
+
       // Write the Uint8List to a file
       final file = File(filePath);
       await file.writeAsBytes(uint8list);
-      
+
       return file;
     } catch (e) {
       throw Exception('Failed to convert Uint8List to File: $e');
@@ -97,6 +135,4 @@ abstract class UtilFunctions {
       throw Exception('Failed to convert File to Uint8List: $e');
     }
   }
-
-
 }

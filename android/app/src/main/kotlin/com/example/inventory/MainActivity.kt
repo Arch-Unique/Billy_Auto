@@ -1,4 +1,4 @@
-package com.example.inventory
+package com.billyauto.app
 
 import io.flutter.embedding.android.FlutterActivity
 
