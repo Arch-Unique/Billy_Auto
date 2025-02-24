@@ -42,7 +42,7 @@ Map<String, dynamic> toJson() {
 
    @override
   bool validate() {
-    return makeId != 0 && modelId != 0 && licenseNo.isNotEmpty && customerId != 0;
+    return makeId != 0 && modelId != 0 && licenseNo.isNotEmpty;
   }
 
       @override

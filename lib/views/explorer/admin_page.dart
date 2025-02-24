@@ -154,11 +154,11 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                   return DataCell(Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const AppIcon(
-                        Icons.remove_red_eye,
-                        color: Colors.brown,
-                      ),
-                      Ui.boxWidth(12),
+                      // const AppIcon(
+                      //   Icons.remove_red_eye,
+                      //   color: Colors.brown,
+                      // ),
+                      // Ui.boxWidth(12),
                       AppIcon(
                         Icons.edit,
                         color: AppColors.green,
@@ -169,14 +169,29 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                       content: Obx(() {
                         return DynamicFormGenerator(
                             model: Get.find<AppController>().currentBaseModel.value,
-                            onSave: (v) {});
+                            onSave: (v) async{
+                              await Get.find<AppController>().editExisitingRecord(v);
+                            });
                       })));
                         },
                       ),
                       Ui.boxWidth(12),
-                      const AppIcon(
+                      AppIcon(
                         Icons.delete,
                         color: Colors.red,
+                        onTap: (){
+                          Get.dialog(AppDialog.normal(
+                      "Delete Record","Are you sure you want to remove this record from the database ?",
+                      titleA: "Yes",
+                      titleB: "No",
+                      onPressedA: () async{
+                        await Get.find<AppController>().deleteExisitingRecord<T>(bm.id.toString());
+                      },
+                      onPressedB: (){
+                        Get.back();
+                      },
+                      ));
+                        },
                       ),
                     ],
                   ));

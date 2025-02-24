@@ -136,7 +136,10 @@ class _ExplorerPageState extends State<ExplorerPage> {
       color: AppColors.primaryColor,
       child: Row(
         children: [
-          BackButton(),
+          Padding(
+            padding: const EdgeInsets.only(left: 16),
+            child: BackButton(color: AppColors.white,),
+          ),
           Ui.boxWidth(24),
           LogoWidget(64, isWhite: false),
           Spacer(),

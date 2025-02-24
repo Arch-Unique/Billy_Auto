@@ -30,7 +30,7 @@ class Order extends BaseModel{
 
   bool get isDispatched => dispatchedAt != null;
   String get rdesc => "Vehicle:  $car\nConcern:  $customerConcerns";
-  String get desc => "${rdesc.substring(0,rdesc.length > 64 ? 64 : rdesc.length)}...";
+  String get desc => "${rdesc.trim()}";
   String get title => "$customer-Order-$id";
 
   Order({

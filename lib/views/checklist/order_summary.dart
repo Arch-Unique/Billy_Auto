@@ -284,8 +284,11 @@ class _OrderSummaryState extends State<OrderSummary> {
                       Get.dialog(AppDialog.normal("Submit Service Order",
                           "Are youy sure you want to submit this service order ?, NB: this will send an email to the customer if any email was provided.",
                           titleA: "Yes", titleB: "No", onPressedA: () async {
-                        await Get.find<AppController>().submitServiceOrder();
+                        final f = await Get.find<AppController>().submitServiceOrder();
+                        if(f){
                         Get.offAll(ChoosePage());
+
+                        }
                       }, onPressedB: () {
                         Get.back();
                       }));

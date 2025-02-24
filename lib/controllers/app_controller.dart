@@ -375,31 +375,44 @@ class AppController extends GetxController {
 
   saveNewRecord(Map<String, dynamic> json) async {
     BaseModel mp = appRepo.factories[currentBaseModel.value.runtimeType]!(json);
+    
     try {
-      if (currentBaseModel.value.validate()) {
+      if (mp.validate()) {
         await appRepo.create(mp);
         Ui.showInfo("Successfully Created A New Record");
+        await initApp();
+        tmds.value.refreshDatasource();
       }
     } catch (e) {
       print(e);
       Ui.showError(e.toString());
-    } finally {
-      await initApp();
     }
   }
 
   editExisitingRecord(Map<String, dynamic> json) async {
     BaseModel mp = appRepo.factories[currentBaseModel.value.runtimeType]!(json);
     try {
-      if (currentBaseModel.value.validate()) {
+      if (mp.validate()) {
         await appRepo.patch(mp);
-        Ui.showInfo("Successfully Created A New Record");
+        Ui.showInfo("Successfully Updated Existing Record");
+        await initApp();
+        tmds.value.refreshDatasource();
       }
     } catch (e) {
       print(e);
       Ui.showError(e.toString());
-    } finally {
+    }
+  }
+
+  deleteExisitingRecord<T>(String id) async {
+    try {
+      await appRepo.delete<T>(id);
+      Ui.showInfo("Successfully Updated Existing Record");
       await initApp();
+      tmds.value.refreshDatasource();
+    } catch (e) {
+      print(e);
+      Ui.showError(e.toString());
     }
   }
 }

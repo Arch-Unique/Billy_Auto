@@ -147,7 +147,7 @@ class AppRepo extends GetxController {
   }
 
   Future<String> delete<T>(String id) async {
-    final res = await apiService.patch("${urls[T]!}/$id");
+    final res = await apiService.delete("${urls[T]!}/$id");
     if (!res.statusCode!.isSuccess()) {
       throw res.data["error"];
     }
