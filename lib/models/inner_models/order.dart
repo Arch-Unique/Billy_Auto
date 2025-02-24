@@ -12,7 +12,7 @@ class Order extends BaseModel{
   String? customerConcerns;
   String? observations;
   DateTime? dispatchedAt;
-  List<String> maintenanceType;
+  // List<String> maintenanceType;
   String? fuelLevel, bodyCheck,customerImage,mileageImage;
   int technicianId,serviceAdvisorId;
   List<int> servicesPerformed; //id of services
@@ -30,7 +30,7 @@ class Order extends BaseModel{
 
   bool get isDispatched => dispatchedAt != null;
   String get rdesc => "Vehicle:  $car\nConcern:  $customerConcerns";
-  String get desc => "${rdesc.trim()}";
+  String get desc => rdesc.trim();
   String get title => "$customer-Order-$id";
 
   Order({
@@ -46,7 +46,7 @@ class Order extends BaseModel{
     this.mileageImage,
     this.customerConcerns,
     this.observations,
-    this.maintenanceType = const [],
+    // this.maintenanceType = const [],
     this.fuelLevel,
     this.dispatchedAt,
     this.bodyCheck,
@@ -67,7 +67,7 @@ Map<String, dynamic> toJson() {
       'mileageOnReception': mileageOnReception.toString(),
       'customerConcerns': customerConcerns,
       'observations': observations,
-      'maintenanceType': jsonEncode(maintenanceType),
+      // 'maintenanceType': jsonEncode(maintenanceType),
       'fuelLevel': fuelLevel,
       'bodyCheck': bodyCheck,
       'servicesPerformed': jsonEncode(servicesPerformed),
@@ -84,7 +84,7 @@ Map<String, dynamic> toJson() {
 
       @override
 List<dynamic> toTableRows(){
-    return [id,customer,car,mileageOnReception,fuelLevel,createdAt];
+    return [id,customer,car,mileageOnReception,fuelLevel,createdAtRaw];
   }
 
   @override
@@ -105,7 +105,7 @@ List<dynamic> toTableRows(){
       mileageOnReception: int.tryParse(json['mileageOnReception'] ?? "0") ?? 0,
       customerConcerns: json['customerConcerns'] ?? "",
       observations: json['observations'] ?? "",
-      maintenanceType: List<String>.from(json['maintenanceType'] ?? []),
+      // maintenanceType: List<String>.from(json['maintenanceType'] ?? []),
       fuelLevel: json['fuelLevel'] ?? "",
       bodyCheck: json['bodyCheck'] ?? "",
       customerImage: json['customerImage'] ?? "",

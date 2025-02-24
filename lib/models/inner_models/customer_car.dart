@@ -47,15 +47,15 @@ Map<String, dynamic> toJson() {
 
       @override
 List<dynamic> toTableRows(){
-    return [id,make,model,year,licenseNo,customer,createdAt];
+    return [id,make,model,year,licenseNo,customer,createdAtRaw];
   }
 
   // Create CustomerCar object from JSON
   factory CustomerCar.fromJson(Map<String, dynamic> json) {
     return CustomerCar(
       id: json['id'] ?? 0,
-      makeId: json['makeId'],
-      modelId: json['modelId'],
+      makeId: int.tryParse(json['makeId'].toString()) ?? 0,
+      modelId: int.tryParse(json['modelId'].toString()) ?? 0,
       make: json['make'] ?? "",
       desc: json['description'],
       model: json['model'] ?? "",
@@ -64,7 +64,7 @@ List<dynamic> toTableRows(){
       chassisNo: json['chassisNo'] ?? "",
       createdAt: DateTime.tryParse(json['createdAt']),
       updatedAt: DateTime.tryParse(json['updatedAt']),
-      customerId: json['customerId'],
+      customerId: int.tryParse(json['customerId'].toString()) ?? 0,
       customer: json['customer'] ?? "",
     );
   }

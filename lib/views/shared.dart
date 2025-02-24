@@ -7,8 +7,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:inventory/tools/colors.dart';
+import 'package:multi_dropdown/multi_dropdown.dart';
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
 
+import '../controllers/app_controller.dart';
 import '../tools/assets.dart';
 import '../tools/enums.dart';
 import '../tools/service.dart';
@@ -1072,12 +1074,29 @@ class CustomTextField extends StatelessWidget {
     );
   }
 
-  static dropdown(
-      List<String> options, TextEditingController cont, String label,
-      {Function(String)? onChanged, String? initOption, double? w}) {
-    String curOption =
-        (initOption == null || initOption.isEmpty) ? options[0] : initOption;
-    cont.text = curOption;
+  static dropdown(List<String> optionss, List<dynamic> valuess,
+      TextEditingController cont, String label,
+      {Function(String)? onChanged, dynamic initOption, double? w}) {
+    dynamic curOption;
+
+    final options = List.from(optionss);
+    final values = List.from(valuess);
+    if (options.isEmpty || options[0] != "None") {
+      options.insert(0, "None");
+      dynamic defaultValue =
+          options.isEmpty ? 0 : (initOption.runtimeType == String ? "" : 0);
+      values.insert(0, defaultValue);
+    }
+
+    if (initOption.runtimeType == String) {
+      curOption =
+          (initOption == null && initOption.isEmpty) ? values[0] : initOption;
+    } else {
+      curOption = (initOption == null) ? values[0] : initOption;
+    }
+
+    cont.text = curOption.toString();
+
     return StatefulBuilder(builder: (context, setState) {
       return SizedBox(
         width: w ?? Ui.width(context) - 48,
@@ -1091,13 +1110,16 @@ class CustomTextField extends StatelessWidget {
                 height: 8,
               ),
             CurvedContainer(
-              color: AppColors.primaryColorLight,
+              color: AppColors.white,
               padding: EdgeInsets.symmetric(horizontal: 16),
-              child: DropdownButton<String>(
+              border: Border.all(color: Colors.grey),
+              child: DropdownButton<dynamic>(
                   value: curOption,
                   isExpanded: true,
                   elevation: 0,
-                  hint: AppText.thin(curOption),
+                  hint: AppText.thin(options[!values.contains(curOption)
+                      ? 0
+                      : values.indexOf(curOption)]),
                   underline: SizedBox(),
                   // underline: Padding(
                   //   padding: const EdgeInsets.only(top: 16.0),
@@ -1111,14 +1133,15 @@ class CustomTextField extends StatelessWidget {
                     color: AppColors.primaryColor,
                   ),
                   dropdownColor: AppColors.white,
-                  items: options
-                      .map((e) => DropdownMenuItem<String>(
-                          value: e, child: AppText.thin(e)))
+                  items: values
+                      .map((e) => DropdownMenuItem<dynamic>(
+                          value: e,
+                          child: AppText.thin(options[values.indexOf(e)])))
                       .toList(),
                   onChanged: (value) {
                     setState(() {
                       curOption = value!;
-                      cont.text = curOption;
+                      cont.text = curOption.toString();
                     });
                     if (onChanged != null) {
                       onChanged(curOption);
@@ -1138,14 +1161,16 @@ class CustomTextField extends StatelessWidget {
 
 class MultiSelectDropdown extends StatefulWidget {
   final List<String> options;
+  final List<dynamic> values;
   final TextEditingController controller;
   final String label;
-  final Function(List<String>)? onChanged;
-  final List<String>? initialSelectedOptions;
+  final Function(List<dynamic>)? onChanged;
+  final List<dynamic>? initialSelectedOptions;
   final double? width;
 
   const MultiSelectDropdown(
     this.options,
+    this.values,
     this.controller,
     this.label, {
     super.key,
@@ -1159,19 +1184,22 @@ class MultiSelectDropdown extends StatefulWidget {
 }
 
 class MultiSelectDropdownState extends State<MultiSelectDropdown> {
-  List<String> selectedOptions = [];
+  List<dynamic> selectedOptions = [];
+  List<dynamic> selectedTitleOptions = [];
 
   @override
   void initState() {
     super.initState();
     if (widget.initialSelectedOptions != null) {
       selectedOptions = List.from(widget.initialSelectedOptions!);
+      selectedTitleOptions = List.from(widget.initialSelectedOptions!
+          .map((e) => widget.options[widget.values.indexOf(e)]));
     }
     _updateControllerText();
   }
 
   void _updateControllerText() {
-    widget.controller.text = selectedOptions.join(', ');
+    widget.controller.text = selectedTitleOptions.join(', ');
   }
 
   @override
@@ -1189,17 +1217,17 @@ class MultiSelectDropdownState extends State<MultiSelectDropdown> {
               CurvedContainer(
                 color: AppColors.primaryColorLight,
                 padding: EdgeInsets.symmetric(horizontal: 16),
-                child: DropdownButtonFormField<String>(
+                child: DropdownButtonFormField<dynamic>(
                   isExpanded: true,
                   elevation: 0,
-                  hint: AppText.thin(selectedOptions.isEmpty
+                  hint: AppText.thin(selectedTitleOptions.isEmpty
                       ? 'Select options'
-                      : selectedOptions.join(', ')),
+                      : selectedTitleOptions.join(', ')),
                   selectedItemBuilder: (context) {
                     return [
-                      AppText.thin(selectedOptions.isEmpty
+                      AppText.thin(selectedTitleOptions.isEmpty
                           ? 'Select options'
-                          : selectedOptions.join(', '))
+                          : selectedTitleOptions.join(', '))
                     ];
                   },
                   icon: Icon(
@@ -1207,8 +1235,8 @@ class MultiSelectDropdownState extends State<MultiSelectDropdown> {
                     color: AppColors.primaryColor,
                   ),
                   dropdownColor: AppColors.white,
-                  items: widget.options.map((e) {
-                    return DropdownMenuItem<String>(
+                  items: widget.values.map((e) {
+                    return DropdownMenuItem<dynamic>(
                       value: e,
                       child: Row(
                         children: [
@@ -1218,8 +1246,12 @@ class MultiSelectDropdownState extends State<MultiSelectDropdown> {
                               setState(() {
                                 if (checked == true) {
                                   selectedOptions.add(e);
+                                  selectedTitleOptions.add(
+                                      widget.options[widget.values.indexOf(e)]);
                                 } else {
                                   selectedOptions.remove(e);
+                                  selectedTitleOptions.remove(
+                                      widget.options[widget.values.indexOf(e)]);
                                 }
                                 _updateControllerText();
                               });
@@ -1228,7 +1260,8 @@ class MultiSelectDropdownState extends State<MultiSelectDropdown> {
                               }
                             },
                           ),
-                          AppText.thin(e),
+                          AppText.thin(
+                              widget.options[widget.values.indexOf(e)]),
                         ],
                       ),
                     );
@@ -1242,6 +1275,96 @@ class MultiSelectDropdownState extends State<MultiSelectDropdown> {
             ],
           ),
         );
+      },
+    );
+  }
+}
+
+class CustomMultiDropdown extends StatefulWidget {
+  final List<String> options;
+  final List<dynamic> values;
+  final List<dynamic> initValues;
+  final TextEditingController controller;
+  final String title;
+  final bool isEnable;
+  const CustomMultiDropdown(
+      this.options, this.values, this.controller, this.title,
+      {this.initValues = const [],this.isEnable=true, super.key});
+
+  @override
+  State<CustomMultiDropdown> createState() => _CustomMultiDropdownState();
+}
+
+class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
+  @override
+  Widget build(BuildContext context) {
+    Widget md;
+    if (widget.values.isEmpty || widget.values[0].runtimeType == String) {
+      md = getMultiDropDown<String>();
+    } else {
+      md = getMultiDropDown<int>();
+    }
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return SizedBox(
+          width: MediaQuery.of(context).size.width - 48,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (widget.title.isNotEmpty) AppText.thin(widget.title),
+              if (widget.title.isNotEmpty) const SizedBox(height: 8),
+              md,
+              if (widget.title.isNotEmpty) const SizedBox(height: 32),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget getMultiDropDown<T extends Object>() {
+    final mdcont = MultiSelectController<T>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      for (var element in widget.initValues) {
+        mdcont.selectWhere((p) {
+          return element == p.value;
+        });
+      }
+    });
+
+    final ddec = DropdownItemDecoration(
+      backgroundColor: AppColors.primaryColorLight.withOpacity(0.5),
+      selectedBackgroundColor: AppColors.primaryColor,
+      textColor: AppColors.textColor,
+      selectedTextColor: AppColors.white,
+    );
+    final fdec = FieldDecoration(
+        hintText: "Select ${widget.title}",
+        suffixIcon: Icon(
+          Icons.keyboard_arrow_down_rounded,
+          color: AppColors.primaryColor,
+        ),
+        border: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)));
+    return MultiDropdown<T>(
+      items: widget.values
+          .map((e) => DropdownItem<T>(
+              label: widget.options[widget.values.indexOf(e)], value: e))
+          .toList(),
+      searchEnabled: true,
+      controller: mdcont,
+      enabled: widget.isEnable,
+
+      dropdownItemDecoration: ddec,
+      fieldDecoration: fdec,
+    
+      onSelectionChange: (selectedItems) {
+        if(selectedItems.isEmpty){
+          widget.controller.text="";
+        }
+        widget.controller.text = selectedItems.join(",");
       },
     );
   }
@@ -1302,7 +1425,7 @@ class _SignatureViewState extends State<SignatureView> {
   @override
   void initState() {
     // TODO: implement initState
-    if(widget.tec.value.isNotEmpty){
+    if (widget.tec.value.isNotEmpty) {
       isCaptured = true;
       bytes = widget.tec.value;
     }
@@ -1430,11 +1553,9 @@ class _SignatureViewState extends State<SignatureView> {
   }
 }
 
-
-
 class ProfileLogo extends StatelessWidget {
   const ProfileLogo({
-    this.size=20,
+    this.size = 20,
     super.key,
   });
   final double size;
@@ -1443,11 +1564,74 @@ class ProfileLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<AppService>();
     return CircleAvatar(
-     radius: size,
-     backgroundColor: AppColors.white,
-     child: CircleAvatar(radius: size-1,
-     backgroundColor: AppColors.green,
-     child: Center(child: AppText.thin(controller.currentUser.value.username[0].toUpperCase(),color: AppColors.white),),),
+      radius: size,
+      backgroundColor: AppColors.white,
+      child: CircleAvatar(
+        radius: size - 1,
+        backgroundColor: AppColors.green,
+        child: Center(
+          child: AppText.thin(
+              controller.currentUser.value.username[0].toUpperCase(),
+              color: AppColors.white),
+        ),
+      ),
     );
+  }
+}
+
+class PasswordChangeModal extends StatefulWidget {
+  const PasswordChangeModal(this.username,{super.key});
+  final TextEditingController username;
+
+  @override
+  State<PasswordChangeModal> createState() => _PasswordChangeModalState();
+}
+
+class _PasswordChangeModalState extends State<PasswordChangeModal> {
+  TextEditingController p1 = TextEditingController();
+  TextEditingController p2 = TextEditingController();
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return AppDialog(title: AppText.bold("Change Password"), content: Column(
+      mainAxisSize: MainAxisSize.min,
+children: [
+  CustomTextField(
+                  "Username",
+                  widget.username,
+                  readOnly: true,
+                  varl: FPL.text,
+                ),CustomTextField(
+                  "New Password",
+                  p1,
+                  varl: FPL.password,
+                ),
+                CustomTextField(
+                  "Confirm Password",
+                  p2,
+                  varl: FPL.password,
+                ),
+                AppButton(
+                  onPressed: () async {
+                    final msgU = Validators.validate(FPL.password, p1.text);
+                    final msgP =
+                        Validators.validate(FPL.password, p2.text);
+                        final msgV = Validators.confirmPasswordValidator(p1.text, p2.text);
+                    if (msgU == null && msgP == null && msgV == null) {
+                      final f = await Get.find<AppController>()
+                          .resetPassword(widget.username.text, p1.text);
+                      if (f) {
+                        Get.back();
+                      }
+                    } else {
+                      Ui.showError(msgU ?? msgP ?? msgV ?? "An error occured");
+                    }
+                  },
+                  text: "Change Password",
+                ),
+],
+       ));
   }
 }

@@ -28,7 +28,8 @@ abstract class AppUrls {
 
   //auth repo
   static const String login = "$user/auth/login";
-  static const String changePassword = "$user/auth/changePassword";
+  static const String resetPassword = "$user/auth/reset-password";
+  static const String changePassword = "$user/auth/change-password";
   
   static const String getUser = "$user$profile";
 

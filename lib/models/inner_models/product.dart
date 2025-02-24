@@ -46,7 +46,7 @@ Map<String, dynamic> toJson() {
 
       @override
 List<dynamic> toTableRows(){
-    return [id,name,code,cost,sellingPrice,productType,productCategory,createdAt];
+    return [id,name,code,cost,sellingPrice,productType,productCategory,createdAtRaw];
   }
 
   @override
@@ -59,16 +59,16 @@ List<dynamic> toTableRows(){
     return Product(
       id: json['id'] ?? 0,
       name: json['name'],
-      cost: json['cost'],
-      sellingPrice: json['sellingPrice'],
-      productCategoryId: json['productCategoryId'],
+      cost: double.tryParse(json['cost'].toString()) ?? 0,
+      sellingPrice: double.tryParse(json['sellingPrice'].toString()) ?? 0,
+      productCategoryId: int.tryParse(json['productCategoryId'].toString()) ?? 0,
       productCategory: json['productCategory'] ?? "",
       code: json['code'] ?? "",
       image: json['image'] ?? "",
       createdAt: DateTime.tryParse(json['createdAt']),
       updatedAt: DateTime.tryParse(json['updatedAt']),
-      productTypeId: json['productTypeId'],
-      supplierId: json['supplierId'],
+      productTypeId: int.tryParse(json['productTypeId'].toString()) ?? 0,
+      supplierId: int.tryParse(json['supplierId'].toString()) ?? 0,
       productType: json['productType'] ?? "",
     );
   }
@@ -112,7 +112,7 @@ Map<String, dynamic> toJson() {
 
       @override
 List<dynamic> toTableRows(){
-    return [id,name,code,productCategory,createdAt];
+    return [id,name,code,productCategory,createdAtRaw];
   }
 
   // Create ProductType object from JSON
@@ -124,7 +124,7 @@ List<dynamic> toTableRows(){
       image: json['image'] ?? "",
       createdAt: DateTime.tryParse(json['createdAt']),
       updatedAt: DateTime.tryParse(json['updatedAt']),
-      productCategoryId: json['productCategoryId'],
+      productCategoryId: int.tryParse(json['productCategoryId'].toString()) ?? 0,
       productCategory: json['productCategory'] ?? "",
     );
   }
@@ -155,7 +155,7 @@ Map<String, dynamic> toJson() {
 
       @override
 List<dynamic> toTableRows(){
-    return [id,name,code,createdAt];
+    return [id,name,code,createdAtRaw];
   }
 
   @override

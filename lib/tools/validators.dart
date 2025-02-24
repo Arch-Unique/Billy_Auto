@@ -19,7 +19,7 @@ abstract class Validators {
     } else if (value.toString().trim() != password.trim()) {
       debugPrint(value);
       debugPrint(password);
-      return 'PIN doesn\'t match';
+      return 'Password doesn\'t match';
     } else {
       return null;
     }

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:data_table_2/data_table_2.dart';
@@ -14,6 +15,7 @@ import 'package:inventory/views/checklist/shared2.dart';
 
 import '../../models/inner_models/barrel.dart';
 import '../../tools/functions.dart';
+import '../../tools/urls.dart';
 import '../shared.dart';
 
 class CustomTable extends StatefulWidget {
@@ -41,31 +43,36 @@ class _CustomTableState extends State<CustomTable> {
           },
 
           columnSpacing: 0,
-          onSelectAll: (v) {
-            print(v);
-          },
+          showCheckboxColumn: false,
+          // onSelectAll: (v) {
+          //   print(v);
+          // },
           // controller: controller.paginatorController.value,
           header: AppText.medium("Records",
               fontFamily: Assets.appFontFamily2, fontSize: 16),
           actions: [
-            InkWell(
-                mouseCursor: SystemMouseCursors.click,
+            Material(
+              color: AppColors.green,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8),),
+              
+              child: AppIcon(
+                Icons.add,
+                color: AppColors.white,
                 onTap: () {
                   Get.dialog(AppDialog(
                       title: AppText.thin("Add New Record"),
                       content: Obx(() {
                         return DynamicFormGenerator(
                             model: controller.currentBaseModel.value,
-                            onSave: (v) async{
+                            isNew: true,
+                            onSave: (v) async {
                               await controller.saveNewRecord(v);
                             });
                       })));
                 },
-                child: AppIcon(
-                  Icons.add_circle,
-                  color: AppColors.green,
-                  size: 40,
-                )), //add new
+                size: 40,
+              ),
+            ), //add new
           ],
 
           columns: controller.currentHeaders
@@ -101,7 +108,17 @@ class CustomTableFilter extends StatelessWidget {
               if (controller.currentFilters.isEmpty) const SizedBox(),
               ...controller.currentFilters.map((e) {
                 if (e.filterType == 0) {
-                  return MultiSelectDropdown(e.options!, e.tec!, e.title);
+                  var iv = [];
+                  if(e.tec != null){
+                    if(e.tec!.text.trim().isNotEmpty && e.tec!.text.trim() != ","){
+                      if(e.tec!.text.contains(",")){
+                        iv = e.tec!.text.split(",");
+                      }else{
+                        iv = [e.tec!.text];
+                      }
+                    }
+                  }
+                  return CustomMultiDropdown(e.options!.titles, e.options!.values,e.tec!, e.title,initValues:iv,isEnable: true);
                 }
                 return CustomTextField(
                   e.title,
@@ -118,7 +135,16 @@ class CustomTableFilter extends StatelessWidget {
                     }
                   },
                 );
-              })
+              }),
+              Ui.boxHeight(16),
+              AppButton(onPressed: (){
+                controller.applyFilters();
+              },text: "Apply Filters",),
+              Ui.boxHeight(16),
+              AppButton.outline((){
+                controller.resetCurrentFilters();
+                controller.applyFilters();
+              }, "Clear Filters",),
             ],
           );
         }),
@@ -128,16 +154,16 @@ class CustomTableFilter extends StatelessWidget {
 }
 
 class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
-  List<FilterModel> filters;
   List<String> tm;
-  TableModelDataSource(this.tm, this.filters);
+  TableModelDataSource(this.tm);
 
   @override
   Future<AsyncRowsResponse> getRows(int startIndex, int count) async {
     final appRepo = Get.find<AppRepo>();
     int page = (startIndex ~/ count) + 1;
 
-    final res = await appRepo.getAll<T>(page: page, limit: count);
+
+    final res = await appRepo.getAll<T>(page: page, limit: count,fm: Get.find<AppController>().currentFilters);
     List<T> bms = res.data;
     List<List<dynamic>> tvals =
         res.data.map((e) => (e as BaseModel).toTableRows()).toList();
@@ -165,32 +191,38 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                         onTap: () {
                           Get.find<AppController>().currentBaseModel = bm.obs;
                           Get.dialog(AppDialog(
-                      title: AppText.thin("Edit Record"),
-                      content: Obx(() {
-                        return DynamicFormGenerator(
-                            model: Get.find<AppController>().currentBaseModel.value,
-                            onSave: (v) async{
-                              await Get.find<AppController>().editExisitingRecord(v);
-                            });
-                      })));
+                              title: AppText.thin("Edit Record"),
+                              content: Obx(() {
+                                return DynamicFormGenerator(
+                                    model: Get.find<AppController>()
+                                        .currentBaseModel
+                                        .value,
+                                    onSave: (v) async {
+                                      await Get.find<AppController>()
+                                          .editExisitingRecord(v);
+                                    });
+                              })));
                         },
                       ),
                       Ui.boxWidth(12),
                       AppIcon(
                         Icons.delete,
                         color: Colors.red,
-                        onTap: (){
+                        onTap: () {
                           Get.dialog(AppDialog.normal(
-                      "Delete Record","Are you sure you want to remove this record from the database ?",
-                      titleA: "Yes",
-                      titleB: "No",
-                      onPressedA: () async{
-                        await Get.find<AppController>().deleteExisitingRecord<T>(bm.id.toString());
-                      },
-                      onPressedB: (){
-                        Get.back();
-                      },
-                      ));
+                            "Delete Record",
+                            "Are you sure you want to remove this record from the database ?",
+                            titleA: "Yes",
+                            titleB: "No",
+                            onPressedA: () async {
+                              await Get.find<AppController>()
+                                  .deleteExisitingRecord<T>(bm.id.toString());
+                              
+                            },
+                            onPressedB: () {
+                              Get.back();
+                            },
+                          ));
                         },
                       ),
                     ],
@@ -219,21 +251,21 @@ class CustomTableTitle extends StatelessWidget {
             HeaderChooser(hi),
             if (actions.isNotEmpty) ...actions,
             const Spacer(),
-            SizedBox(
-                width: Ui.width(context) / 4,
-                child: CustomTextField2(
-                  "Search",
-                  TextEditingController(),
-                  isDense: true,
-                  hasBottomPadding: false,
-                )),
-            Ui.boxWidth(16),
-            SizedBox(
-                width: 100,
-                child: AppButton(
-                  onPressed: () {},
-                  text: "Submit",
-                ))
+            // SizedBox(
+            //     width: Ui.width(context) / 4,
+            //     child: CustomTextField2(
+            //       "Search",
+            //       TextEditingController(),
+            //       isDense: true,
+            //       hasBottomPadding: false,
+            //     )),
+            // Ui.boxWidth(16),
+            // SizedBox(
+            //     width: 100,
+            //     child: AppButton(
+            //       onPressed: () {},
+            //       text: "Submit",
+            //     ))
           ],
         ));
   }
@@ -333,12 +365,14 @@ class HeaderChooser extends StatelessWidget {
 
 class DynamicFormGenerator extends StatefulWidget {
   final BaseModel model;
+  final bool isNew;
   final Function(Map<String, dynamic>) onSave;
 
   const DynamicFormGenerator({
     super.key,
     required this.model,
     required this.onSave,
+    this.isNew =false,
   });
 
   @override
@@ -362,24 +396,30 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
 
     // Create controllers for each field
     _formData['id'] = widget.model.id;
-    _formData['createdAt'] = DateTime.now().toIso8601String();
-    _formData['updatedAt'] = DateTime.now().toIso8601String();
+    _formData['createdAt'] = widget.model.createdAt?.toIso8601String() ?? DateTime.now().toIso8601String();
+    _formData['updatedAt'] = widget.model.updatedAt?.toIso8601String() ?? DateTime.now().toIso8601String();
     jsonMap.forEach((key, value) {
       if (!['id', 'createdAt', 'updatedAt'].contains(key)) {
         _controllers[key] =
-            TextEditingController(text: value?.toString() ?? '');
+            TextEditingController(text: widget.isNew ? "" : value?.toString() ?? '');
       }
     });
   }
 
   Widget _buildField(String fieldName, dynamic value) {
     // Determine field type based on value
-    if (fieldName.endsWith("Id") || fieldName.endsWith("Type")) {
-      return CustomTextField.dropdown(["None"], _controllers[fieldName]!,
-          "Select ${_formatFieldName(fieldName).replaceAll(" id", "")}");
+    if (fieldName.endsWith("Id") || fieldName.endsWith("Type") || fieldName.endsWith("role")) {
+      return CustomTextField.dropdown(Get.find<AppController>().filterOptions[fieldName]?.titles ?? ["None"], Get.find<AppController>().filterOptions[fieldName]?.values ?? [0],_controllers[fieldName]!,
+          "Select ${_formatFieldName(fieldName).replaceAll(" id", "")}",initOption: value);
     }
 
-    if (fieldName == "image") {
+    if (fieldName == "servicesPerformed"){
+      final options=Get.find<AppController>().allBillyServices.map((element) => element.name).toList();
+      final values=Get.find<AppController>().allBillyServices.map((element) => element.id).toList();
+      return CustomMultiDropdown(options, values, TextEditingController(), _formatFieldName(fieldName),initValues: widget.isNew ? []: (jsonDecode(value) as List),isEnable: widget.isNew,);
+    }
+
+    if (fieldName.toLowerCase().endsWith("image")) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -401,10 +441,10 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
                     _controllers[fieldName]!.text.isNotEmpty ? 0 : 24),
                 margin: EdgeInsets.all(24),
                 child: _controllers[fieldName]!.text.isNotEmpty
-                    ? Image.file(
+                    ? _controllers[fieldName]!.text.contains("\\") ? Image.file(
                         File(_controllers[fieldName]!.text),
                         fit: BoxFit.cover,
-                      )
+                      ) : Image.network("${AppUrls.baseURL}${AppUrls.upload}/all/${_controllers[fieldName]!.text}",fit: BoxFit.contain,)
                     : Center(
                         child: AppIcon(
                         Icons.add_a_photo,
@@ -484,10 +524,19 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
         key: _formKey,
         child: Column(
           children: [
+            if(!widget.isNew)
+            CustomTextField(
+        _formatFieldName("id"), TextEditingController(text: _formData['id'].toString()),readOnly: true),
             ...jsonMap.entries
                 .where((entry) =>
                     !['id', 'createdAt', 'updatedAt'].contains(entry.key))
                 .map((entry) => _buildField(entry.key, entry.value)),
+                if(!widget.isNew)
+            CustomTextField(
+        _formatFieldName("createdAt"), TextEditingController(text: _formData['createdAt']),readOnly: true,),
+        if(!widget.isNew)
+            CustomTextField(
+        _formatFieldName("updatedAt"), TextEditingController(text: _formData['updatedAt']),readOnly: true,),
             Ui.boxHeight(24),
             AppButton(
               onPressed: () async {

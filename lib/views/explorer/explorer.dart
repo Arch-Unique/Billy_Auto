@@ -12,6 +12,7 @@ import 'package:inventory/views/explorer/admin_page.dart';
 import 'package:inventory/views/shared.dart';
 
 import '../../tools/assets.dart';
+import '../checklist/profile.dart';
 
 class ExplorerPage extends StatefulWidget {
   const ExplorerPage({super.key});
@@ -35,16 +36,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
           HeaderItem("Inventory", vb: () {
             controller.setCurrentTypeTable<Inventory>();
           }),
-          HeaderItem("Inbound", vb: () {
-            // controller.setCurrentTypeTable<Inventory>();
-          }),
-          HeaderItem("Transfer", vb: () {
-            // controller.setCurrentTypeTable<Inventory>();
-          }),
-
-          HeaderItem("Outbound", vb: () {
-            // controller.setCurrentTypeTable<Inventory>();
-          }),
+          
           HeaderItem("Location", vb: () {
             // controller.setCurrentTypeTable<Inventory>();
           }),
@@ -183,7 +175,12 @@ class _ExplorerPageState extends State<ExplorerPage> {
             });
           }),
           Ui.boxWidth(24),
-          ProfileLogo(),
+          InkWell(
+            onTap: () {
+                        Get.find<AppController>().editOn.value = false;
+                        Get.to(ProfilePage());
+                      },
+            child: ProfileLogo()),
           Ui.boxWidth(24),
         ],
       ),

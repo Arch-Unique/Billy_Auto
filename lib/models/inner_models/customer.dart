@@ -38,7 +38,7 @@ class Customer extends BaseModel {
 
   @override
   List<dynamic> toTableRows() {
-    return [id, fullName, phone, email, customerType, createdAt];
+    return [id, fullName, phone, email, customerType, createdAtRaw];
   }
 
   // Create Customer object from JSON

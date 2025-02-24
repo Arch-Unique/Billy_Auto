@@ -35,7 +35,7 @@ Map<String, dynamic> toJson() {
 
       @override
 List<dynamic> toTableRows(){
-    return [id,fullName,email,phone,code,createdAt];
+    return [id,fullName,email,phone,code,createdAtRaw];
   }
 
   @override

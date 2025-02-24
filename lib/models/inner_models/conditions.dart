@@ -27,7 +27,7 @@ Map<String, dynamic> toJson() {
 
     @override
 List<dynamic> toTableRows(){
-    return [id,name,conditionsCategory,createdAt];
+    return [id,name,conditionsCategory,createdAtRaw];
   }
 
     @override
@@ -40,7 +40,7 @@ List<dynamic> toTableRows(){
     return BillyConditions(
       id: json['id'] ?? 0,
       name: json['name'],
-      conditionsCategoryId: json['conditionsCategoryId'],
+      conditionsCategoryId: int.tryParse(json['conditionsCategoryId'].toString()) ?? 0,
       conditionsCategory: json['conditionsCategory'] ?? "",
       createdAt: DateTime.tryParse(json['createdAt']),
       updatedAt: DateTime.tryParse(json['updatedAt']),
@@ -71,7 +71,7 @@ Map<String, dynamic> toJson() {
 
       @override
 List<dynamic> toTableRows(){
-    return [id,name,createdAt];
+    return [id,name,createdAtRaw];
   }
 
    @override

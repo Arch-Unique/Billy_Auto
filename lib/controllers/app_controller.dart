@@ -83,6 +83,8 @@ class AppController extends GetxController {
   RxList<CarModels> allCarModels = <CarModels>[].obs;
   RxList<Customer> allCustomer = <Customer>[].obs;
   RxList<CustomerCar> allCustomerCar = <CustomerCar>[].obs;
+  RxList<Supplier> allSuppliers = <Supplier>[].obs;
+  RxList<Product> allProducts = <Product>[].obs;
   RxList<User> allServiceAdvisor = <User>[].obs;
   RxList<User> allTechnicians = <User>[].obs;
   RxList<Order> allOrders = <Order>[].obs;
@@ -92,16 +94,66 @@ class AppController extends GetxController {
   RxList<String> inventoryTransactionTypes = <String>[].obs;
 
   //TABLE
-  Rx<TableModelDataSource> tmds = TableModelDataSource([], []).obs;
+  Rx<TableModelDataSource> tmds = TableModelDataSource([]).obs;
   Rx<PaginatorController> paginatorController = PaginatorController().obs;
   Rx<BaseModel> currentBaseModel = User().obs;
   Rx<Order> currentOrder = Order(customerId: 0).obs;
+
+  Map<String, FilterOptionsModel> filterOptions = {};
 
   //PROFILE
   RxBool editOn = false.obs;
   Type currentType = User;
 
   final appRepo = Get.find<AppRepo>();
+
+  initFilterOptions() {
+    filterOptions["productCategoryId"] = FilterOptionsModel(
+        allProductCategory.map((element) => element.name).toList(),
+        allProductCategory.map((element) => element.id).toList());
+    filterOptions["productTypeId"] = FilterOptionsModel(
+        allProductType.map((element) => element.name).toList(),
+        allProductType.map((element) => element.id).toList());
+
+    filterOptions["productId"] = FilterOptionsModel(
+        allProducts.map((element) => element.name).toList(),
+        allProducts.map((element) => element.id).toList());
+    filterOptions["supplierId"] = FilterOptionsModel(
+        allSuppliers.map((element) => element.fullName).toList(),
+        allSuppliers.map((element) => element.id).toList());
+    filterOptions["customerId"] = FilterOptionsModel(
+        allCustomer.map((element) => element.fullName).toList(),
+        allCustomer.map((element) => element.id).toList());
+    filterOptions["carId"] = FilterOptionsModel(
+        allCustomerCar.map((element) => element.desc).toList(),
+        allCustomerCar.map((element) => element.id).toList());
+
+    filterOptions["makeId"] = FilterOptionsModel(
+        allCarMakes.map((element) => element.make).toList(),
+        allCarMakes.map((element) => element.id).toList());
+    filterOptions["modelId"] = FilterOptionsModel(
+        allCarModels.map((element) => element.model).toList(),
+        allCarModels.map((element) => element.id).toList());
+
+    filterOptions["status"] =
+        FilterOptionsModel(inventoryStatus, inventoryStatus);
+    filterOptions["transactionType"] =
+        FilterOptionsModel(inventoryStatus, inventoryStatus);
+    filterOptions["customerType"] =
+        FilterOptionsModel(customerTypes, customerTypes);
+    filterOptions["role"] = FilterOptionsModel(userRoles, userRoles);
+    filterOptions["technicianId"] = FilterOptionsModel(
+        allTechnicians.map((element) => element.fullName).toList(),
+        allTechnicians.map((element) => element.id).toList());
+    filterOptions["serviceAdvisorId"] = FilterOptionsModel(
+        allServiceAdvisor.map((element) => element.fullName).toList(),
+        allServiceAdvisor.map((element) => element.id).toList());
+    filterOptions["conditionsCategoryId"] = FilterOptionsModel(
+        allBillyConditionCategories.map((element) => element.name).toList(),
+        allBillyConditionCategories.map((element) => element.id).toList());
+    filterOptions["maintenanceType"] = FilterOptionsModel(["None"], [0]);
+    // filterOptions["productTypeId"] = allProductType;
+  }
 
   initApp() async {
     UtilFunctions.clearTextEditingControllers(tecs);
@@ -125,6 +177,8 @@ class AppController extends GetxController {
     allCustomer.value = await _getAll<Customer>();
     allCustomerCar.value = await _getAll<CustomerCar>();
     allOrders.value = await _getAll<Order>();
+    allProducts.value = await _getAll<Product>();
+    allSuppliers.value = await _getAll<Supplier>();
 
     allTechnicians.value = await _getAll<User>(fm: [
       FilterModel("", "role", 0, tec: TextEditingController(text: userRoles[2]))
@@ -162,9 +216,10 @@ class AppController extends GetxController {
       allSteps.addAll(allStepItem);
       inspectionNo[totalConditionsHeaders[j]] = allStepItem;
     }
+    initFilterOptions();
   }
 
-  Future<List<T>> _getAll<T>({List<FilterModel> fm = const []}) async {
+  Future<List<T>> _getAll<T>({List<FilterModel> fm = const [],T? bm}) async {
     final g = (await appRepo.getAll<T>(limit: 10000, fm: fm)).data;
     return g;
   }
@@ -337,6 +392,20 @@ class AppController extends GetxController {
       await appRepo.login(username, password);
       return true;
     } catch (e) {
+      
+      Ui.showError(e.toString());
+      if(e.toString() == "Please change password"){
+       Get.dialog(PasswordChangeModal(TextEditingController(text:username)));
+      }
+      return false;
+    }
+  }
+
+    Future<bool> resetPassword(String username, String password) async {
+    try {
+      await appRepo.resetPassword(username, password);
+      return true;
+    } catch (e) {
       Ui.showError(e.toString());
       return false;
     }
@@ -367,18 +436,34 @@ class AppController extends GetxController {
     }
     currentFilters.value = AllTables.tablesData[T]!.fm;
     currentBaseModel = AllTables.tablesData[T]!.bm.obs;
+    resetCurrentFilters();
+
+    tmds.value = TableModelDataSource<T>(currentHeaders);
+  }
+
+  resetCurrentFilters() {
+    for (var i = 0; i < currentFilters.length; i++) {
+      final fm = currentFilters[i];
+      if (fm.filterType == 0) {
+        fm.options = filterOptions[fm.tableTitle];
+        fm.tec?.clear();
+      }
+    }
     currentFilters.refresh();
     currentHeaders.refresh();
+  }
 
-    tmds.value = TableModelDataSource<T>(currentHeaders, currentFilters);
+  applyFilters() async {
+    tmds.value.refreshDatasource();
   }
 
   saveNewRecord(Map<String, dynamic> json) async {
     BaseModel mp = appRepo.factories[currentBaseModel.value.runtimeType]!(json);
-    
+
     try {
       if (mp.validate()) {
         await appRepo.create(mp);
+        Get.back();
         Ui.showInfo("Successfully Created A New Record");
         await initApp();
         tmds.value.refreshDatasource();
@@ -394,6 +479,7 @@ class AppController extends GetxController {
     try {
       if (mp.validate()) {
         await appRepo.patch(mp);
+        Get.back();
         Ui.showInfo("Successfully Updated Existing Record");
         await initApp();
         tmds.value.refreshDatasource();
@@ -407,7 +493,8 @@ class AppController extends GetxController {
   deleteExisitingRecord<T>(String id) async {
     try {
       await appRepo.delete<T>(id);
-      Ui.showInfo("Successfully Updated Existing Record");
+      Get.back();
+      Ui.showInfo("Successfully Deleted Record");
       await initApp();
       tmds.value.refreshDatasource();
     } catch (e) {
