@@ -14,7 +14,6 @@ import 'package:inventory/views/checklist/shared2.dart';
 import 'package:inventory/views/explorer/explorer.dart';
 import 'package:inventory/views/shared.dart';
 import 'package:printing/printing.dart';
-import 'package:widgets_to_image/widgets_to_image.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -33,7 +32,6 @@ class OrderSummary extends StatefulWidget {
 
 class _OrderSummaryState extends State<OrderSummary> {
   // final controller = Get.find<AppController>();
-  final imageController = WidgetsToImageController();
   final frameId = "archpage";
   bool isSaving = false;
   // ExportDelegate exd = ExportDelegate(
