@@ -34,46 +34,50 @@ class _AuthPageState extends State<AuthPage> {
                 : Ui.width(context) / 2.5
             : Ui.width(context) / 3.5;
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Center(
-          child: SizedBox(
-            width: w,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Ui.boxWidth(24),
-                LogoWidget(w / 3),
-                Ui.boxWidth(24),
-                Image.asset(
-                  Assets.s5,
-                  width: w,
-                ),
-                Ui.boxWidth(24),
-                CustomTextField("Username", username),
-                CustomTextField(
-                  "Password",
-                  password,
-                  varl: FPL.password,
-                ),
-                Ui.boxWidth(24),
-                AppButton(
-                  onPressed: () async {
-                    final msgU = Validators.validate(FPL.text, username.text);
-                    final msgP =
-                        Validators.validate(FPL.password, password.text);
-                    if (msgU == null && msgP == null) {
-                      final f = await Get.find<AppController>()
-                          .loginUser(username.text, password.text);
-                      if (f) {
-                        Get.offAll(ChoosePage());
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Center(
+            child: SizedBox(
+              width: w,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Ui.boxWidth(24),
+                  LogoWidget(w / 3),
+                  Ui.boxWidth(24),
+                  Image.asset(
+                    Assets.s5,
+                    width: w,
+                  ),
+                  Ui.boxWidth(24),
+                  CustomTextField("Username", username),
+                  CustomTextField(
+                    "Password",
+                    password,
+                    varl: FPL.password,
+                  ),
+                  Ui.boxWidth(24),
+                  AppButton(
+                    onPressed: () async {
+                      final msgU = Validators.validate(FPL.text, username.text);
+                      final msgP =
+                          Validators.validate(FPL.password, password.text);
+                      if (msgU == null && msgP == null) {
+                        final f = await Get.find<AppController>()
+                            .loginUser(username.text, password.text);
+                        if (f) {
+                          Ui.showInfo("Login Successful. Getting you ready...");
+                          await Get.find<AppController>().initApp();
+                          Get.offAll(ChoosePage());
+                        }
+                      } else {
+                        Ui.showError(msgU ?? msgP ?? "An error occured");
                       }
-                    } else {
-                      Ui.showError(msgU ?? msgP ?? "An error occured");
-                    }
-                  },
-                  text: "Log In",
-                ),
-              ],
+                    },
+                    text: "Log In",
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -86,7 +90,7 @@ class _AuthPageState extends State<AuthPage> {
 class ChoosePage extends StatelessWidget {
   const ChoosePage({super.key});
   static final pages = ["Service Order", "Order History", "Admin Dashboard"];
-  static final assets = [Assets.s1,Assets.s2,Assets.s3];
+  static final assets = [Assets.s1, Assets.s2, Assets.s3];
 
   @override
   Widget build(BuildContext context) {
@@ -98,6 +102,7 @@ class ChoosePage extends StatelessWidget {
             constraints: BoxConstraints(maxWidth: 850),
             child: Column(
               children: [
+                Ui.boxWidth(24),
                 LogoWidget(120),
                 AppText.medium("Dashboard",
                     fontSize: 32,
@@ -110,50 +115,66 @@ class ChoosePage extends StatelessWidget {
                     fontFamily: Assets.appFontFamily1,
                     color: AppColors.lightTextColor),
                 Ui.boxHeight(24),
-                ...List.generate(3, (index) => CurvedContainer(
-                  height: 100,
-                  width: wideUi(context),
-                  radius: 16,
-                  onPressed: (){
-                    if(index == 0){
-                      Get.to(CheckList2Page());
-                    }else if(index == 1){
-                      Get.to(OrderHistoryPage());
-                    }else{
-                          if (!GetPlatform.isMobile) {
-                    Get.to(ExplorerPage());
-                    }
-                    }
-                  },
-                  // color: AppColors.primaryColor,
-                  border: Border.all(color: AppColors.primaryColor,strokeAlign: BorderSide.strokeAlignOutside),
-                  margin: EdgeInsets.symmetric(vertical: 12),
-                  child: Row(
-                    children: [
-                      Stack(
-                        children: [
-                          Container(
-                            height: 100,
-                            width: 100,
-                            color: AppColors.white,
-                            child: Image.asset(assets[index],height: 100,width: 100,fit: BoxFit.cover,)),
-                            Container(
-                            height: 100,
-                            width: 100,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(colors: [AppColors.white.withOpacity(0.7),AppColors.white.withOpacity(0.05)],begin: Alignment.centerRight,end: Alignment.centerLeft)
-                            ),
-                            ),
-                        ],
-                      ),
-                      
-                      Ui.spacer(),
-                      AppText.bold(pages[index],fontSize: 20,color: AppColors.primaryColor),
-                      Ui.spacer(),
-                      SizedBox(width: 100,)
-                    ],
-                  ),
-                )),
+                ...List.generate(
+                    3,
+                    (index) => CurvedContainer(
+                          height: 100,
+                          width: wideUi(context),
+                          radius: 16,
+                          onPressed: () {
+                            if (index == 0) {
+                              Get.to(CheckList2Page());
+                            } else if (index == 1) {
+                              Get.to(OrderHistoryPage());
+                            } else {
+                              // if (!GetPlatform.isMobile) {
+                                Get.to(ExplorerPage());
+                              // }
+                            }
+                          },
+                          // color: AppColors.primaryColor,
+                          border: Border.all(
+                              color: AppColors.primaryColor,
+                              strokeAlign: BorderSide.strokeAlignOutside),
+                          margin: EdgeInsets.symmetric(vertical: 12),
+                          child: Row(
+                            children: [
+                              Stack(
+                                children: [
+                                  Container(
+                                      height: 100,
+                                      width: 100,
+                                      color: AppColors.white,
+                                      child: Image.asset(
+                                        assets[index],
+                                        height: 100,
+                                        width: 100,
+                                        fit: BoxFit.cover,
+                                      )),
+                                  Container(
+                                    height: 100,
+                                    width: 100,
+                                    decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                            colors: [
+                                          AppColors.white.withOpacity(0.7),
+                                          AppColors.white.withOpacity(0.05)
+                                        ],
+                                            begin: Alignment.centerRight,
+                                            end: Alignment.centerLeft)),
+                                  ),
+                                ],
+                              ),
+                              Ui.spacer(),
+                              AppText.bold(pages[index],
+                                  fontSize: 20, color: AppColors.primaryColor),
+                              Ui.spacer(),
+                              SizedBox(
+                                width: 100,
+                              )
+                            ],
+                          ),
+                        )),
                 // actionBody("Service Order", "Order History", Assets.s1, Assets.s2,
                 //     () {
                 //   Get.to(CheckList2Page());

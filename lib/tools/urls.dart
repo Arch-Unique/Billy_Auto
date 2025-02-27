@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:inventory/tools/service.dart';
 import 'package:inventory/views/auth/auth_page.dart';
@@ -57,6 +58,7 @@ class AppPages {
 class AuthMiddleWare extends GetMiddleware {
   @override
   RouteSettings? redirect(String? route) {
+    FlutterNativeSplash.remove();
     final controller = Get.find<AppService>();
     if (controller.hasOpenedOnboarding.value) {
       if (controller.isLoggedIn.value) {

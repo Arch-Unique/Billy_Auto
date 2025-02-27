@@ -767,6 +767,11 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
                       fit: pw.BoxFit.cover,
                       height: PdfPageFormat.a4.height,
                       width: PdfPageFormat.a4.width)),
+                      pw.Container(
+                        height: PdfPageFormat.a4.height,
+                      width: PdfPageFormat.a4.width,
+                      color: PdfColor.fromInt(0x88FFFFFF)
+                      ),
               pw.Padding(
                   padding: pw.EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   child: pf)
