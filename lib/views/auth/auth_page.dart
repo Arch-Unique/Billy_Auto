@@ -84,76 +84,89 @@ class _AuthPageState extends State<AuthPage> {
 //ONLY IN DEMO
 class ChoosePage extends StatelessWidget {
   const ChoosePage({super.key});
-  static final pages = ["Service Order", "Order History", "Inventory"];
+  static final pages = ["Service Order", "Order History", "Admin Dashboard"];
   static final assets = [Assets.s1,Assets.s2,Assets.s3];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BackgroundScaffold(
-        hasUser: true,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 850),
-          child: Column(
-            children: [
-              LogoWidget(120),
-              AppText.medium("Dashboard",
-                  fontSize: 32,
-                  fontFamily: Assets.appFontFamily2,
-                  alignment: TextAlign.center,
-                  color: AppColors.textColor),
-              Ui.boxHeight(8),
-              AppText.thin("Choose any section to attend to",
-                  fontSize: 15,
-                  fontFamily: Assets.appFontFamily1,
-                  color: AppColors.lightTextColor),
-              Ui.boxHeight(24),
-              ...List.generate(3, (index) => CurvedContainer(
-                height: 100,
-                width: wideUi(context),
-                radius: 16,
-                onPressed: (){
-                  if(index == 0){
-                    Get.to(CheckList2Page());
-                  }else if(index == 1){
-                    Get.to(OrderHistoryPage());
-                  }else{
-                        if (!GetPlatform.isMobile) {
-                  Get.to(ExplorerPage());
-                  }
-                  }
-                },
-                color: AppColors.primaryColor,
-                border: Border.all(color: AppColors.primaryColor,strokeAlign: BorderSide.strokeAlignOutside),
-                margin: EdgeInsets.symmetric(vertical: 12),
-                child: Row(
-                  children: [
-                    Container(
-                      height: 100,
-                      width: 100,
-                      color: AppColors.white,
-                      child: Image.asset(assets[index],height: 100,width: 100,fit: BoxFit.cover,)),
-                    
-                    Ui.spacer(),
-                    AppText.bold(pages[index],fontSize: 24,color: AppColors.white),
-                    Ui.spacer(),
-                    SizedBox(width: 100,)
-                  ],
-                ),
-              )),
-              // actionBody("Service Order", "Order History", Assets.s1, Assets.s2,
-              //     () {
-              //   Get.to(CheckList2Page());
-              // }, () {
-              //   Get.to(OrderHistoryPage());
-              // }),
-              // Ui.boxHeight(24),
-              // if (!GetPlatform.isMobile)
-              //   actionItem("Inventory", Assets.s3, () {
-              //     Get.to(ExplorerPage());
-              //   }),
-              Ui.boxHeight(24),
-            ],
+      body: ConnectivityWidget(
+        child: BackgroundScaffold(
+          hasUser: true,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 850),
+            child: Column(
+              children: [
+                LogoWidget(120),
+                AppText.medium("Dashboard",
+                    fontSize: 32,
+                    fontFamily: Assets.appFontFamily2,
+                    alignment: TextAlign.center,
+                    color: AppColors.textColor),
+                Ui.boxHeight(8),
+                AppText.thin("Choose any section to attend to",
+                    fontSize: 15,
+                    fontFamily: Assets.appFontFamily1,
+                    color: AppColors.lightTextColor),
+                Ui.boxHeight(24),
+                ...List.generate(3, (index) => CurvedContainer(
+                  height: 100,
+                  width: wideUi(context),
+                  radius: 16,
+                  onPressed: (){
+                    if(index == 0){
+                      Get.to(CheckList2Page());
+                    }else if(index == 1){
+                      Get.to(OrderHistoryPage());
+                    }else{
+                          if (!GetPlatform.isMobile) {
+                    Get.to(ExplorerPage());
+                    }
+                    }
+                  },
+                  // color: AppColors.primaryColor,
+                  border: Border.all(color: AppColors.primaryColor,strokeAlign: BorderSide.strokeAlignOutside),
+                  margin: EdgeInsets.symmetric(vertical: 12),
+                  child: Row(
+                    children: [
+                      Stack(
+                        children: [
+                          Container(
+                            height: 100,
+                            width: 100,
+                            color: AppColors.white,
+                            child: Image.asset(assets[index],height: 100,width: 100,fit: BoxFit.cover,)),
+                            Container(
+                            height: 100,
+                            width: 100,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(colors: [AppColors.white.withOpacity(0.7),AppColors.white.withOpacity(0.05)],begin: Alignment.centerRight,end: Alignment.centerLeft)
+                            ),
+                            ),
+                        ],
+                      ),
+                      
+                      Ui.spacer(),
+                      AppText.bold(pages[index],fontSize: 20,color: AppColors.primaryColor),
+                      Ui.spacer(),
+                      SizedBox(width: 100,)
+                    ],
+                  ),
+                )),
+                // actionBody("Service Order", "Order History", Assets.s1, Assets.s2,
+                //     () {
+                //   Get.to(CheckList2Page());
+                // }, () {
+                //   Get.to(OrderHistoryPage());
+                // }),
+                // Ui.boxHeight(24),
+                // if (!GetPlatform.isMobile)
+                //   actionItem("Inventory", Assets.s3, () {
+                //     Get.to(ExplorerPage());
+                //   }),
+                Ui.boxHeight(24),
+              ],
+            ),
           ),
         ),
       ),

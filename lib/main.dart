@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:inventory/tools/assets.dart';
+import 'package:inventory/tools/colors.dart';
 import 'package:inventory/views/onboarding/splashscreen.dart';
 
 import 'controllers/dependency.dart';
@@ -22,6 +23,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       initialRoute: AppRoutes.home,
       title: 'Billy Auto Plus',
+      color: AppColors.primaryColor,
       getPages: AppPages.getPages,
       theme: ThemeData(
           fontFamily: Assets.appFontFamily,),

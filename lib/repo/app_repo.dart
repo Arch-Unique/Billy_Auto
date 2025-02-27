@@ -174,6 +174,16 @@ class AppRepo extends GetxController {
     }
   }
 
+  changePassword(String password,String npassword) async {
+    final res = await apiService.post("${AppUrls.changePassword}/${appService.currentUser.value.id}",
+        data: {"password": password,"npassword": npassword});
+    if (res.statusCode!.isSuccess()) {
+      // await appService.loginUser(res.data["data"]["jwt"]);
+    } else {
+      throw res.data["error"];
+    }
+  }
+
   Future<String?> uploadPhoto(String? imagePath) async {
     if(imagePath == null) return null;
     if(imagePath.isEmpty) return null;

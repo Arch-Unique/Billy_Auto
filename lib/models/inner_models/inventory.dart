@@ -63,8 +63,8 @@ class Inventory extends BaseModel {
       status,
       transactionType,
       location,
-      productType,
-      productCategory,
+      // productType,
+      // productCategory,
       createdAt
     ];
   }

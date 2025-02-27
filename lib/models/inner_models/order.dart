@@ -29,9 +29,9 @@ class Order extends BaseModel{
   List<BillyServices> allServices = [];
 
   bool get isDispatched => dispatchedAt != null;
-  String get rdesc => "Vehicle:  $car\nConcern:  $customerConcerns";
+  String get rdesc => "Customer: $customer\nVehicle: $car\nConcern: $customerConcerns";
   String get desc => rdesc.trim();
-  String get title => "$customer-Order-$id";
+  String get title => "ORD-${id.toString().padLeft(4,"0")}-${customerId.toString().padLeft(4,"0")}";
 
   Order({
     required this.customerId,
@@ -84,7 +84,7 @@ Map<String, dynamic> toJson() {
 
       @override
 List<dynamic> toTableRows(){
-    return [id,customer,car,mileageOnReception,fuelLevel,createdAtRaw];
+    return [id,customer,car,isDispatched,createdAtRaw];
   }
 
   @override
@@ -95,13 +95,13 @@ List<dynamic> toTableRows(){
   // Create Order object from JSON
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
-      customerId: json['customerId'],
-      customer: json['customer'],
+      customerId: int.tryParse(json['customerId'].toString()) ?? 0,
+      customer: json['customer'] ?? "",
       id: json['id'] ?? 0,
-      carId: json['carId'] ?? 0,
+      carId: int.tryParse(json['carId'].toString()) ?? 0,
       car: json['car'] ?? "",
-      technicianId: json['technicianId'] ?? "",
-      serviceAdvisorId: json['serviceAdvisorId'] ?? "",
+      technicianId: int.tryParse(json['technicianId'].toString()) ?? 0,
+      serviceAdvisorId: int.tryParse(json['serviceAdvisorId'].toString()) ?? 0,
       mileageOnReception: int.tryParse(json['mileageOnReception'] ?? "0") ?? 0,
       customerConcerns: json['customerConcerns'] ?? "",
       observations: json['observations'] ?? "",

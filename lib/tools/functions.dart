@@ -66,7 +66,7 @@ abstract class UtilFunctions {
 
   static Future<String?> showCamera() async {
     final fg = await Get.dialog<String?>(AppDialog(
-        title: AppText.thin("Select Image Source"),
+        title: AppText.medium("Select Image Source"),
         content: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,

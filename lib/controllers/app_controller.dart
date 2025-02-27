@@ -87,6 +87,7 @@ class AppController extends GetxController {
   RxList<Product> allProducts = <Product>[].obs;
   RxList<User> allServiceAdvisor = <User>[].obs;
   RxList<User> allTechnicians = <User>[].obs;
+  RxList<Inventory> allInventory = <Inventory>[].obs;
   RxList<Order> allOrders = <Order>[].obs;
   RxList<String> userRoles = <String>[].obs;
   RxList<String> customerTypes = <String>[].obs;
@@ -100,6 +101,9 @@ class AppController extends GetxController {
   Rx<Order> currentOrder = Order(customerId: 0).obs;
 
   Map<String, FilterOptionsModel> filterOptions = {};
+
+  //ORDERS
+  List<Order> get allPendingOrders => allOrders.where((p0) => !p0.isDispatched).toList();
 
   //PROFILE
   RxBool editOn = false.obs;
@@ -179,6 +183,7 @@ class AppController extends GetxController {
     allOrders.value = await _getAll<Order>();
     allProducts.value = await _getAll<Product>();
     allSuppliers.value = await _getAll<Supplier>();
+    allInventory.value = await _getAll<Inventory>();
 
     allTechnicians.value = await _getAll<User>(fm: [
       FilterModel("", "role", 0, tec: TextEditingController(text: userRoles[2]))
@@ -411,6 +416,16 @@ class AppController extends GetxController {
     }
   }
 
+  Future<bool> changePassword(String password,String npassword) async {
+    try {
+      await appRepo.changePassword(password,npassword);
+      return true;
+    } catch (e) {
+      Ui.showError(e.toString());
+      return false;
+    }
+  }
+
   updateUser(String path) async {
     try {
       if (path.isNotEmpty) {
@@ -458,6 +473,12 @@ class AppController extends GetxController {
   }
 
   saveNewRecord(Map<String, dynamic> json) async {
+    final imageKeys = json.keys.where((element) => element.toLowerCase().endsWith("image") && json[element].contains("\\"));
+    if(imageKeys.isNotEmpty){
+      for (var ik in imageKeys) {
+        json[ik] = await appRepo.uploadPhoto(json[ik]);
+      }
+    }
     BaseModel mp = appRepo.factories[currentBaseModel.value.runtimeType]!(json);
 
     try {
@@ -475,6 +496,12 @@ class AppController extends GetxController {
   }
 
   editExisitingRecord(Map<String, dynamic> json) async {
+    final imageKeys = json.keys.where((element) => element.toLowerCase().endsWith("image") && json[element].contains("\\"));
+    if(imageKeys.isNotEmpty){
+      for (var ik in imageKeys) {
+        json[ik] = await appRepo.uploadPhoto(json[ik]);
+      }
+    }
     BaseModel mp = appRepo.factories[currentBaseModel.value.runtimeType]!(json);
     try {
       if (mp.validate()) {

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:inventory/tools/functions.dart';
 import 'package:inventory/tools/urls.dart';
@@ -10,6 +11,8 @@ import 'package:inventory/views/shared.dart';
 import '../../controllers/app_controller.dart';
 import '../../tools/assets.dart';
 import '../../tools/colors.dart';
+import '../../tools/enums.dart';
+import '../../tools/validators.dart';
 
 class ProfilePage extends StatelessWidget {
   ProfilePage({super.key});
@@ -27,7 +30,7 @@ class ProfilePage extends StatelessWidget {
       TextEditingController(
           text: controller.appRepo.appService.currentUser.value.role),
       TextEditingController(
-          text: controller.appRepo.appService.currentUser.value.email)
+          text: controller.appRepo.appService.currentUser.value.email),TextEditingController(),TextEditingController(),TextEditingController()
     ];
 
     return Scaffold(
@@ -96,6 +99,50 @@ class ProfilePage extends StatelessWidget {
                       ),
                     ),
                   
+                  Ui.boxHeight(48),
+                  AppDivider(),
+                  Ui.boxHeight(48),
+                  AppText.medium("Change Password"),
+                  Ui.boxHeight(12),
+                  CustomTextField2(
+                  "Old Password",
+                  tecs[6],
+                  varl: FPL.password,
+                ),
+                  CustomTextField2(
+                  "New  Password",
+                  tecs[4],
+                  varl: FPL.password,
+                ),
+                CustomTextField2(
+                  "Confirm Password",
+                  tecs[5],
+                  varl: FPL.password,
+                ),
+                SizedBox(
+                  width: wideUi(context) / 3,
+                  child: AppButton(
+                    onPressed: () async {
+                      final msgU = Validators.validate(FPL.password, tecs[4].text);
+                      final msgP =
+                          Validators.validate(FPL.password, tecs[5].text);
+                          final msgV = Validators.confirmPasswordValidator(tecs[4].text, tecs[5].text);
+                      if (msgU == null && msgP == null && msgV == null) {
+                        bool f = await Get.find<AppController>()
+                            .changePassword(tecs[6].text,tecs[5].text);
+                        
+                        if (f) {
+                          Ui.showInfo("Successfully changed password");
+                        }
+                      } else {
+                        Ui.showError(msgU ?? msgP ?? msgV ?? "An error occured");
+                      }
+                    },
+                    text: "Change Password",
+                  ),
+                ),
+                  Ui.boxHeight(48),
+                  AppDivider(),
                   Ui.boxHeight(48),
                   SizedBox(
                     width: wideUi(context) / 3,

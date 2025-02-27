@@ -5,7 +5,8 @@ abstract class BaseModel {
   DateTime? createdAt;
   DateTime? updatedAt;
 
-  String get createdAtRaw => DateFormat("dd/MM/yyyy hh:mm:ss").format(createdAt ?? DateTime.now());
+  String get createdAtRaw => DateFormat("dd/MM/yyyy hh:mm:ssa").format(createdAt ?? DateTime.now());
+  String get updatedAtRaw => DateFormat("dd/MM/yyyy hh:mm:ssa").format(updatedAt ?? DateTime.now());
 
   BaseModel({
     this.id = 0,

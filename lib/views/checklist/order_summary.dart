@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -209,7 +210,7 @@ class _OrderSummaryState extends State<OrderSummary> {
                     ],
                   )),
               serviceItem(
-                  "VEHICLE CONDTION",
+                  "VEHICLE CONDITION",
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -353,7 +354,13 @@ class _OrderSummaryState extends State<OrderSummary> {
                     width: Ui.width(context),
                     height: Ui.height(context),
                   ),
-                  toreturn,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: min(1200,Ui.width(context)-48)),child: toreturn),
+                    ],
+                  ),
                   if (widget.order.id != 0)
                     Positioned(
                         top: 24,
@@ -399,7 +406,7 @@ class _OrderSummaryState extends State<OrderSummary> {
               alignment: Alignment.centerLeft,
               child: Padding(
                 padding: const EdgeInsets.only(left: 0.0, bottom: 8),
-                child: AppText.thin(g ? "Image of Customer/Driver" : "Vehicle Dashbpard Image"),
+                child: AppText.thin(g ? "Image of Customer/Driver" : "Vehicle Dashboard Image"),
               )),
         );
       }),
@@ -627,7 +634,7 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
               useMaxSize: [true]),
 
           // VEHICLE CONDITIONS
-          ...descText("Vehicle Condtions", {
+          ...descText("Vehicle Conditions", {
             "Mileage": widget.order.mileageOnReception.toString(),
             "Fuel Level": widget.order.fuelLevel,
             "Body Check": widget.order.bodyCheck,

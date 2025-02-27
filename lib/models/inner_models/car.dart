@@ -63,7 +63,7 @@ Map<String, dynamic> toJson() {
 
     @override
 List<dynamic> toTableRows(){
-    return [id,make,model,createdAtRaw];
+    return [id,model,make,createdAtRaw];
   }
 
   @override

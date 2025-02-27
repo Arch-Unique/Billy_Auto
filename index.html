@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #003b09;
+            color: #72ff1b;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .error {
+            color: red;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Password Reset</h1>
+        <div id="errorMessage" class="error"></div>
+        <form id="resetPasswordForm">
+            <input type="password" id="newPassword" placeholder="Enter new password" required />
+            <input type="password" id="confirmPassword" placeholder="Confirm new password" required />
+            <button type="submit">Reset Password</button>
+        </form>
+    </div>
+
+    <script>
+        // Function to get query parameters from the URL
+        function getQueryParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return {
+                token: urlParams.get('token'),
+                email: urlParams.get('email')
+            };
+        }
+
+        // Function to handle the form submission
+        document.getElementById('resetPasswordForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            // Get form values
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Get URL parameters (token, email)
+            const { token, email } = getQueryParams();
+
+            // Simple validation for passwords
+            if (newPassword !== confirmPassword) {
+                document.getElementById('errorMessage').innerText = "Passwords do not match.";
+                return;
+            }
+
+            if (!newPassword || !confirmPassword) {
+                document.getElementById('errorMessage').innerText = "Please enter a valid password.";
+                return;
+            }
+
+            // Proceed to send the password reset data to the server
+            resetPassword(token, email, newPassword);
+        });
+
+        // Function to reset the password (simulated for now)
+        function resetPassword(token, email, newPassword) {
+            fetch(`https://stayples.archyuniq.com/auth/customer/emailpass/update?token=${token}`, {
+                credentials: "include",
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email,
+                    newPassword,
+                }),
+            })
+                .then((res) => res.json())
+                .then(({ success }) => {
+                    alert(success ? "Password reset successfully!" : "Couldn't reset password")
+                })
+        }
+
+    </script>
+
+</body>
+
+</html>

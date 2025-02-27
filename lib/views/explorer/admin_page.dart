@@ -32,12 +32,16 @@ class _CustomTableState extends State<CustomTable> {
     return CurvedContainer(
       width: (Ui.width(context) * 0.75) - 24,
       height: double.maxFinite,
+      border: Border.all(
+        color: AppColors.primaryColorLight
+      ),
       color: AppColors.white.withOpacity(0.6),
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: Obx(() {
         return AsyncPaginatedDataTable2(
           minWidth: (Ui.width(context) * 0.75) - 56,
+          // border: TableBorder.all(),
           onRowsPerPageChanged: (value) {
             print('Row per page changed to $value');
           },
@@ -50,17 +54,19 @@ class _CustomTableState extends State<CustomTable> {
           // controller: controller.paginatorController.value,
           header: AppText.medium("Records",
               fontFamily: Assets.appFontFamily2, fontSize: 16),
+              headingRowColor: MaterialStatePropertyAll<Color>(AppColors.primaryColorLight.withOpacity(0.5)),
           actions: [
             Material(
               color: AppColors.green,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8),),
-              
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
               child: AppIcon(
                 Icons.add,
                 color: AppColors.white,
                 onTap: () {
                   Get.dialog(AppDialog(
-                      title: AppText.thin("Add New Record"),
+                      title: AppText.medium("Add New Record"),
                       content: Obx(() {
                         return DynamicFormGenerator(
                             model: controller.currentBaseModel.value,
@@ -74,10 +80,11 @@ class _CustomTableState extends State<CustomTable> {
               ),
             ), //add new
           ],
+          
 
           columns: controller.currentHeaders
               .map((e) => DataColumn2(
-                  label: AppText.bold(e, fontSize: 14), size: ColumnSize.S))
+                  label: AppText.bold(e, fontSize: 14,fontFamily: Assets.appFontFamily2), size: ColumnSize.S))
               .toList(),
           source: controller.tmds.value,
         );
@@ -96,6 +103,9 @@ class CustomTableFilter extends StatelessWidget {
       width: (Ui.width(context) * 0.25) - 24,
       height: double.maxFinite,
       color: AppColors.white.withOpacity(0.6),
+      border: Border.all(
+        color: AppColors.primaryColorLight
+      ),
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: SingleChildScrollView(
@@ -109,16 +119,19 @@ class CustomTableFilter extends StatelessWidget {
               ...controller.currentFilters.map((e) {
                 if (e.filterType == 0) {
                   var iv = [];
-                  if(e.tec != null){
-                    if(e.tec!.text.trim().isNotEmpty && e.tec!.text.trim() != ","){
-                      if(e.tec!.text.contains(",")){
+                  if (e.tec != null) {
+                    if (e.tec!.text.trim().isNotEmpty &&
+                        e.tec!.text.trim() != ",") {
+                      if (e.tec!.text.contains(",")) {
                         iv = e.tec!.text.split(",");
-                      }else{
+                      } else {
                         iv = [e.tec!.text];
                       }
                     }
                   }
-                  return CustomMultiDropdown(e.options!.titles, e.options!.values,e.tec!, e.title,initValues:iv,isEnable: true);
+                  return CustomMultiDropdown(
+                      e.options!.titles, e.options!.values, e.tec!, e.title,
+                      initValues: iv, isEnable: true);
                 }
                 return CustomTextField(
                   e.title,
@@ -137,14 +150,29 @@ class CustomTableFilter extends StatelessWidget {
                 );
               }),
               Ui.boxHeight(16),
-              AppButton(onPressed: (){
-                controller.applyFilters();
-              },text: "Apply Filters",),
-              Ui.boxHeight(16),
-              AppButton.outline((){
-                controller.resetCurrentFilters();
-                controller.applyFilters();
-              }, "Clear Filters",),
+              if (controller.currentFilters.isEmpty) AppText.thin("No Filters"),
+              if (controller.currentFilters.isNotEmpty)
+                AppButton.row(
+                  "Apply",
+                  () {
+                    controller.applyFilters();
+                  },
+                  "Clear",
+                  () {
+                    controller.resetCurrentFilters();
+                    controller.applyFilters();
+                  },
+                  
+                )
+              // AppButton(onPressed: (){
+              //   controller.applyFilters();
+              // },text: "Apply Filters",),
+              // Ui.boxHeight(16),
+              // if (controller.currentFilters.isNotEmpty)
+              // AppButton.outline((){
+              //   controller.resetCurrentFilters();
+              //   controller.applyFilters();
+              // }, "Clear Filters",),
             ],
           );
         }),
@@ -162,8 +190,8 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
     final appRepo = Get.find<AppRepo>();
     int page = (startIndex ~/ count) + 1;
 
-
-    final res = await appRepo.getAll<T>(page: page, limit: count,fm: Get.find<AppController>().currentFilters);
+    final res = await appRepo.getAll<T>(
+        page: page, limit: count, fm: Get.find<AppController>().currentFilters);
     List<T> bms = res.data;
     List<List<dynamic>> tvals =
         res.data.map((e) => (e as BaseModel).toTableRows()).toList();
@@ -174,7 +202,22 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
           final tval = tvals[index];
           final bm = bms[index];
           return DataRow2(
-              onSelectChanged: (b) {},
+              onTap: () {
+                Get.find<AppController>().currentBaseModel = bm.obs;
+                          Get.dialog(AppDialog(
+                              title: AppText.medium("Edit Record"),
+                              content: Obx(() {
+                                return DynamicFormGenerator(
+                                    model: Get.find<AppController>()
+                                        .currentBaseModel
+                                        .value,
+                                    onSave: (v) async {
+                                      await Get.find<AppController>()
+                                          .editExisitingRecord(v);
+                                    });
+                              })));
+              },
+              
               cells: List.generate(tm.length, (jindex) {
                 if (jindex == tm.length - 1) {
                   return DataCell(Row(
@@ -191,7 +234,7 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                         onTap: () {
                           Get.find<AppController>().currentBaseModel = bm.obs;
                           Get.dialog(AppDialog(
-                              title: AppText.thin("Edit Record"),
+                              title: AppText.medium("Edit Record"),
                               content: Obx(() {
                                 return DynamicFormGenerator(
                                     model: Get.find<AppController>()
@@ -217,7 +260,6 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                             onPressedA: () async {
                               await Get.find<AppController>()
                                   .deleteExisitingRecord<T>(bm.id.toString());
-                              
                             },
                             onPressedB: () {
                               Get.back();
@@ -227,6 +269,12 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                       ),
                     ],
                   ));
+                }
+                if(T == Order && jindex == 3){
+                  return DataCell(Chip(label: AppText.thin(tval[jindex] ? "Dispatched": "In Progress",color: tval[jindex] ? Colors.green : Colors.orange[700]!),shape: RoundedRectangleBorder(
+                    side: BorderSide(color: tval[jindex] ? Colors.green : Colors.orange[700]!),
+                    borderRadius: BorderRadius.circular(8)
+                  ),));
                 }
                 return DataCell(AppText.thin(tval[jindex].toString()));
               }));
@@ -244,7 +292,11 @@ class CustomTableTitle extends StatelessWidget {
     return CurvedContainer(
         width: Ui.width(context) - 24,
         color: AppColors.white.withOpacity(0.6),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(0),
+        radius: 16,
+        border: Border.all(
+        color: AppColors.primaryColorLight
+      ),
         margin: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: [
@@ -372,7 +424,7 @@ class DynamicFormGenerator extends StatefulWidget {
     super.key,
     required this.model,
     required this.onSave,
-    this.isNew =false,
+    this.isNew = false,
   });
 
   @override
@@ -396,27 +448,83 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
 
     // Create controllers for each field
     _formData['id'] = widget.model.id;
-    _formData['createdAt'] = widget.model.createdAt?.toIso8601String() ?? DateTime.now().toIso8601String();
-    _formData['updatedAt'] = widget.model.updatedAt?.toIso8601String() ?? DateTime.now().toIso8601String();
+    _formData['createdAt'] = widget.model.createdAt?.toIso8601String() ??
+        DateTime.now().toIso8601String();
+    _formData['updatedAt'] = widget.model.updatedAt?.toIso8601String() ??
+        DateTime.now().toIso8601String();
     jsonMap.forEach((key, value) {
       if (!['id', 'createdAt', 'updatedAt'].contains(key)) {
-        _controllers[key] =
-            TextEditingController(text: widget.isNew ? "" : value?.toString() ?? '');
+        _controllers[key] = TextEditingController(
+            text: widget.isNew ? "" : value?.toString() ?? '');
       }
     });
   }
 
   Widget _buildField(String fieldName, dynamic value) {
     // Determine field type based on value
-    if (fieldName.endsWith("Id") || fieldName.endsWith("Type") || fieldName.endsWith("role")) {
-      return CustomTextField.dropdown(Get.find<AppController>().filterOptions[fieldName]?.titles ?? ["None"], Get.find<AppController>().filterOptions[fieldName]?.values ?? [0],_controllers[fieldName]!,
-          "Select ${_formatFieldName(fieldName).replaceAll(" id", "")}",initOption: value);
+    if (fieldName.endsWith("Id") ||
+        fieldName.endsWith("Type") ||
+        fieldName.endsWith("role")) {
+      return CustomTextField.dropdown(
+          Get.find<AppController>().filterOptions[fieldName]?.titles ??
+              ["None"],
+          Get.find<AppController>().filterOptions[fieldName]?.values ?? [0],
+          _controllers[fieldName]!,
+          "Select ${_formatFieldName(fieldName).replaceAll(" id", "")}",
+          initOption: value);
     }
 
-    if (fieldName == "servicesPerformed"){
-      final options=Get.find<AppController>().allBillyServices.map((element) => element.name).toList();
-      final values=Get.find<AppController>().allBillyServices.map((element) => element.id).toList();
-      return CustomMultiDropdown(options, values, TextEditingController(), _formatFieldName(fieldName),initValues: widget.isNew ? []: (jsonDecode(value) as List),isEnable: widget.isNew,);
+    if (fieldName.endsWith("signature")) {
+      return SizedBox();
+    }
+
+    if (fieldName.endsWith("At")) {
+      return _buildDateTimePicker(fieldName);
+    }
+
+    if (fieldName == "servicesPerformed") {
+      final options = Get.find<AppController>()
+          .allBillyServices
+          .map((element) => element.name)
+          .toList();
+      final values = Get.find<AppController>()
+          .allBillyServices
+          .map((element) => element.id)
+          .toList();
+      return CustomMultiDropdown(
+        options,
+        values,
+        _controllers[fieldName]!,
+        _formatFieldName(fieldName),
+        initValues: widget.isNew ? [] : (jsonDecode(value) as List),
+        isEnable: true,
+      );
+    }
+
+    if (fieldName == "conditions") {
+      final options = Get.find<AppController>()
+          .allBillyConditions
+          .map((element) => element.name)
+          .toList();
+      final values = Get.find<AppController>()
+          .allBillyConditions
+          .map((element) => element.id)
+          .toList();
+      List<dynamic> conds = (jsonDecode(value) as List);
+      List<int> newConds = [];
+      for (var i = 0; i < conds.length; i++) {
+        if (conds[i] as int != 0) {
+          newConds.add(values[i]);
+        }
+      }
+      return CustomMultiDropdown(
+        options,
+        values,
+        _controllers[fieldName]!,
+        _formatFieldName(fieldName),
+        initValues: widget.isNew ? [] : newConds,
+        isEnable: true,
+      );
     }
 
     if (fieldName.toLowerCase().endsWith("image")) {
@@ -425,32 +533,38 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
         children: [
           Align(
               alignment: Alignment.centerLeft,
-              child: AppText.thin("Pick an Image")),
-          Builder(builder: (_) {
+              child: AppText.thin(_formatFieldName(fieldName))),
+          Obx( () {
+            RxString cimg= _controllers[fieldName]!.text.obs;
             final cc = CurvedContainer(
                 border: Border.all(color: AppColors.grey),
                 onPressed: () async {
                   final img = await UtilFunctions.showCamera();
                   if (img != null) {
                     _controllers[fieldName]!.text = img;
-                    setState(() {});
+                    cimg.value = img;
                   }
                 },
                 height: 120,
                 padding: EdgeInsets.all(
-                    _controllers[fieldName]!.text.isNotEmpty ? 0 : 24),
+                    cimg.isNotEmpty ? 0 : 24),
                 margin: EdgeInsets.all(24),
-                child: _controllers[fieldName]!.text.isNotEmpty
-                    ? _controllers[fieldName]!.text.contains("\\") ? Image.file(
-                        File(_controllers[fieldName]!.text),
-                        fit: BoxFit.cover,
-                      ) : Image.network("${AppUrls.baseURL}${AppUrls.upload}/all/${_controllers[fieldName]!.text}",fit: BoxFit.contain,)
+                child: cimg.value.isNotEmpty
+                    ? cimg.value.contains("\\")
+                        ? Image.file(
+                            File(cimg.value),
+                            fit: BoxFit.cover,
+                          )
+                        : Image.network(
+                            "${AppUrls.baseURL}${AppUrls.upload}/all/${cimg.value}",
+                            fit: BoxFit.contain,
+                          )
                     : Center(
                         child: AppIcon(
                         Icons.add_a_photo,
                         size: Ui.width(context) < 750 ? 24 : 48,
                       )));
-            if (_controllers[fieldName]!.text.isNotEmpty) {
+            if (cimg.value.isNotEmpty) {
               return Stack(
                 children: [
                   cc,
@@ -462,7 +576,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
                         color: Colors.red,
                         onTap: () {
                           _controllers[fieldName]!.text = "";
-                          setState(() {});
+                          cimg.value = "";
                         },
                       ))
                 ],
@@ -479,7 +593,11 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
   }
 
   Widget _buildDateTimePicker(String fieldName) {
-    return InkWell(
+    return CustomTextField(
+      _formatFieldName(fieldName),
+      _controllers[fieldName]!,
+      readOnly: true,
+      shdValidate: false,
       onTap: () async {
         final DateTime? picked = await showDatePicker(
           context: context,
@@ -488,21 +606,13 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
           lastDate: DateTime(2100),
         );
         if (picked != null) {
-          setState(() {
-            _controllers[fieldName]?.text = picked.toIso8601String();
-            _formData[fieldName] = picked;
-          });
+          // setState(() {
+          _controllers[fieldName]?.text =
+              DateFormat("dd/MM/yyyy hh:mm:ss").format(picked);
+          _formData[fieldName] = picked;
+          // });
         }
       },
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: _formatFieldName(fieldName),
-          border: const OutlineInputBorder(),
-        ),
-        child: Text(
-          _controllers[fieldName]?.text ?? 'Select Date',
-        ),
-      ),
     );
   }
 
@@ -524,26 +634,66 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
         key: _formKey,
         child: Column(
           children: [
-            if(!widget.isNew)
-            CustomTextField(
-        _formatFieldName("id"), TextEditingController(text: _formData['id'].toString()),readOnly: true),
+            if (!widget.isNew)
+              CustomTextField(_formatFieldName("id"),
+                  TextEditingController(text: _formData['id'].toString()),
+                  readOnly: true),
             ...jsonMap.entries
                 .where((entry) =>
                     !['id', 'createdAt', 'updatedAt'].contains(entry.key))
                 .map((entry) => _buildField(entry.key, entry.value)),
-                if(!widget.isNew)
-            CustomTextField(
-        _formatFieldName("createdAt"), TextEditingController(text: _formData['createdAt']),readOnly: true,),
-        if(!widget.isNew)
-            CustomTextField(
-        _formatFieldName("updatedAt"), TextEditingController(text: _formData['updatedAt']),readOnly: true,),
+            if (!widget.isNew)
+              CustomTextField(
+                _formatFieldName("createdAt"),
+                TextEditingController(
+                    text: DateFormat("dd/MM/yyyy hh:mm:ss")
+                        .format(DateTime.parse(_formData['createdAt']))),
+                readOnly: true,
+              ),
+            if (!widget.isNew)
+              CustomTextField(
+                _formatFieldName("updatedAt"),
+                TextEditingController(
+                    text: DateFormat("dd/MM/yyyy hh:mm:ss")
+                        .format(DateTime.parse(_formData['updatedAt']))),
+                readOnly: true,
+              ),
             Ui.boxHeight(24),
             AppButton(
               onPressed: () async {
                 if (_formKey.currentState?.validate() ?? false) {
                   _formKey.currentState?.save();
                   _controllers.forEach((key, value) {
-                    _formData[key] = value.text;
+                    if (key == "servicesPerformed") {
+                      _formData[key] = value.text.isEmpty
+                          ? <int>[]
+                          : value.text
+                              .split(",")
+                              .map((e) => int.tryParse(e) ?? 0)
+                              .toList();
+                    } else if (key == "conditions") {
+                      final vg = value.text
+                          .split(",")
+                          .map((e) => int.tryParse(e) ?? 0)
+                          .toList();
+                      _formData[key] = value.text.isEmpty
+                          ? List.generate(
+                              Get.find<AppController>()
+                                  .allBillyConditions
+                                  .length,
+                              (index) => 0)
+                          : List.generate(
+                              Get.find<AppController>()
+                                  .allBillyConditions
+                                  .length,
+                              (index) => vg.contains(Get.find<AppController>()
+                                      .allBillyConditions[index]
+                                      .id)
+                                  ? 1
+                                  : 0);
+                    } else {
+                      _formData[key] = value.text;
+                    }
                   });
                   await widget.onSave(_formData);
                 }

@@ -67,30 +67,30 @@ class AllTables {
       "createdAt"
     ], [
       FilterModel("Role", "role", 0),
-      FilterModel("Created At", "createdAt", 1)
+      
     ], User()),
     Supplier: TableModel(
         ["id", "fullName", "email", "phone", "code", "createdAt"],
-        [FilterModel("Created At", "createdAt", 1)],
+        [],
         Supplier(fullName: "", email: "", phone: "", address: "", code: "")),
     BillyServices: TableModel(
         ["id", "name", "createdAt"],
-        [FilterModel("Created At", "createdAt", 1)],
+        [],
         BillyServices(name: "", image: "")),
     CarMake: TableModel(["id", "make", "createdAt"],
-        [FilterModel("Created At", "createdAt", 1)], CarMake(make: "")),
+        [], CarMake(make: "")),
     CarModels: TableModel([
       "id",
-      "make",
       "model",
+      "make",
       "createdAt"
     ], [
       FilterModel("Car Brand", "makeId", 0),
-      FilterModel("Created At", "createdAt", 1)
+      
     ], CarModels(makeId: 0, model: "")),
     BillyConditionCategory: TableModel(
         ["id", "name", "createdAt"],
-        [FilterModel("Created At", "createdAt", 1)],
+        [],
         BillyConditionCategory(name: "")),
     BillyConditions: TableModel([
       "id",
@@ -99,7 +99,7 @@ class AllTables {
       "createdAt"
     ], [
       FilterModel("Conditions Category", "conditionsCategoryId", 0),
-      FilterModel("Created At", "createdAt", 1)
+      
     ], BillyConditions(name: "", conditionsCategoryId: 0)),
     Customer: TableModel(
         [
@@ -112,7 +112,7 @@ class AllTables {
         ],
         [
           FilterModel("Customer Type", "customerType", 0),
-          FilterModel("Created At", "createdAt", 1)
+          
         ],
         Customer(
             email: "",
@@ -134,13 +134,13 @@ class AllTables {
           FilterModel("Car Brand", "makeId", 0),
           FilterModel("Car Model", "modelId", 0),
           FilterModel("Customer", "customerId", 0),
-          FilterModel("Created At", "createdAt", 1)
+          
         ],
         CustomerCar(
             makeId: 0, modelId: 0, year: "", licenseNo: "", customerId: 0)),
     ProductCategory: TableModel(
         ["id", "name", "code", "createdAt"],
-        [FilterModel("Created At", "createdAt", 1)],
+        [],
         ProductCategory(name: "", code: "", image: "")),
     ProductType: TableModel([
       "id",
@@ -150,7 +150,7 @@ class AllTables {
       "createdAt"
     ], [
       FilterModel("Product Category", "productCategoryId", 0),
-      FilterModel("Created At", "createdAt", 1)
+      
     ], ProductType(name: "", code: "", image: "", productCategoryId: 0)),
     Product: TableModel(
         [
@@ -166,7 +166,7 @@ class AllTables {
         [
           FilterModel("Product Type", "productTypeId", 0),
           FilterModel("Product Category", "productCategoryId", 0),
-          FilterModel("Created At", "createdAt", 1)
+          
         ],
         Product(
             name: "",
@@ -183,8 +183,8 @@ class AllTables {
           "status",
           "transaction Type",
           "location",
-          "product Type",
-          "product Category",
+          // "product Type",
+          // "product Category",
           "createdAt"
         ],
         [
@@ -193,7 +193,7 @@ class AllTables {
           FilterModel("Transaction Type", "transactionType", 0),
           FilterModel("Product Type", "productTypeId", 0),
           FilterModel("Product Category", "productCategoryId", 0),
-          FilterModel("Created At", "createdAt", 1)
+          
         ],
         Inventory(
             productId: 0,
@@ -209,13 +209,12 @@ class AllTables {
       "id",
       "customer",
       "car",
-      "mileage",
-      "fuel level",
+      "status",
       "createdAt"
     ], [
       FilterModel("Customer", "customerId", 0),
       FilterModel("Customer Car", "carId", 0),
-      FilterModel("Created At", "createdAt", 1)
+      
     ], Order(customerId: 0)),
   };
 }

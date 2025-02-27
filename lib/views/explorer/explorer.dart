@@ -9,6 +9,7 @@ import 'package:inventory/tools/colors.dart';
 import 'package:inventory/tools/enums.dart';
 import 'package:inventory/tools/service.dart';
 import 'package:inventory/views/explorer/admin_page.dart';
+import 'package:inventory/views/explorer/dashboard_page.dart';
 import 'package:inventory/views/shared.dart';
 
 import '../../tools/assets.dart';
@@ -30,18 +31,18 @@ class _ExplorerPageState extends State<ExplorerPage> {
   void initState() {
     // TODO: implement initState
     screens = [
-      Placeholder(),
-      CustomTablePage(
-        [
-          HeaderItem("Inventory", vb: () {
-            controller.setCurrentTypeTable<Inventory>();
-          }),
-          
-          HeaderItem("Location", vb: () {
-            // controller.setCurrentTypeTable<Inventory>();
-          }),
-        ],
-      ),
+      ExpDashboardPage(),
+      CustomTablePage([
+        HeaderItem("Orders", vb: () {
+          controller.setCurrentTypeTable<Order>();
+        }),
+        HeaderItem("Customers", vb: () {
+          controller.setCurrentTypeTable<Customer>();
+        }),
+        HeaderItem("Customer Cars", vb: () {
+          controller.setCurrentTypeTable<CustomerCar>();
+        })
+      ]),
       CustomTablePage(
         [
           HeaderItem("Products", vb: () {
@@ -57,17 +58,19 @@ class _ExplorerPageState extends State<ExplorerPage> {
           })
         ],
       ),
-      CustomTablePage([
-        HeaderItem("Orders", vb: () {
-          controller.setCurrentTypeTable<Order>();
-        }),
-        HeaderItem("Customers", vb: () {
-          controller.setCurrentTypeTable<Customer>();
-        }),
-        HeaderItem("Customer Cars", vb: () {
-          controller.setCurrentTypeTable<CustomerCar>();
-        })
-      ]),
+      CustomTablePage(
+        [
+          HeaderItem("Inventory", vb: () {
+            controller.setCurrentTypeTable<Inventory>();
+          }),
+          
+          HeaderItem("Location", vb: () {
+            // controller.setCurrentTypeTable<Inventory>();
+          }),
+        ],
+      ),
+      
+      
       CustomTablePage([
         HeaderItem("Car Brands", vb: () {
           controller.setCurrentTypeTable<CarMake>();
@@ -95,30 +98,32 @@ class _ExplorerPageState extends State<ExplorerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Opacity(
-              opacity: 0.5,
-              child: Image.asset(
-                Assets.backge,
-                fit: BoxFit.cover,
-                width: Ui.width(context),
-                height: Ui.height(context),
-              )),
-          Container(
-            width: Ui.width(context),
-            height: Ui.height(context),
-            color: AppColors.white.withOpacity(0.7),
-          ),
-          Column(
-            children: [
-              header(),
-              Expanded(child: Obx(() {
-                return screens[controller.currentDashboardMode.value.index];
-              }))
-            ],
-          ),
-        ],
+      body: ConnectivityWidget(
+        child: Stack(
+          children: [
+            Opacity(
+                opacity: 0.5,
+                child: Image.asset(
+                  Assets.backge,
+                  fit: BoxFit.cover,
+                  width: Ui.width(context),
+                  height: Ui.height(context),
+                )),
+            Container(
+              width: Ui.width(context),
+              height: Ui.height(context),
+              color: AppColors.white.withOpacity(0.7),
+            ),
+            Column(
+              children: [
+                header(),
+                Expanded(child: Obx(() {
+                  return screens[controller.currentDashboardMode.value.index];
+                }))
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -133,7 +138,8 @@ class _ExplorerPageState extends State<ExplorerPage> {
             child: BackButton(color: AppColors.white,),
           ),
           Ui.boxWidth(24),
-          LogoWidget(64, isWhite: false),
+          Ui.boxHeight(56),
+          // LogoWidget(64, isWhite: false),
           Spacer(),
           ...List.generate(DashboardModes.values.length, (i) {
             return Obx(() {

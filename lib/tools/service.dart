@@ -1,4 +1,6 @@
+import 'dart:async';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/instance_manager.dart';
@@ -14,7 +16,7 @@ import 'prefs.dart';
 
 abstract class ApiService {
   Future<Response> get(String url);
-  Future<Response> on(String url,String option, {dynamic data});
+  Future<Response> on(String url, String option, {dynamic data});
   Future<Response> post(String url, {dynamic data});
   Future<Response> patch(String url, {dynamic data});
   Future<Response> delete(String url, {dynamic data});
@@ -101,12 +103,16 @@ class DioApiService extends GetxService implements ApiService {
     return response;
   }
 
-    @override
-  Future<Response> on(String url, String method ,{data,bool hasToken = true}) async {
+  @override
+  Future<Response> on(String url, String method,
+      {data, bool hasToken = true}) async {
     final response = await _dio.request(url,
         cancelToken: _cancelToken,
         data: data,
-        options: Options(headers: _getHeader(hasToken),method: method,));
+        options: Options(
+          headers: _getHeader(hasToken),
+          method: method,
+        ));
     _lastRequestOptions = response.requestOptions;
 
     return response;
@@ -174,20 +180,25 @@ class DioApiService extends GetxService implements ApiService {
           }
         : {};
   }
-  
 }
-
 
 class AppService extends GetxService {
   Rx<User> currentUser = User().obs;
   RxBool hasOpenedOnboarding = false.obs;
   RxBool isLoggedIn = false.obs;
+  RxBool isConnected = true.obs;
 
   final apiService = Get.find<DioApiService>();
   final prefService = Get.find<MyPrefService>();
+  late StreamSubscription<List<ConnectivityResult>> subscription;
 
   initUserConfig() async {
     try {
+      subscription = Connectivity()
+          .onConnectivityChanged
+          .listen((List<ConnectivityResult> result) {
+        isConnected.value = !result.contains(ConnectivityResult.none);
+      });
       await _hasOpened();
       await _setLoginStatus();
       if (isLoggedIn.value) {
@@ -222,8 +233,7 @@ class AppService extends GetxService {
   }
 
   _logout() async {
-    await prefService
-        .eraseAllExcept([MyPrefs.hasOpenedOnboarding]);
+    await prefService.eraseAllExcept([MyPrefs.hasOpenedOnboarding]);
   }
 
   _saveJWT(String jwt) async {
@@ -236,15 +246,18 @@ class AppService extends GetxService {
     });
   }
 
-
   _setCurrentUser() async {
-    final res = await apiService.post("${AppUrls.getUser}/get/${prefService.get(MyPrefs.mpUserID)}", data: {"filter":{}});
+    final res = await apiService.post(
+        "${AppUrls.getUser}/get/${prefService.get(MyPrefs.mpUserID)}",
+        data: {"filter": {}});
     print(res.data);
     currentUser.value = User.fromJson(res.data["data"]);
   }
 
   refreshUser() async {
-    final res = await apiService.post("${AppUrls.getUser}/get/${prefService.get(MyPrefs.mpUserID)}",data: {"filter":{}});
+    final res = await apiService.post(
+        "${AppUrls.getUser}/get/${prefService.get(MyPrefs.mpUserID)}",
+        data: {"filter": {}});
     currentUser.value = User.fromJson(res.data["data"]);
     currentUser.refresh();
   }

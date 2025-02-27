@@ -1,12 +1,15 @@
 import 'dart:ui' as ui;
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:inventory/tools/colors.dart';
+import 'package:inventory/views/checklist/shared2.dart';
 import 'package:multi_dropdown/multi_dropdown.dart';
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
 
@@ -517,15 +520,16 @@ class AppButton extends StatefulWidget {
     return Row(
       children: [
         Expanded(
-          child: outline(onPressedB, titleB),
-        ),
-        Ui.boxWidth(24),
-        Expanded(
           child: AppButton(
             onPressed: onPressedA,
             text: titleA,
           ),
-        )
+        ),
+        Ui.boxWidth(24),
+        Expanded(
+          child: outline(onPressedB, titleB),
+        ),
+        
       ],
     );
   }
@@ -577,10 +581,12 @@ class _AppButtonState extends State<AppButton> {
                 isPressed = true;
               });
               await widget.onPressed!();
-              setState(() {
-                disabled = false;
-                isPressed = false;
-              });
+              if (mounted) {
+                setState(() {
+                  disabled = false;
+                  isPressed = false;
+                });
+              }
             },
       child: widget.isCircle
           ? Container(
@@ -692,6 +698,7 @@ abstract class Ui {
       borderRadius: 16,
       forwardAnimationCurve: Curves.elasticInOut,
       snackPosition: SnackPosition.TOP,
+      maxWidth: 700,
       animationDuration: Duration(milliseconds: 1500),
       duration: Duration(seconds: 3),
       padding: EdgeInsets.all(24),
@@ -709,6 +716,7 @@ abstract class Ui {
         BoxShadow(offset: Offset(0, -4), blurRadius: 40, color: Colors.white)
       ],
       shouldIconPulse: true,
+      maxWidth: 700,
       icon: AppIcon(
         Icons.dangerous_outlined,
         color: Colors.white,
@@ -828,11 +836,13 @@ class AppDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           SizedBox(
             width: 36,
           ),
-          Expanded(child: title),
+          // Expanded(child: title),
+          title,
           SizedBox(
             width: 36,
             child: InkWell(
@@ -995,7 +1005,7 @@ class CustomTextField extends StatelessWidget {
                   : null,
               style: TextStyle(fontSize: fs, fontWeight: fw, color: col),
               decoration: InputDecoration(
-                fillColor: suffix != null ? Colors.white : Colors.white,
+                fillColor: readOnly ? Colors.grey[300] : Colors.white,
                 filled: true,
                 enabledBorder: customBorder(color: borderCol),
                 focusedBorder: customBorder(color: borderCol),
@@ -1289,7 +1299,7 @@ class CustomMultiDropdown extends StatefulWidget {
   final bool isEnable;
   const CustomMultiDropdown(
       this.options, this.values, this.controller, this.title,
-      {this.initValues = const [],this.isEnable=true, super.key});
+      {this.initValues = const [], this.isEnable = true, super.key});
 
   @override
   State<CustomMultiDropdown> createState() => _CustomMultiDropdownState();
@@ -1356,13 +1366,11 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
       searchEnabled: true,
       controller: mdcont,
       enabled: widget.isEnable,
-
       dropdownItemDecoration: ddec,
       fieldDecoration: fdec,
-    
       onSelectionChange: (selectedItems) {
-        if(selectedItems.isEmpty){
-          widget.controller.text="";
+        if (selectedItems.isEmpty) {
+          widget.controller.text = "";
         }
         widget.controller.text = selectedItems.join(",");
       },
@@ -1580,7 +1588,7 @@ class ProfileLogo extends StatelessWidget {
 }
 
 class PasswordChangeModal extends StatefulWidget {
-  const PasswordChangeModal(this.username,{super.key});
+  const PasswordChangeModal(this.username, {super.key});
   final TextEditingController username;
 
   @override
@@ -1591,47 +1599,98 @@ class _PasswordChangeModalState extends State<PasswordChangeModal> {
   TextEditingController p1 = TextEditingController();
   TextEditingController p2 = TextEditingController();
 
+  @override
+  Widget build(BuildContext context) {
+    return AppDialog(
+        title: AppText.medium("Change Password"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CustomTextField(
+              "Username",
+              widget.username,
+              readOnly: true,
+              varl: FPL.text,
+            ),
+            CustomTextField(
+              "New Password",
+              p1,
+              varl: FPL.password,
+            ),
+            CustomTextField(
+              "Confirm Password",
+              p2,
+              varl: FPL.password,
+            ),
+            AppButton(
+              onPressed: () async {
+                final msgU = Validators.validate(FPL.password, p1.text);
+                final msgP = Validators.validate(FPL.password, p2.text);
+                final msgV =
+                    Validators.confirmPasswordValidator(p1.text, p2.text);
+                if (msgU == null && msgP == null && msgV == null) {
+                  bool f = await Get.find<AppController>()
+                      .resetPassword(widget.username.text, p1.text);
 
+                  if (f) {
+                    Get.back();
+                    Ui.showInfo(
+                        "Password set successfully, Now proceed to login");
+                  }
+                } else {
+                  Ui.showError(msgU ?? msgP ?? msgV ?? "An error occured");
+                }
+              },
+              text: "Change Password",
+            ),
+          ],
+        ));
+  }
+}
+
+
+class ConnectivityWidget extends StatelessWidget {
+  const ConnectivityWidget({required this.child,super.key});
+  final Widget child;
+
+  
 
   @override
   Widget build(BuildContext context) {
-    return AppDialog(title: AppText.bold("Change Password"), content: Column(
-      mainAxisSize: MainAxisSize.min,
-children: [
-  CustomTextField(
-                  "Username",
-                  widget.username,
-                  readOnly: true,
-                  varl: FPL.text,
-                ),CustomTextField(
-                  "New Password",
-                  p1,
-                  varl: FPL.password,
-                ),
-                CustomTextField(
-                  "Confirm Password",
-                  p2,
-                  varl: FPL.password,
-                ),
-                AppButton(
-                  onPressed: () async {
-                    final msgU = Validators.validate(FPL.password, p1.text);
-                    final msgP =
-                        Validators.validate(FPL.password, p2.text);
-                        final msgV = Validators.confirmPasswordValidator(p1.text, p2.text);
-                    if (msgU == null && msgP == null && msgV == null) {
-                      final f = await Get.find<AppController>()
-                          .resetPassword(widget.username.text, p1.text);
-                      if (f) {
-                        Get.back();
-                      }
-                    } else {
-                      Ui.showError(msgU ?? msgP ?? msgV ?? "An error occured");
-                    }
-                  },
-                  text: "Change Password",
-                ),
-],
-       ));
+    final appService = Get.find<AppService>();
+    
+    return Obx(() 
+    {
+      final ic = appService.isConnected.value;
+      if(!ic){
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            AbsorbPointer(child: child),
+            BackdropFilter(filter: ui.ImageFilter.blur(sigmaX: 5,sigmaY: 5),child: CurvedContainer(
+              padding: EdgeInsets.all(24),
+              
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppText.bold("No Network Connection",fontFamily: Assets.appFontFamily2,fontSize: 24),
+                  AppText.thin("Please kindly connect to a network source or try again later",fontFamily: Assets.appFontFamily2),
+                  Icon(Icons.wifi_off_rounded,color: AppColors.primaryColor,size: 128,),
+                  SizedBox(
+                    width: 200,
+                    child: AppButton(onPressed: () async {
+                    final f = await Connectivity().checkConnectivity();
+                    appService.isConnected.value = !f.contains(ConnectivityResult.none);
+                    },text: "Retry",),
+                  )
+                ],
+              ),
+
+            ),),
+          ],
+        );
+      }
+      return child;
+    });
   }
 }
