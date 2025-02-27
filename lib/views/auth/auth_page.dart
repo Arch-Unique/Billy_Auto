@@ -5,6 +5,7 @@ import 'package:inventory/controllers/app_controller.dart';
 import 'package:inventory/repo/app_repo.dart';
 import 'package:inventory/tools/assets.dart';
 import 'package:inventory/tools/enums.dart';
+import 'package:inventory/tools/service.dart';
 import 'package:inventory/tools/validators.dart';
 import 'package:inventory/views/checklist/checklist2.dart';
 import 'package:inventory/views/checklist/history.dart';
@@ -116,7 +117,7 @@ class ChoosePage extends StatelessWidget {
                     color: AppColors.lightTextColor),
                 Ui.boxHeight(24),
                 ...List.generate(
-                    3,
+                    !GetPlatform.isMobile || Get.find<AppService>().currentUser.value.username != "dev" ? 3  : 2,
                     (index) => CurvedContainer(
                           height: 100,
                           width: wideUi(context),
@@ -127,9 +128,7 @@ class ChoosePage extends StatelessWidget {
                             } else if (index == 1) {
                               Get.to(OrderHistoryPage());
                             } else {
-                              // if (!GetPlatform.isMobile) {
-                                Get.to(ExplorerPage());
-                              // }
+                              Get.to(ExplorerPage());
                             }
                           },
                           // color: AppColors.primaryColor,

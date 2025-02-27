@@ -133,34 +133,64 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                                   Ui.boxWidth(24),
                                 ],
                               ),
+                              Ui.boxHeight(12),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Ui.boxHeight(24),
+Obx(
+   () {
+    return AppText.bold("Total Orders : ${suggestions.length}");
+  }
+),
+Ui.boxHeight(24),
+Obx(
+   () {
+    return AppText.bold("Dispatched Orders : ${suggestions.where((p0) => p0.isDispatched).length}",color: AppColors.green);
+  }
+),
+Ui.boxHeight(24),
+Obx(
+   () {
+    return AppText.bold("Pending Orders : ${suggestions.where((p0) => !p0.isDispatched).length}",color: AppColors.primaryColor);
+  }
+),
+Ui.boxHeight(24),
+                                ],
+                              ),
+                              Ui.boxHeight(12),
                               Expanded(
                                 child: Obx(() {
                                   return ListView.builder(
                                     itemBuilder: (_, i) {
                                       final order = suggestions[i];
-                                      return Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 12),
-                                        child: ListTile(
-                                          selectedTileColor: order.isDispatched
-                                              ? AppColors.green
-                                              : AppColors.primaryColor,
-                                          selected: true,
-                                          leading: AppIcon(
-                                            Icons.widgets_rounded,
-                                            color: AppColors.primaryColor,
+                                      return Material(
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 12,
+                                              horizontal: 24
+                                              ),
+                                          child: ListTile(
+                                            selectedTileColor: order.isDispatched
+                                                ? AppColors.green.withOpacity(0.2)
+                                                : AppColors.primaryColor.withOpacity(0.2),
+                                            selected: true,
+                                            leading: AppIcon(
+                                              Icons.widgets_rounded,
+                                              color: AppColors.primaryColor,
+                                            ),
+                                            title: Row(
+                                              children: [
+                                                AppText.bold(order.title),
+                                                Ui.spacer(),
+                                                AppText.thin(order.createdAtRaw)
+                                              ],
+                                            ),
+                                            subtitle: AppText.thin(order.desc),
+                                            onTap: () {
+                                              Get.to(OrderSummary(order));
+                                            },
                                           ),
-                                          title: Row(
-                                            children: [
-                                              AppText.bold(order.title),
-                                              Ui.spacer(),
-                                              AppText.thin(order.createdAtRaw)
-                                            ],
-                                          ),
-                                          subtitle: AppText.thin(order.desc),
-                                          onTap: () {
-                                            Get.to(OrderSummary(order));
-                                          },
                                         ),
                                       );
                                     },

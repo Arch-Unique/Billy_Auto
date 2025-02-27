@@ -439,7 +439,7 @@ class _OrderSummaryState extends State<OrderSummary> {
       radius: 16,
       padding: EdgeInsets.only(left: 24),
       margin: EdgeInsets.only(bottom: 24),
-      color: AppColors.primaryColor.withOpacity(0.5),
+      color: AppColors.primaryColor.withOpacity(0.2),
       child: Row(
         children: [
           SizedBox(
