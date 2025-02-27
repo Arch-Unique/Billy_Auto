@@ -41,6 +41,7 @@ class _AuthPageState extends State<AuthPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Ui.boxWidth(24),
                 LogoWidget(w / 3),
                 Ui.boxWidth(24),
                 Image.asset(

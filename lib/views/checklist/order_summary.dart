@@ -109,6 +109,8 @@ class _OrderSummaryState extends State<OrderSummary> {
               : "Service Order Summary";
           final toreturn = Column(
             children: [
+              
+                Ui.boxWidth(24),
               LogoWidget(144),
               AppText.medium(title,
                   fontSize: 32,

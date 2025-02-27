@@ -44,6 +44,8 @@ class ProfilePage extends StatelessWidget {
             child: Obx(() {
               return Column(
                 children: [
+                  
+                Ui.boxWidth(24),
                   LogoWidget(120),
                   AppText.medium("Profile",
                       fontSize: 32,

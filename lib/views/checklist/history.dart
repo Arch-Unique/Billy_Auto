@@ -37,6 +37,8 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
         body: BackgroundScaffold(
             hasBack: true,
             child: Column(children: [
+              
+                Ui.boxWidth(24),
               LogoWidget(144),
               AppText.medium("Order History",
                   fontSize: 32,
