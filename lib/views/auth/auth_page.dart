@@ -117,7 +117,7 @@ class ChoosePage extends StatelessWidget {
                     color: AppColors.lightTextColor),
                 Ui.boxHeight(24),
                 ...List.generate(
-                    !GetPlatform.isMobile || Get.find<AppService>().currentUser.value.username != "dev" ? 3  : 2,
+                    !GetPlatform.isMobile || Get.find<AppService>().currentUser.value.username == "dev" ? 3  : 2,
                     (index) => CurvedContainer(
                           height: 100,
                           width: wideUi(context),
