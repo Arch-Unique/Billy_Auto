@@ -109,6 +109,8 @@ class _OrderSummaryState extends State<OrderSummary> {
               : "Service Order Summary";
           final toreturn = Column(
             children: [
+              
+                Ui.boxWidth(24),
               LogoWidget(144),
               AppText.medium(title,
                   fontSize: 32,
@@ -437,7 +439,7 @@ class _OrderSummaryState extends State<OrderSummary> {
       radius: 16,
       padding: EdgeInsets.only(left: 24),
       margin: EdgeInsets.only(bottom: 24),
-      color: AppColors.primaryColor.withOpacity(0.5),
+      color: AppColors.primaryColor.withOpacity(0.2),
       child: Row(
         children: [
           SizedBox(
@@ -765,6 +767,11 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
                       fit: pw.BoxFit.cover,
                       height: PdfPageFormat.a4.height,
                       width: PdfPageFormat.a4.width)),
+                      pw.Container(
+                        height: PdfPageFormat.a4.height,
+                      width: PdfPageFormat.a4.width,
+                      color: PdfColor.fromInt(0x88FFFFFF)
+                      ),
               pw.Padding(
                   padding: pw.EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   child: pf)

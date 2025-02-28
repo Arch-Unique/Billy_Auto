@@ -703,6 +703,8 @@ class CheckList2Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        
+                Ui.boxWidth(24),
         LogoWidget(120),
         Obx(() {
           return AppText.medium(controller.currentChecklistMode.value.title,

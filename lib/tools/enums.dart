@@ -17,7 +17,7 @@ enum FPL {
   email(TextInputType.emailAddress),
   number(TextInputType.number),
   text(TextInputType.text),
-  password(TextInputType.number),
+  password(TextInputType.visiblePassword),
   multi(TextInputType.multiline, maxLength: 1000, maxLines: 5),
   phone(TextInputType.phone),
   money(TextInputType.number),

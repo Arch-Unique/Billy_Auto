@@ -344,7 +344,7 @@ class BackgroundScaffold extends StatelessWidget {
           height: Ui.height(context),
           color: AppColors.white.withOpacity(0.7),
         ),
-        child,
+        SafeArea(child: child),
         if (hasBack)
           Positioned(
               top: 24,

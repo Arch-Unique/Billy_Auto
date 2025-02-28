@@ -26,6 +26,7 @@ dependencies:
   pdf: ^3.11.2
   printing: ^5.13.4
   syncfusion_flutter_signaturepad: ^27.2.5
+  flutter_native_splash: ^2.4.4
 
 dev_dependencies:
   flutter_test:
@@ -63,3 +64,7 @@ flutter:
           weight: 400
         - asset: assets/fonts/SharpGrotesk-Medium2.otf
           weight: 500
+
+flutter_native_splash:
+  image: assets/images/logo_white.jpg
+  color: "#FFFFFF"
