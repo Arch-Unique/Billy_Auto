@@ -26,7 +26,6 @@ class ExplorerPage extends StatefulWidget {
 class _ExplorerPageState extends State<ExplorerPage> {
   List<Widget> screens = [];
   final controller = Get.find<AppController>();
-  
 
   @override
   void initState() {
@@ -54,7 +53,8 @@ class _ExplorerPageState extends State<ExplorerPage> {
           }),
           HeaderItem("Types", vb: () {
             controller.setCurrentTypeTable<ProductType>();
-          }),HeaderItem("Supplier", vb: () {
+          }),
+          HeaderItem("Supplier", vb: () {
             controller.setCurrentTypeTable<Supplier>();
           })
         ],
@@ -64,14 +64,11 @@ class _ExplorerPageState extends State<ExplorerPage> {
           HeaderItem("Inventory", vb: () {
             controller.setCurrentTypeTable<Inventory>();
           }),
-          
           HeaderItem("Location", vb: () {
             // controller.setCurrentTypeTable<Inventory>();
           }),
         ],
       ),
-      
-      
       CustomTablePage([
         HeaderItem("Car Brands", vb: () {
           controller.setCurrentTypeTable<CarMake>();
@@ -93,6 +90,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
         })
       ]),
     ];
+    controller.initApp();
     super.initState();
   }
 
@@ -136,7 +134,9 @@ class _ExplorerPageState extends State<ExplorerPage> {
         children: [
           Padding(
             padding: const EdgeInsets.only(left: 16),
-            child: BackButton(color: AppColors.white,),
+            child: BackButton(
+              color: AppColors.white,
+            ),
           ),
           Ui.boxWidth(24),
           Ui.boxHeight(56),
@@ -183,11 +183,11 @@ class _ExplorerPageState extends State<ExplorerPage> {
           }),
           Ui.boxWidth(24),
           InkWell(
-            onTap: () {
-                        Get.find<AppController>().editOn.value = false;
-                        Get.to(ProfilePage());
-                      },
-            child: ProfileLogo()),
+              onTap: () {
+                Get.find<AppController>().editOn.value = false;
+                Get.to(ProfilePage());
+              },
+              child: ProfileLogo()),
           Ui.boxWidth(24),
         ],
       ),

@@ -47,30 +47,34 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
             ],
           ),
           Ui.boxHeight(24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              itemDataWidget(
-                  "Total Customers",
-                  controller.allCustomer.length.toString(),
-                  Colors.lightBlue[100]!.withOpacity(0.7)),
-              itemDataWidget(
-                  "Total Suppliers",
-                  controller.allSuppliers.length.toString(),
-                  Colors.yellow[100]!.withOpacity(0.7)),
-              itemDataWidget(
-                  "Total Products",
-                  controller.allProducts.length.toString(),
-                  Colors.lightGreen[100]!.withOpacity(0.7)),
-              itemDataWidget(
-                  "Total Orders",
-                  controller.allOrders.length.toString(),
-                  Colors.lightGreen[100]!.withOpacity(0.7)),
-              itemDataWidget(
-                  "Pending Orders",
-                  controller.allCustomer.length.toString(),
-                  Colors.red[100]!.withOpacity(0.7)),
-            ],
+          Obx(
+             () {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  itemDataWidget(
+                      "Total Customers",
+                      controller.allCustomer.length.toString(),
+                      Colors.lightBlue[100]!.withOpacity(0.7)),
+                  itemDataWidget(
+                      "Total Suppliers",
+                      controller.allSuppliers.length.toString(),
+                      Colors.yellow[100]!.withOpacity(0.7)),
+                  itemDataWidget(
+                      "Total Products",
+                      controller.allProducts.length.toString(),
+                      Colors.lightGreen[100]!.withOpacity(0.7)),
+                  itemDataWidget(
+                      "Total Orders",
+                      controller.allOrders.length.toString(),
+                      Colors.lightGreen[100]!.withOpacity(0.7)),
+                  itemDataWidget(
+                      "Pending Orders",
+                      controller.allPendingOrders.length.toString(),
+                      Colors.red[100]!.withOpacity(0.7)),
+                ],
+              );
+            }
           ),
           Expanded(
               child: Row(

@@ -27,7 +27,7 @@ List<dynamic> toTableRows(){
   factory CarMake.fromJson(Map<String, dynamic> json) {
     return CarMake(
       id: json['id'] ?? 0,
-      make: json['make'],
+      make: json['make'] ?? "",
       createdAt: DateTime.tryParse(json['createdAt']),
       updatedAt: DateTime.tryParse(json['updatedAt']),
     );
@@ -76,8 +76,8 @@ List<dynamic> toTableRows(){
     return CarModels(
       id: json['id'] ?? 0,
       makeId: int.tryParse(json['makeId'].toString()) ?? 0,
-      make: json['make'],
-      model: json['model'],
+      make: json['make'] ?? "",
+      model: json['model'] ?? "",
       createdAt: DateTime.tryParse(json['createdAt']),
       updatedAt: DateTime.tryParse(json['updatedAt']),
     );

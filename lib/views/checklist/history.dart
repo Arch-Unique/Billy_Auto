@@ -27,8 +27,15 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
 
   @override
   void initState() {
-    suggestions.value = List.from(orders);
+    refresh();
     super.initState();
+  }
+
+  refresh() async {
+    suggestions.value = List.from(orders);
+    await Get.find<AppController>().initApp();
+    orders = Get.find<AppController>().allOrders;
+    suggestions.value = List.from(orders);
   }
 
   @override
@@ -37,8 +44,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
         body: BackgroundScaffold(
             hasBack: true,
             child: Column(children: [
-              
-                Ui.boxWidth(24),
+              Ui.boxWidth(24),
               LogoWidget(144),
               AppText.medium("Order History",
                   fontSize: 32,
@@ -135,27 +141,27 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                               ),
                               Ui.boxHeight(12),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Ui.boxHeight(24),
-Obx(
-   () {
-    return AppText.bold("Total Orders : ${suggestions.length}");
-  }
-),
-Ui.boxHeight(24),
-Obx(
-   () {
-    return AppText.bold("Dispatched Orders : ${suggestions.where((p0) => p0.isDispatched).length}",color: AppColors.green);
-  }
-),
-Ui.boxHeight(24),
-Obx(
-   () {
-    return AppText.bold("Pending Orders : ${suggestions.where((p0) => !p0.isDispatched).length}",color: AppColors.primaryColor);
-  }
-),
-Ui.boxHeight(24),
+                                  Obx(() {
+                                    return AppText.bold(
+                                        "Total Orders : ${suggestions.length}");
+                                  }),
+                                  Ui.boxHeight(24),
+                                  Obx(() {
+                                    return AppText.bold(
+                                        "Dispatched Orders : ${suggestions.where((p0) => p0.isDispatched).length}",
+                                        color: AppColors.green);
+                                  }),
+                                  Ui.boxHeight(24),
+                                  Obx(() {
+                                    return AppText.bold(
+                                        "Pending Orders : ${suggestions.where((p0) => !p0.isDispatched).length}",
+                                        color: AppColors.primaryColor);
+                                  }),
+                                  Ui.boxHeight(24),
                                 ],
                               ),
                               Ui.boxHeight(12),
@@ -167,13 +173,14 @@ Ui.boxHeight(24),
                                       return Material(
                                         child: Padding(
                                           padding: const EdgeInsets.symmetric(
-                                              vertical: 12,
-                                              horizontal: 24
-                                              ),
+                                              vertical: 12, horizontal: 24),
                                           child: ListTile(
-                                            selectedTileColor: order.isDispatched
-                                                ? AppColors.green.withOpacity(0.2)
-                                                : AppColors.primaryColor.withOpacity(0.2),
+                                            selectedTileColor:
+                                                order.isDispatched
+                                                    ? AppColors.green
+                                                        .withOpacity(0.2)
+                                                    : AppColors.primaryColor
+                                                        .withOpacity(0.2),
                                             selected: true,
                                             leading: AppIcon(
                                               Icons.widgets_rounded,

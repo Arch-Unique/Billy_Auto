@@ -45,9 +45,9 @@ class Customer extends BaseModel {
   factory Customer.fromJson(Map<String, dynamic> json) {
     return Customer(
       id: json['id'] ?? 0,
-      email: json['email'],
-      phone: json['phone'],
-      fullName: json['fullName'],
+      email: json['email'] ?? "",
+      phone: json['phone'] ?? "",
+      fullName: json['fullName'] ?? "",
       signature: json['signature'] ?? "",
       
       customerType: json['customerType'] ?? "Individual",
