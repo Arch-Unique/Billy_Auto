@@ -33,7 +33,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
 
   refresh() async {
     suggestions.value = List.from(orders);
-    await Get.find<AppController>().initApp();
+    await Get.find<AppController>().refreshModels();
     orders = Get.find<AppController>().allOrders;
     suggestions.value = List.from(orders);
   }

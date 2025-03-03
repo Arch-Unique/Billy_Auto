@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ import 'package:inventory/views/checklist/shared2.dart';
 
 import '../../models/inner_models/barrel.dart';
 import '../../tools/functions.dart';
+import '../../tools/service.dart';
 import '../../tools/urls.dart';
 import '../shared.dart';
 
@@ -54,7 +56,7 @@ class _CustomTableState extends State<CustomTable> {
           // controller: controller.paginatorController.value,
           header: AppText.medium("Records",
               fontFamily: Assets.appFontFamily2, fontSize: 16),
-              headingRowColor: MaterialStatePropertyAll<Color>(AppColors.primaryColorLight.withOpacity(0.5)),
+              headingRowColor: WidgetStatePropertyAll<Color>(AppColors.primaryColorLight.withOpacity(0.5)),
           actions: [
             Material(
               color: AppColors.green,
@@ -65,6 +67,10 @@ class _CustomTableState extends State<CustomTable> {
                 Icons.add,
                 color: AppColors.white,
                 onTap: () {
+                  if(Get.find<AppService>().currentUser.value.role != "admin"){
+                    Ui.showError("Not enough permissions");
+                    return;
+                  }
                   Get.dialog(AppDialog(
                       title: AppText.medium("Add New Record"),
                       content: Obx(() {
@@ -232,10 +238,15 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                         Icons.edit,
                         color: AppColors.green,
                         onTap: () {
+                          if(Get.find<AppService>().currentUser.value.role != "admin"){
+                    Ui.showError("Not enough permissions");
+                    return;
+                  }
                           Get.find<AppController>().currentBaseModel = bm.obs;
                           Get.dialog(AppDialog(
                               title: AppText.medium("Edit Record"),
                               content: Obx(() {
+                                
                                 return DynamicFormGenerator(
                                     model: Get.find<AppController>()
                                         .currentBaseModel
@@ -252,6 +263,10 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                         Icons.delete,
                         color: Colors.red,
                         onTap: () {
+                          if(Get.find<AppService>().currentUser.value.role != "admin"){
+                    Ui.showError("Not enough permissions");
+                    return;
+                  }
                           Get.dialog(AppDialog.normal(
                             "Delete Record",
                             "Are you sure you want to remove this record from the database ?",
@@ -555,10 +570,13 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
                             File(cimg.value),
                             fit: BoxFit.cover,
                           )
-                        : Image.network(
-                            "${AppUrls.baseURL}${AppUrls.upload}/all/${cimg.value}",
-                            fit: BoxFit.contain,
-                          )
+                        : Transform.rotate(
+                          angle: pi/2,
+                          child: Image.network(
+                              "${AppUrls.baseURL}${AppUrls.upload}/all/${cimg.value}",
+                              fit: BoxFit.contain,
+                            ),
+                        )
                     : Center(
                         child: AppIcon(
                         Icons.add_a_photo,

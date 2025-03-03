@@ -424,9 +424,12 @@ class _OrderSummaryState extends State<OrderSummary> {
                         File(img),
                         fit: BoxFit.cover,
                       )
-                    : Image.network(
-                      "${AppUrls.baseURL}${AppUrls.upload}/all/$img",
-                      fit: BoxFit.contain,
+                    : Transform.rotate(
+                      angle: pi/2,
+                      child: Image.network(
+                        "${AppUrls.baseURL}${AppUrls.upload}/all/$img",
+                        fit: BoxFit.contain,
+                      ),
                     ),),
           ),
 

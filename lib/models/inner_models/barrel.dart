@@ -8,3 +8,4 @@ export 'product.dart';
 export 'services.dart';
 export 'supplier.dart';
 export 'user.dart';
+export 'loginHistory.dart';

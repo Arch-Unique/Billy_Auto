@@ -181,7 +181,6 @@ class AllTables {
           "product",
           "qty",
           "status",
-          "transaction Type",
           "location",
           // "product Type",
           // "product Category",
@@ -215,6 +214,17 @@ class AllTables {
       FilterModel("Customer", "customerId", 0),
       FilterModel("Customer Car", "carId", 0),
       
-    ], Order(customerId: 0)),
+    ], Order(customerId: 0),),
+     LoginHistory: TableModel([
+      "id",
+      "username",
+      "device",
+      "loggedIn",
+      "loggedOut"
+    ], [
+      FilterModel("User", "userId", 0),
+      FilterModel("Device", "device", 0),
+      
+    ], LoginHistory(),),
   };
 }

@@ -64,7 +64,8 @@ class AppRepo extends GetxController {
     ProductCategory: ProductCategory.fromJson,
     BillyConditions: BillyConditions.fromJson,
     BillyConditionCategory: BillyConditionCategory.fromJson,
-    BillyServices: BillyServices.fromJson
+    BillyServices: BillyServices.fromJson,
+    LoginHistory: LoginHistory.fromJson,
   };
 
   final Map<Type, String> urls = {
@@ -81,7 +82,8 @@ class AppRepo extends GetxController {
     ProductCategory: AppUrls.productCategory,
     BillyConditions: AppUrls.condition,
     BillyConditionCategory: AppUrls.conditionCategory,
-    BillyServices: AppUrls.service
+    BillyServices: AppUrls.service,
+    LoginHistory: AppUrls.loginHistory
   };
 
   TotalResponse<T> getListOf<T>(dynamic res) {
@@ -156,7 +158,7 @@ class AppRepo extends GetxController {
 
   login(String username, String password) async {
     final res = await apiService.post(AppUrls.login,
-        data: {"username": username, "password": password});
+        data: {"username": username, "password": password,"device":GetPlatform.isMobile ? "mobile":"pc"});
     if (res.statusCode!.isSuccess()) {
       await appService.loginUser(res.data["data"]["jwt"]);
     } else {

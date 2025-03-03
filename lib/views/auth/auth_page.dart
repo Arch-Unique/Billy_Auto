@@ -48,7 +48,7 @@ class _AuthPageState extends State<AuthPage> {
                   Ui.boxWidth(24),
                   Image.asset(
                     Assets.s5,
-                    width: w,
+                    width: w/1.2,
                   ),
                   Ui.boxWidth(24),
                   CustomTextField("Username", username),
@@ -95,6 +95,7 @@ class ChoosePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    RxBool isPressed = false.obs;
     return Scaffold(
       body: ConnectivityWidget(
         child: BackgroundScaffold(
@@ -115,7 +116,27 @@ class ChoosePage extends StatelessWidget {
                     fontSize: 15,
                     fontFamily: Assets.appFontFamily1,
                     color: AppColors.lightTextColor),
-                Ui.boxHeight(24),
+                Ui.boxHeight(12),
+                InkWell(
+                      onTap: () async{
+                        isPressed.value = true;
+                        await Get.find<AppController>().refreshModels();
+                        isPressed.value = false;
+                        Ui.showInfo("Data Refreshed");
+                      },
+                      child: CircleAvatar(
+                          backgroundColor: AppColors.primaryColor,
+                          radius: 24,
+                          child: Center(
+                              child: Obx(
+                                 () {
+                                  return isPressed.value ? CircularProgressIndicator(color: AppColors.white,): AppIcon(
+                                                              Icons.refresh,
+                                                              color: AppColors.white,
+                                                            );
+                                }
+                              )))),
+                Ui.boxHeight(12),
                 ...List.generate(
                     !GetPlatform.isMobile || Get.find<AppService>().currentUser.value.username == "dev" ? 3  : 2,
                     (index) => CurvedContainer(

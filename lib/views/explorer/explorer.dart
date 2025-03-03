@@ -87,10 +87,13 @@ class _ExplorerPageState extends State<ExplorerPage> {
         }),
         HeaderItem("Users", vb: () {
           controller.setCurrentTypeTable<User>();
+        }),
+        HeaderItem("Login History", vb: () {
+          controller.setCurrentTypeTable<LoginHistory>();
         })
       ]),
     ];
-    controller.initApp();
+    controller.refreshModels();
     super.initState();
   }
 

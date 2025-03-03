@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:get/get_utils/get_utils.dart';
 import 'package:get/instance_manager.dart';
 import 'package:get/state_manager.dart';
 import 'package:get_storage/get_storage.dart';
@@ -220,7 +221,7 @@ class AppService extends GetxService {
   }
 
   logout() async {
-    //await apiService.post(AppUrls.logout);
+    await apiService.post("${AppUrls.logout}/${prefService.get(MyPrefs.mpUserID)}/${GetPlatform.isMobile ? "mobile":"pc"}");
     await _logout();
   }
 

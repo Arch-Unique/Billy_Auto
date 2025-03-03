@@ -83,7 +83,7 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
               Column(
                 children: [
                   Expanded(child: recentOrders()),
-                  Expanded(child: recentInventory()),
+                  // Expanded(child: recentInventory()),
                 ],
               )
             ],
@@ -310,7 +310,7 @@ class _MyBarChartState extends State<MyBarChart> {
         enabled: true,
         touchTooltipData: BarTouchTooltipData(
           tooltipBgColor: Colors.transparent,
-          tooltipPadding: EdgeInsets.only(bottom: 16),
+          tooltipPadding: EdgeInsets.only(bottom: 4),
           tooltipMargin: 8,
           getTooltipItem: (
             BarChartGroupData group,
@@ -350,7 +350,7 @@ class _MyBarChartState extends State<MyBarChart> {
         leftTitles:  AxisTitles(
           axisNameWidget: Padding(
             padding: const EdgeInsets.all(24.0),
-            child: AppText.bold("No of Service Orders per Month",fontFamily: Assets.appFontFamily2),
+            child: AppText.bold("No of Orders per Month",fontFamily: Assets.appFontFamily2),
           ),
           sideTitles: SideTitles(showTitles: false),
         ),
@@ -385,7 +385,7 @@ class _MyBarChartState extends State<MyBarChart> {
               toY: orderCnt[index].toDouble(),
               gradient: _barsGradient,
               borderRadius: BorderRadius.circular(16),
-              width: 100
+              width: 56
             )
           ],
           showingTooltipIndicators: [0],)) ;

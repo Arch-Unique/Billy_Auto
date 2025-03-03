@@ -5,6 +5,7 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inventory/models/inner_models/base_model.dart';
+import 'package:inventory/models/inner_models/loginHistory.dart';
 import 'package:inventory/models/table_repo.dart';
 import 'package:inventory/tools/demo.dart';
 import 'package:inventory/tools/enums.dart';
@@ -87,12 +88,15 @@ class AppController extends GetxController {
   RxList<Product> allProducts = <Product>[].obs;
   RxList<User> allServiceAdvisor = <User>[].obs;
   RxList<User> allTechnicians = <User>[].obs;
+  RxList<User> allUsers = <User>[].obs;
+  RxList<LoginHistory> allLoginHistory = <LoginHistory>[].obs;
   RxList<Inventory> allInventory = <Inventory>[].obs;
   RxList<Order> allOrders = <Order>[].obs;
   RxList<String> userRoles = <String>[].obs;
   RxList<String> customerTypes = <String>[].obs;
   RxList<String> inventoryStatus = <String>[].obs;
   RxList<String> inventoryTransactionTypes = <String>[].obs;
+  RxList<String> allDevices = <String>[].obs;
 
   //TABLE
   Rx<TableModelDataSource> tmds = TableModelDataSource([]).obs;
@@ -103,7 +107,8 @@ class AppController extends GetxController {
   Map<String, FilterOptionsModel> filterOptions = {};
 
   //ORDERS
-  List<Order> get allPendingOrders => allOrders.where((p0) => !p0.isDispatched).toList();
+  List<Order> get allPendingOrders =>
+      allOrders.where((p0) => !p0.isDispatched).toList();
 
   //PROFILE
   RxBool editOn = false.obs;
@@ -156,7 +161,10 @@ class AppController extends GetxController {
         allBillyConditionCategories.map((element) => element.name).toList(),
         allBillyConditionCategories.map((element) => element.id).toList());
     filterOptions["maintenanceType"] = FilterOptionsModel(["None"], [0]);
-    // filterOptions["productTypeId"] = allProductType;
+    filterOptions["userId"] = FilterOptionsModel(
+        allUsers.map((element) => element.username).toList(),
+        allUsers.map((element) => element.id).toList());
+    filterOptions["device"] = FilterOptionsModel(allDevices, allDevices);
   }
 
   initApp() async {
@@ -167,45 +175,14 @@ class AppController extends GetxController {
     mileageImagePath.value = "";
     customerImagePath.value = "";
 
-    userRoles.value = ["admin", "user", "technician", "service-advisor"];
-    customerTypes.value = ["Individual", "Corporate"];
-    inventoryStatus.value = ["Inbound", "Outbound", "Transfer"];
-    inventoryTransactionTypes.value = ["a", "b"];
-    allBillyServices.value = await _getAll<BillyServices>();
-    allBillyConditionCategories.value = await _getAll<BillyConditionCategory>();
-    allBillyConditions.value = await _getAll<BillyConditions>();
-    allProductCategory.value = await _getAll<ProductCategory>();
-    allProductType.value = await _getAll<ProductType>();
-    allCarMakes.value = await _getAll<CarMake>();
-    allCarModels.value = await _getAll<CarModels>();
-    allCustomer.value = await _getAll<Customer>();
-    allCustomerCar.value = await _getAll<CustomerCar>();
-    allOrders.value = await _getAll<Order>();
-    allProducts.value = await _getAll<Product>();
-    allSuppliers.value = await _getAll<Supplier>();
-    allInventory.value = await _getAll<Inventory>();
-
-    allTechnicians.value = await _getAll<User>(fm: [
-      FilterModel("", "role", 0, tec: TextEditingController(text: userRoles[2]))
-    ]);
-    allServiceAdvisor.value = await _getAll<User>(fm: [
-      FilterModel("", "role", 0, tec: TextEditingController(text: userRoles[3]))
-    ]);
-    updateOrderWithInfo();
-
-    totalConditionsHeaders =
-        allBillyConditionCategories.map((element) => element.name).toList();
-
+    await refreshModels();
+    allServicesItems.value =
+        allBillyServices.map((e) => CStep(e.id, e.id, e.name)).toList();
     condItem = allBillyConditions.fold<Map<String, int>>({}, (map, condition) {
       map[condition.conditionsCategory] =
           (map[condition.conditionsCategory] ?? 0) + 1;
       return map;
     });
-
-    totalConditionsExpanded.value =
-        totalConditionsHeaders.map((e) => true).toList();
-    allServicesItems.value =
-        allBillyServices.map((e) => CStep(e.id, e.id, e.name)).toList();
 
     int k = 0;
     for (var j = 0; j < condItem.length; j++) {
@@ -221,10 +198,42 @@ class AppController extends GetxController {
       allSteps.addAll(allStepItem);
       inspectionNo[totalConditionsHeaders[j]] = allStepItem;
     }
+  }
+
+  refreshModels() async {
+    userRoles.value = ["admin", "user", "technician", "service-advisor"];
+    customerTypes.value = ["Individual", "Corporate"];
+    inventoryStatus.value = ["Inbound", "Outbound", "Transfer"];
+    inventoryTransactionTypes.value = ["a", "b"];
+    allDevices.value = ["mobile", "pc"];
+    allBillyServices.value = await _getAll<BillyServices>();
+    allBillyConditionCategories.value = await _getAll<BillyConditionCategory>();
+    allBillyConditions.value = await _getAll<BillyConditions>();
+    allProductCategory.value = await _getAll<ProductCategory>();
+    allProductType.value = await _getAll<ProductType>();
+    allCarMakes.value = await _getAll<CarMake>();
+    allCarModels.value = await _getAll<CarModels>();
+    allCustomer.value = await _getAll<Customer>();
+    allCustomerCar.value = await _getAll<CustomerCar>();
+    allOrders.value = await _getAll<Order>();
+    allProducts.value = await _getAll<Product>();
+    allSuppliers.value = await _getAll<Supplier>();
+    allInventory.value = await _getAll<Inventory>();
+    allLoginHistory.value = await _getAll<LoginHistory>();
+    allUsers.value = await _getAll<User>();
+    allTechnicians.value = allUsers.where((test) => test.role == userRoles[2]).toList();
+    allServiceAdvisor.value = allUsers.where((test) => test.role == userRoles[3]).toList();
+    updateOrderWithInfo();
+
+    totalConditionsHeaders =
+        allBillyConditionCategories.map((element) => element.name).toList();
+    totalConditionsExpanded.value =
+        totalConditionsHeaders.map((e) => true).toList();
+
     initFilterOptions();
   }
 
-  Future<List<T>> _getAll<T>({List<FilterModel> fm = const [],T? bm}) async {
+  Future<List<T>> _getAll<T>({List<FilterModel> fm = const [], T? bm}) async {
     final g = (await appRepo.getAll<T>(limit: 10000, fm: fm)).data;
     return g;
   }
@@ -397,16 +406,15 @@ class AppController extends GetxController {
       await appRepo.login(username, password);
       return true;
     } catch (e) {
-      
       Ui.showError(e.toString());
-      if(e.toString() == "Please change password"){
-       Get.dialog(PasswordChangeModal(TextEditingController(text:username)));
+      if (e.toString() == "Please change password") {
+        Get.dialog(PasswordChangeModal(TextEditingController(text: username)));
       }
       return false;
     }
   }
 
-    Future<bool> resetPassword(String username, String password) async {
+  Future<bool> resetPassword(String username, String password) async {
     try {
       await appRepo.resetPassword(username, password);
       return true;
@@ -416,9 +424,9 @@ class AppController extends GetxController {
     }
   }
 
-  Future<bool> changePassword(String password,String npassword) async {
+  Future<bool> changePassword(String password, String npassword) async {
     try {
-      await appRepo.changePassword(password,npassword);
+      await appRepo.changePassword(password, npassword);
       return true;
     } catch (e) {
       Ui.showError(e.toString());
@@ -473,8 +481,10 @@ class AppController extends GetxController {
   }
 
   saveNewRecord(Map<String, dynamic> json) async {
-    final imageKeys = json.keys.where((element) => element.toLowerCase().endsWith("image") && json[element].contains("\\"));
-    if(imageKeys.isNotEmpty){
+    final imageKeys = json.keys.where((element) =>
+        element.toLowerCase().endsWith("image") &&
+        json[element].contains("\\"));
+    if (imageKeys.isNotEmpty) {
       for (var ik in imageKeys) {
         json[ik] = await appRepo.uploadPhoto(json[ik]);
       }
@@ -486,7 +496,7 @@ class AppController extends GetxController {
         await appRepo.create(mp);
         Get.back();
         Ui.showInfo("Successfully Created A New Record");
-        await initApp();
+        await refreshModels();
         tmds.value.refreshDatasource();
       }
     } catch (e) {
@@ -496,8 +506,10 @@ class AppController extends GetxController {
   }
 
   editExisitingRecord(Map<String, dynamic> json) async {
-    final imageKeys = json.keys.where((element) => element.toLowerCase().endsWith("image") && json[element].contains("\\"));
-    if(imageKeys.isNotEmpty){
+    final imageKeys = json.keys.where((element) =>
+        element.toLowerCase().endsWith("image") &&
+        json[element].contains("\\"));
+    if (imageKeys.isNotEmpty) {
       for (var ik in imageKeys) {
         json[ik] = await appRepo.uploadPhoto(json[ik]);
       }
@@ -508,7 +520,7 @@ class AppController extends GetxController {
         await appRepo.patch(mp);
         Get.back();
         Ui.showInfo("Successfully Updated Existing Record");
-        await initApp();
+        await refreshModels();
         tmds.value.refreshDatasource();
       }
     } catch (e) {
@@ -522,7 +534,7 @@ class AppController extends GetxController {
       await appRepo.delete<T>(id);
       Get.back();
       Ui.showInfo("Successfully Deleted Record");
-      await initApp();
+      await refreshModels();
       tmds.value.refreshDatasource();
     } catch (e) {
       print(e);

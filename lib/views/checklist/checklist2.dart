@@ -75,7 +75,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
 
   @override
   Widget build(BuildContext context) {
-    print(Ui.width(context));
+    print("${Ui.width(context)} ${Ui.height(context)}");
     return PopScope(
       canPop: false,
       onPopInvoked: (dp) {
