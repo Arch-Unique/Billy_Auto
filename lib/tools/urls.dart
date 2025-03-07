@@ -15,6 +15,7 @@ abstract class AppUrls {
   static const String supplier = "/supplier$profile";
   static const String service = "/service$profile";
   static const String loginHistory = "/loginhistory$profile";
+  static const String invoice = "/invoice$profile";
   static const String product = "/product$profile";
   static const String productType = "/product/type";
   static const String productCategory = "/product/category";
@@ -32,11 +33,11 @@ abstract class AppUrls {
   static const String login = "$user/auth/login";
   static const String resetPassword = "$user/auth/reset-password";
   static const String changePassword = "$user/auth/change-password";
-  
   static const String getUser = "$user$profile";
-
-
   static const String logout = "$user/auth/logout";
+
+  //inventory metric
+  static const String metrics = "/inventory/metrics";
 }
 
 abstract class AppRoutes {

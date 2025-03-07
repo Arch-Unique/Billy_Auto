@@ -529,7 +529,6 @@ class AppButton extends StatefulWidget {
         Expanded(
           child: outline(onPressedB, titleB),
         ),
-        
       ],
     );
   }
@@ -857,7 +856,15 @@ class AppDialog extends StatelessWidget {
           )
         ],
       ),
-      content: SizedBox(width: Ui.width(context) / 3, child: content),
+      content: SizedBox(
+          width: Ui.width(context) < 1500
+              ? (Ui.width(context) < 1000
+                  ? (Ui.width(context) < 700
+                      ? Ui.width(context) / 1.4
+                      : Ui.width(context) / 2)
+                  : Ui.width(context) / 2.5)
+              : Ui.width(context) / 3,
+          child: content),
     );
   }
 
@@ -1086,7 +1093,7 @@ class CustomTextField extends StatelessWidget {
 
   static dropdown(List<String> optionss, List<dynamic> valuess,
       TextEditingController cont, String label,
-      {Function(String)? onChanged, dynamic initOption, double? w}) {
+      {Function(dynamic)? onChanged, dynamic initOption, double? w,bool isEnabled=true}) {
     dynamic curOption;
 
     final options = List.from(optionss);
@@ -1121,7 +1128,7 @@ class CustomTextField extends StatelessWidget {
               ),
             CurvedContainer(
               color: AppColors.white,
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(horizontal: 10,vertical: 0),
               border: Border.all(color: Colors.grey),
               child: DropdownButton<dynamic>(
                   value: curOption,
@@ -1137,18 +1144,20 @@ class CustomTextField extends StatelessWidget {
                   //     color: AppColors.white,
                   //   ),
                   // ),
+                  padding: EdgeInsets.all(6),
 
                   icon: Icon(
                     Icons.keyboard_arrow_down_rounded,
                     color: AppColors.primaryColor,
                   ),
                   dropdownColor: AppColors.white,
+                  isDense: true,
                   items: values
                       .map((e) => DropdownMenuItem<dynamic>(
                           value: e,
                           child: AppText.thin(options[values.indexOf(e)])))
                       .toList(),
-                  onChanged: (value) {
+                  onChanged: !isEnabled ? null : (value) {
                     setState(() {
                       curOption = value!;
                       cont.text = curOption.toString();
@@ -1366,6 +1375,7 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
       searchEnabled: true,
       controller: mdcont,
       enabled: widget.isEnable,
+      
       dropdownItemDecoration: ddec,
       fieldDecoration: fdec,
       onSelectionChange: (selectedItems) {
@@ -1408,7 +1418,7 @@ class AppDivider extends StatelessWidget {
     return const Padding(
       padding: EdgeInsets.symmetric(vertical: 16.0),
       child: Divider(
-        color: AppColors.grey,
+        color: AppColors.primaryColorLight,
       ),
     );
   }
@@ -1648,45 +1658,53 @@ class _PasswordChangeModalState extends State<PasswordChangeModal> {
   }
 }
 
-
 class ConnectivityWidget extends StatelessWidget {
-  const ConnectivityWidget({required this.child,super.key});
+  const ConnectivityWidget({required this.child, super.key});
   final Widget child;
-
-  
 
   @override
   Widget build(BuildContext context) {
     final appService = Get.find<AppService>();
-    
-    return Obx(() 
-    {
+
+    return Obx(() {
       final ic = appService.isConnected.value;
-      if(!ic){
+      if (!ic) {
         return Stack(
           alignment: Alignment.center,
           children: [
             AbsorbPointer(child: child),
-            BackdropFilter(filter: ui.ImageFilter.blur(sigmaX: 5,sigmaY: 5),child: CurvedContainer(
-              padding: EdgeInsets.all(24),
-              
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AppText.bold("No Network Connection",fontFamily: Assets.appFontFamily2,fontSize: 24),
-                  AppText.thin("Please kindly connect to a network source or try again later",fontFamily: Assets.appFontFamily2),
-                  Icon(Icons.wifi_off_rounded,color: AppColors.primaryColor,size: 128,),
-                  SizedBox(
-                    width: 200,
-                    child: AppButton(onPressed: () async {
-                    final f = await Connectivity().checkConnectivity();
-                    appService.isConnected.value = !f.contains(ConnectivityResult.none);
-                    },text: "Retry",),
-                  )
-                ],
+            BackdropFilter(
+              filter: ui.ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: CurvedContainer(
+                padding: EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AppText.bold("No Network Connection",
+                        fontFamily: Assets.appFontFamily2, fontSize: 24),
+                    AppText.thin(
+                        "Please kindly connect to a network source or try again later",
+                        fontFamily: Assets.appFontFamily2),
+                    Icon(
+                      Icons.wifi_off_rounded,
+                      color: AppColors.primaryColor,
+                      size: 128,
+                    ),
+                    SizedBox(
+                      width: 200,
+                      child: AppButton(
+                        onPressed: () async {
+                          final f = await Connectivity().checkConnectivity();
+                          appService.isConnected.value =
+                              !f.contains(ConnectivityResult.none);
+                        },
+                        text: "Retry",
+                      ),
+                    )
+                  ],
+                ),
               ),
-
-            ),),
+            ),
           ],
         );
       }

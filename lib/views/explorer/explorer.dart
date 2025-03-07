@@ -41,6 +41,9 @@ class _ExplorerPageState extends State<ExplorerPage> {
         }),
         HeaderItem("Customer Cars", vb: () {
           controller.setCurrentTypeTable<CustomerCar>();
+        }),
+        HeaderItem("Invoice", vb: () {
+          controller.setCurrentTypeTable<Invoice>();
         })
       ]),
       CustomTablePage(
@@ -85,9 +88,11 @@ class _ExplorerPageState extends State<ExplorerPage> {
         HeaderItem("Inspection Category", vb: () {
           controller.setCurrentTypeTable<BillyConditionCategory>();
         }),
+        if(controller.appRepo.appService.currentUser.value.isAdmin)
         HeaderItem("Users", vb: () {
           controller.setCurrentTypeTable<User>();
         }),
+        if(controller.appRepo.appService.currentUser.value.isAdmin)
         HeaderItem("Login History", vb: () {
           controller.setCurrentTypeTable<LoginHistory>();
         })
@@ -131,6 +136,47 @@ class _ExplorerPageState extends State<ExplorerPage> {
   }
 
   header() {
+    final cl = List.generate(DashboardModes.values.length, (i) {
+            return Obx(() {
+              return CurvedContainer(
+                radius: 64,
+                onPressed: () {
+                  controller.currentDashboardMode.value =
+                      DashboardModes.values[i];
+                },
+                color: controller.currentDashboardMode.value ==
+                        DashboardModes.values[i]
+                    ? AppColors.primaryColor
+                    : AppColors.transparent,
+                padding: EdgeInsets.symmetric(vertical: 8, horizontal: (Ui.width(context) < 975 ? 8 :24),),
+                border: Border.all(
+                    color: controller.currentDashboardMode.value ==
+                            DashboardModes.values[i]
+                        ? AppColors.white
+                        : AppColors.transparent),
+                margin: EdgeInsets.symmetric(horizontal: (Ui.width(context) >= 975 ? 8 :4)),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AppIcon(DashboardModes.values[i].icon,
+                        color: controller.currentDashboardMode.value ==
+                                DashboardModes.values[i]
+                            ? AppColors.white
+                            : AppColors.primaryColorLight),
+                    if(Ui.width(context) >= 975)
+                    Ui.boxWidth(8),
+                    if(Ui.width(context) >= 975)
+                    AppText.bold(DashboardModes.values[i].title,
+                        fontSize: 14,
+                        color: controller.currentDashboardMode.value ==
+                                DashboardModes.values[i]
+                            ? AppColors.white
+                            : AppColors.primaryColorLight)
+                  ],
+                ),
+              );
+            });
+          });
     return Container(
       color: AppColors.primaryColor,
       child: Row(
@@ -145,45 +191,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
           Ui.boxHeight(56),
           // LogoWidget(64, isWhite: false),
           Spacer(),
-          ...List.generate(DashboardModes.values.length, (i) {
-            return Obx(() {
-              return CurvedContainer(
-                radius: 64,
-                onPressed: () {
-                  controller.currentDashboardMode.value =
-                      DashboardModes.values[i];
-                },
-                color: controller.currentDashboardMode.value ==
-                        DashboardModes.values[i]
-                    ? AppColors.primaryColor
-                    : AppColors.transparent,
-                padding: EdgeInsets.symmetric(vertical: 8, horizontal: 24),
-                border: Border.all(
-                    color: controller.currentDashboardMode.value ==
-                            DashboardModes.values[i]
-                        ? AppColors.white
-                        : AppColors.transparent),
-                margin: EdgeInsets.symmetric(horizontal: 8),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    AppIcon(DashboardModes.values[i].icon,
-                        color: controller.currentDashboardMode.value ==
-                                DashboardModes.values[i]
-                            ? AppColors.white
-                            : AppColors.primaryColorLight),
-                    Ui.boxWidth(8),
-                    AppText.bold(DashboardModes.values[i].title,
-                        fontSize: 14,
-                        color: controller.currentDashboardMode.value ==
-                                DashboardModes.values[i]
-                            ? AppColors.white
-                            : AppColors.primaryColorLight)
-                  ],
-                ),
-              );
-            });
-          }),
+          ...cl,
           Ui.boxWidth(24),
           InkWell(
               onTap: () {

@@ -8,7 +8,8 @@ class User extends BaseModel{
   String signature;
   String role;
   
-  
+  bool get isAdmin => role == "admin";
+  bool get isServiceAdvisor => isAdmin || role == "service-advisor";
 
   User({
     super.id=0,

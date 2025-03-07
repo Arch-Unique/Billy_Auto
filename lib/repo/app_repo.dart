@@ -66,6 +66,13 @@ class AppRepo extends GetxController {
     BillyConditionCategory: BillyConditionCategory.fromJson,
     BillyServices: BillyServices.fromJson,
     LoginHistory: LoginHistory.fromJson,
+    Invoice: Invoice.fromJson,
+    InventoryMetricStockBalances: InventoryMetricStockBalances.fromJson,
+    InventoryMetricStockBalancesCost: InventoryMetricStockBalancesCost.fromJson,
+    InventoryMetricDailyProfit: InventoryMetricDailyProfit.fromJson,
+    InventoryMetricMonthlyProfit: InventoryMetricMonthlyProfit.fromJson,
+    InventoryMetricYearlyProfit: InventoryMetricYearlyProfit.fromJson,
+    InventoryMetricProductPrice: InventoryMetricProductPrice.fromJson,
   };
 
   final Map<Type, String> urls = {
@@ -83,7 +90,14 @@ class AppRepo extends GetxController {
     BillyConditions: AppUrls.condition,
     BillyConditionCategory: AppUrls.conditionCategory,
     BillyServices: AppUrls.service,
-    LoginHistory: AppUrls.loginHistory
+    LoginHistory: AppUrls.loginHistory,
+    Invoice: AppUrls.invoice,
+    InventoryMetricStockBalances: "${AppUrls.metrics}/1",
+    InventoryMetricStockBalancesCost: "${AppUrls.metrics}/2",
+    InventoryMetricDailyProfit: "${AppUrls.metrics}/3",
+    InventoryMetricMonthlyProfit: "${AppUrls.metrics}/4",
+    InventoryMetricYearlyProfit: "${AppUrls.metrics}/5",
+    InventoryMetricProductPrice: "${AppUrls.metrics}/6"
   };
 
   TotalResponse<T> getListOf<T>(dynamic res) {
@@ -201,6 +215,11 @@ class AppRepo extends GetxController {
       return res.data["data"];
     }
     return null;
+  }
+
+  Future<List<T>> getAllMetricData<T>() async {
+    final res = await apiService.get(urls[T]!);
+    return (getListOf<T>(res)).data;
   }
 
   // sendDemoToBackend() async {

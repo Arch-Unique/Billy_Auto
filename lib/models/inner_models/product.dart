@@ -3,8 +3,6 @@ import 'package:inventory/models/inner_models/base_model.dart';
 class Product extends BaseModel{
   
   String name;
-  double cost;
-  double sellingPrice;
   int productCategoryId;
   String code;
   String image;
@@ -16,8 +14,6 @@ class Product extends BaseModel{
   Product({
     super.id = 0,
     required this.name,
-    required this.cost,
-    required this.sellingPrice,
     required this.productCategoryId,
     required this.supplierId,
     this.productCategory="",
@@ -34,8 +30,6 @@ class Product extends BaseModel{
 Map<String, dynamic> toJson() {
     return {
       'name': name,
-      'cost': cost,
-      'sellingPrice': sellingPrice,
       'productCategoryId': productCategoryId,
       'code': code,
       'image': image,
@@ -46,7 +40,7 @@ Map<String, dynamic> toJson() {
 
       @override
 List<dynamic> toTableRows(){
-    return [id,name,code,cost,sellingPrice,productType,productCategory,createdAtRaw];
+    return [id,name,code,productType,productCategory,createdAtRaw];
   }
 
   @override
@@ -59,8 +53,7 @@ List<dynamic> toTableRows(){
     return Product(
       id: json['id'] ?? 0,
       name: json['name'],
-      cost: double.tryParse(json['cost'].toString()) ?? 0,
-      sellingPrice: double.tryParse(json['sellingPrice'].toString()) ?? 0,
+      
       productCategoryId: int.tryParse(json['productCategoryId'].toString()) ?? 0,
       productCategory: json['productCategory'] ?? "",
       code: json['code'] ?? "",

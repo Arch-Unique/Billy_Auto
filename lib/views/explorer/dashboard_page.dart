@@ -12,6 +12,9 @@ import 'package:inventory/models/inner_models/barrel.dart';
 import 'package:inventory/models/table_repo.dart';
 import 'package:inventory/tools/assets.dart';
 import 'package:inventory/tools/colors.dart';
+import 'package:inventory/tools/extensions.dart';
+import 'package:inventory/views/checklist/shared2.dart';
+import 'package:inventory/views/explorer/admin_page.dart';
 import 'package:inventory/views/shared.dart';
 
 class ExpDashboardPage extends StatefulWidget {
@@ -25,6 +28,41 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
   final controller = Get.find<AppController>();
   @override
   Widget build(BuildContext context) {
+    final cl = Obx(() {
+      final cf = [
+        itemDataWidget(
+            "Total Customers",
+            controller.allCustomer.length.toString(),
+            Colors.lightBlue[100]!.withOpacity(0.7)),
+        itemDataWidget(
+            "Total Suppliers",
+            controller.allSuppliers.length.toString(),
+            Colors.yellow[100]!.withOpacity(0.7)),
+        itemDataWidget(
+            "Total Products",
+            controller.allProducts.length.toString(),
+            Colors.lightGreen[100]!.withOpacity(0.7)),
+        itemDataWidget("Total Orders", controller.allOrders.length.toString(),
+            Colors.lightGreen[100]!.withOpacity(0.7)),
+        itemDataWidget(
+            "Pending Orders",
+            controller.allPendingOrders.length.toString(),
+            Colors.red[100]!.withOpacity(0.7)),
+      ];
+      return Ui.width(context) < 975
+          ? Wrap(
+              children: cf
+                  .map((e) => SizedBox(
+                        width: (Ui.width(context) - 48) / 2,
+                        child: e,
+                      ))
+                  .toList(),
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: cf,
+            );
+    });
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
@@ -47,71 +85,51 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
             ],
           ),
           Ui.boxHeight(24),
-          Obx(
-             () {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  itemDataWidget(
-                      "Total Customers",
-                      controller.allCustomer.length.toString(),
-                      Colors.lightBlue[100]!.withOpacity(0.7)),
-                  itemDataWidget(
-                      "Total Suppliers",
-                      controller.allSuppliers.length.toString(),
-                      Colors.yellow[100]!.withOpacity(0.7)),
-                  itemDataWidget(
-                      "Total Products",
-                      controller.allProducts.length.toString(),
-                      Colors.lightGreen[100]!.withOpacity(0.7)),
-                  itemDataWidget(
-                      "Total Orders",
-                      controller.allOrders.length.toString(),
-                      Colors.lightGreen[100]!.withOpacity(0.7)),
-                  itemDataWidget(
-                      "Pending Orders",
-                      controller.allPendingOrders.length.toString(),
-                      Colors.red[100]!.withOpacity(0.7)),
-                ],
-              );
-            }
-          ),
-          Expanded(
-              child: Row(
-            children: [
-              Expanded(child: MyBarChart()),
-              Column(
-                children: [
-                  Expanded(child: recentOrders()),
-                  // Expanded(child: recentInventory()),
-                ],
-              )
-            ],
-          ))
+          cl,
+          if (Ui.width(context) >= 975)
+            Expanded(
+                child: Row(
+              children: [
+                Obx(
+                   () {
+                    return Expanded(child: controller.currentChart.value == 0 ? MyBarChart() : ProfitChart());
+                  }
+                ),
+                Column(
+                  children: [
+                    Expanded(child: recentOrders()),
+                    // Expanded(child: recentInventory()),
+                  ],
+                )
+              ],
+            ))
         ],
       ),
     );
   }
 
-  itemDataWidget(String title, String value, Color color, {String desc = ""}) {
-    return Expanded(
-      child: CurvedContainer(
-        height: 160,
-        padding: EdgeInsets.all(16),
-        margin: EdgeInsets.all(16),
-        color: color,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppText.thin(title,
-                fontSize: 20, fontFamily: Assets.appFontFamily2),
-            Ui.spacer(),
-            AppText.bold(value, fontSize: 48),
-            if (desc.isNotEmpty) AppText.thin(desc)
-          ],
-        ),
+  Widget itemDataWidget(String title, String value, Color color,
+      {String desc = ""}) {
+    final cc = CurvedContainer(
+      height: 160,
+      padding: EdgeInsets.all(16),
+      margin: EdgeInsets.all(16),
+      color: color,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AppText.thin(title, fontSize: 20, fontFamily: Assets.appFontFamily2),
+          Ui.spacer(),
+          AppText.bold(value, fontSize: 48),
+          if (desc.isNotEmpty) AppText.thin(desc)
+        ],
       ),
     );
+    return Ui.width(Get.context!) < 975
+        ? cc
+        : Expanded(
+            child: cc,
+          );
   }
 
   Widget recentOrders() {
@@ -243,6 +261,7 @@ class RecentInventoryDS<Inventory> extends AsyncDataTableSource {
   }
 }
 
+
 class MyBarChart extends StatefulWidget {
   const MyBarChart({super.key});
 
@@ -251,66 +270,139 @@ class MyBarChart extends StatefulWidget {
 }
 
 class _MyBarChartState extends State<MyBarChart> {
-  List<DateTime> dtt = [];
-  List<int> orderCnt=[];
-  Map<DateTime, int> groupedOrders = {};
+  List<DateTime> datePoints = [];
+  List<int> orderCnt = [];
+  Map<DateTime, int> groupedOrdersByMonth = {};
+  Map<DateTime, int> groupedOrdersByDay = {};
+  Map<DateTime, int> groupedOrdersByYear = {};
+
+  TextEditingController filterTec = TextEditingController(text: "Day");
+  String currentFilter = "Day";
 
   @override
   void initState() {
-    getMapOrder();
-    dtt = getLast6Mth();
     super.initState();
+    // Group orders by month, day and year
+    groupOrderData();
+    // Initialize with last 6 months
+    updateChartData();
+  }
+
+  void groupOrderData() {
+    // Group orders by month-year
+    groupedOrdersByMonth = {};
+    for (var order in Get.find<AppController>().allOrders) {
+      DateTime month = DateTime(order.createdAt!.year, order.createdAt!.month);
+      if (groupedOrdersByMonth.containsKey(month)) {
+        groupedOrdersByMonth[month] = groupedOrdersByMonth[month]! + 1;
+      } else {
+        groupedOrdersByMonth[month] = 1;
+      }
+    }
+
+    // Group orders by day
+    groupedOrdersByDay = {};
+    for (var order in Get.find<AppController>().allOrders) {
+      DateTime day = DateTime(
+        order.createdAt!.year, 
+        order.createdAt!.month, 
+        order.createdAt!.day
+      );
+      if (groupedOrdersByDay.containsKey(day)) {
+        groupedOrdersByDay[day] = groupedOrdersByDay[day]! + 1;
+      } else {
+        groupedOrdersByDay[day] = 1;
+      }
+    }
+
+    // Group orders by year
+    groupedOrdersByYear = {};
+    for (var order in Get.find<AppController>().allOrders) {
+      DateTime year = DateTime(order.createdAt!.year);
+      if (groupedOrdersByYear.containsKey(year)) {
+        groupedOrdersByYear[year] = groupedOrdersByYear[year]! + 1;
+      } else {
+        groupedOrdersByYear[year] = 1;
+      }
+    }
+  }
+
+  void updateChartData() {
+    datePoints = [];
+    orderCnt = [];
+    
+    if (currentFilter == "Month") {
+      datePoints = getLast6Months();
+    } else if (currentFilter == "Day") {
+      datePoints = getLast6Days();
+    } else if (currentFilter == "Year") {
+      datePoints = getLast6Years();
+    }
+  }
+
+  List<DateTime> getLast6Months() {
+    DateTime currentDate = DateTime.now();
+    List<DateTime> last6Months = [];
+    orderCnt = [];
+
+    for (int i = 5; i >= 0; i--) {
+      DateTime month = DateTime(currentDate.year, currentDate.month - i);
+      last6Months.add(month);
+      orderCnt.add(groupedOrdersByMonth[month] ?? 0);
+    }
+    return last6Months;
+  }
+
+  List<DateTime> getLast6Days() {
+    DateTime currentDate = DateTime.now();
+    List<DateTime> last6Days = [];
+    orderCnt = [];
+
+    for (int i = 5; i >= 0; i--) {
+      DateTime day = DateTime(
+        currentDate.year, 
+        currentDate.month, 
+        currentDate.day - i
+      );
+      last6Days.add(day);
+      orderCnt.add(groupedOrdersByDay[day] ?? 0);
+    }
+    return last6Days;
+  }
+
+  List<DateTime> getLast6Years() {
+    DateTime currentDate = DateTime.now();
+    List<DateTime> last6Years = [];
+    orderCnt = [];
+
+    for (int i = 5; i >= 0; i--) {
+      DateTime year = DateTime(currentDate.year - i);
+      last6Years.add(year);
+      orderCnt.add(groupedOrdersByYear[year] ?? 0);
+    }
+    return last6Years;
   }
 
   @override
   Widget build(BuildContext context) {
     return BarChart(
-    
       BarChartData(
-        
         barTouchData: barTouchData,
         titlesData: titlesData,
         borderData: borderData,
         barGroups: barGroups,
-        gridData: const FlGridData(show: false,drawVerticalLine: false),
-        
+        gridData: const FlGridData(show: false, drawVerticalLine: false),
         backgroundColor: AppColors.primaryColorLight.withOpacity(0.2),
-        maxY: orderCnt.reduce(max).toDouble()*1.3,
+        maxY: orderCnt.isEmpty ? 10 : (orderCnt.reduce(max).toDouble() * 1.3),
       ),
     );
-  }
-
-  List<DateTime> getLast6Mth() {
-    DateTime currentDate = DateTime.now();
-
-    // List to hold last 6 months
-    List<DateTime> last6Months = [];
-
-    for (int i = 5; i >= 0; i--) {
-      DateTime month = DateTime(currentDate.year, currentDate.month - i);
-      last6Months.add(month);
-      orderCnt.add(groupedOrders[month] ?? 0);
-    }
-    return last6Months;
-  }
-
-  getMapOrder(){
-     // Group orders by month-year
-  for (var order in Get.find<AppController>().allOrders) {
-    DateTime month = DateTime(order.createdAt!.year, order.createdAt!.month);
-    if (groupedOrders.containsKey(month)) {
-      groupedOrders[month] = groupedOrders[month]! + 1;
-    } else {
-      groupedOrders[month] = 1;
-    }
-  }
   }
 
   BarTouchData get barTouchData => BarTouchData(
         enabled: true,
         touchTooltipData: BarTouchTooltipData(
           tooltipBgColor: Colors.transparent,
-          tooltipPadding: EdgeInsets.only(bottom: 4),
+          tooltipPadding: const EdgeInsets.only(bottom: 4),
           tooltipMargin: 8,
           getTooltipItem: (
             BarChartGroupData group,
@@ -321,7 +413,7 @@ class _MyBarChartState extends State<MyBarChart> {
             return BarTooltipItem(
               rod.toY.round().toString(),
               const TextStyle(
-                color: Colors.cyan,
+                color: AppColors.primaryColor,
                 fontWeight: FontWeight.bold,
               ),
             );
@@ -330,7 +422,25 @@ class _MyBarChartState extends State<MyBarChart> {
       );
 
   Widget getTitles(double value, TitleMeta meta) {
-    final text = DateFormat("MMM yyyy").format(dtt[value.toInt()]);
+    if (value.toInt() >= datePoints.length) {
+      return const SizedBox();
+    }
+    
+    String text;
+    switch(currentFilter) {
+      case "Month":
+        text = DateFormat("MMM yyyy").format(datePoints[value.toInt()]);
+        break;
+      case "Day":
+        text = DateFormat("dd MMM").format(datePoints[value.toInt()]);
+        break;
+      case "Year":
+        text = DateFormat("yyyy").format(datePoints[value.toInt()]);
+        break;
+      default:
+        text = "";
+    }
+    
     return SideTitleWidget(
       axisSide: AxisSide.bottom,
       space: 4,
@@ -347,22 +457,47 @@ class _MyBarChartState extends State<MyBarChart> {
             getTitlesWidget: getTitles,
           ),
         ),
-        leftTitles:  AxisTitles(
+        leftTitles: AxisTitles(
           axisNameWidget: Padding(
             padding: const EdgeInsets.all(24.0),
-            child: AppText.bold("No of Orders per Month",fontFamily: Assets.appFontFamily2),
+            child: AppText.bold("No of Orders per ${currentFilter}",
+                fontFamily: Assets.appFontFamily2),
           ),
-          sideTitles: SideTitles(showTitles: false),
+          sideTitles: const SideTitles(showTitles: false),
         ),
-        topTitles:  AxisTitles(
+        topTitles: AxisTitles(
+          drawBelowEverything: false,
+          axisNameSize: 100,
           axisNameWidget: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: AppText.bold("Service Order Metrics",fontFamily: Assets.appFontFamily2),
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ChartHeaderChooser(),
+                Container(
+                  width: 150,
+                  child: CustomTextField.dropdown(
+                    ["Month", "Day", "Year"], 
+                    ["Month", "Day", "Year"], 
+                    filterTec, 
+                    "",
+                    initOption: currentFilter, 
+                    onChanged: (value) {
+                      if (value != null && value != currentFilter) {
+                        setState(() {
+                          currentFilter = value;
+                          updateChartData();
+                        });
+                      }
+                    }
+                  ),
+                )
+              ],
+            ),
           ),
-          sideTitles: SideTitles(showTitles: false),
+          sideTitles: const SideTitles(showTitles: false),
         ),
-        rightTitles: AxisTitles(
-          
+        rightTitles: const AxisTitles(
           sideTitles: SideTitles(showTitles: false),
         ),
       );
@@ -373,20 +508,390 @@ class _MyBarChartState extends State<MyBarChart> {
 
   LinearGradient get _barsGradient => const LinearGradient(
         colors: [
-          Colors.blue,
-          Colors.cyan,
+          AppColors.primaryColorLight,
+          AppColors.primaryColor,
         ],
         begin: Alignment.bottomCenter,
         end: Alignment.topCenter,
       );
 
-  List<BarChartGroupData> get barGroups => List.generate(dtt.length, (index) => BarChartGroupData(x: index,barRods: [
-            BarChartRodData(
-              toY: orderCnt[index].toDouble(),
-              gradient: _barsGradient,
-              borderRadius: BorderRadius.circular(16),
-              width: 56
-            )
-          ],
-          showingTooltipIndicators: [0],)) ;
+  List<BarChartGroupData> get barGroups => List.generate(
+      datePoints.length,
+      (index) => BarChartGroupData(
+            x: index,
+            barRods: [
+              BarChartRodData(
+                  toY: orderCnt[index].toDouble(),
+                  gradient: _barsGradient,
+                  borderRadius: BorderRadius.circular(16),
+                  width: 56)
+            ],
+            showingTooltipIndicators: [0],
+          ));
+}
+
+class ChartHeaderChooser extends StatelessWidget {
+  const ChartHeaderChooser({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(
+       () {
+        return HeaderChooser([
+          HeaderItem("Service Order Metrics",vb: (){
+        Get.find<AppController>().currentChart.value=0;
+          },),
+          HeaderItem("Profit Metrics",vb: (){
+        Get.find<AppController>().currentChart.value=1;
+          }),
+        ],i: Get.find<AppController>().currentChart.value,);
+      }
+    );
+  }
+}
+
+// Profit Chart
+class ProfitChart extends StatefulWidget {
+  const ProfitChart({super.key});
+
+  @override
+  State<ProfitChart> createState() => _ProfitChartState();
+}
+
+class _ProfitChartState extends State<ProfitChart> {
+  List<DateTime> datePoints = [];
+  String currentFilter = "Day";
+  List<InventoryMetricDailyProfit> dailyProfits = [];
+  List<InventoryMetricMonthlyProfit> monthlyProfits = [];
+  List<InventoryMetricYearlyProfit> yearlyProfits = [];
+  TextEditingController filterTec = TextEditingController(text: "Day");
+  String profitType = "Sales"; // Options: Total, Product, Service, Labor
+  TextEditingController profitTypeTec = TextEditingController(text: "Sales");
+
+  List<Color> gradientColors = [
+    const Color.fromARGB(255, 204, 242, 255),
+    AppColors.primaryColor,
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Load profit data
+    loadProfitData();
+    // Initialize with monthly data
+    updateChartData();
+  }
+
+  Future<void> loadProfitData() async {
+    // Fetch data from your API or controller
+    // This is placeholder - replace with your actual data retrieval logic
+    dailyProfits = Get.find<AppController>().allDailyProfit;
+    monthlyProfits = Get.find<AppController>().allMonthlyProfit;
+    yearlyProfits = Get.find<AppController>().allYearlyProfit;
+    setState(() {});
+  }
+
+  void updateChartData() {
+    datePoints = [];
+    
+    switch (currentFilter) {
+      case "Month":
+        datePoints = getLast6Months();
+        break;
+      case "Day":
+        datePoints = getLast6Days();
+        break;
+      case "Year":
+        datePoints = getLast6Years();
+        break;
+    }
+  }
+
+  List<DateTime> getLast6Months() {
+    DateTime currentDate = DateTime.now();
+    List<DateTime> last6Months = [];
+
+    for (int i = 5; i >= 0; i--) {
+      DateTime month = DateTime(currentDate.year, currentDate.month - i, 1);
+      last6Months.add(month);
+    }
+    return last6Months;
+  }
+
+  List<DateTime> getLast6Days() {
+    DateTime currentDate = DateTime.now();
+    List<DateTime> last6Days = [];
+
+    for (int i = 5; i >= 0; i--) {
+      DateTime day = DateTime(
+        currentDate.year, 
+        currentDate.month, 
+        currentDate.day - i
+      );
+      last6Days.add(day);
+    }
+    return last6Days;
+  }
+
+  List<DateTime> getLast6Years() {
+    DateTime currentDate = DateTime.now();
+    List<DateTime> last6Years = [];
+
+    for (int i = 5; i >= 0; i--) {
+      DateTime year = DateTime(currentDate.year - i);
+      last6Years.add(year);
+    }
+    return last6Years;
+  }
+
+  // Get profit value based on current selection
+  double getProfitValue(dynamic profitObj) {
+    switch (profitType) {
+      case "Sales":
+        return profitObj.sales;
+      case "Profit":
+        return profitObj.profit;
+      // case "Service":
+      //   return profitObj.serviceProfit;
+      // case "Labor":
+      //   return profitObj.laborProfit;
+      case "Expenses":
+        return profitObj.productCost;
+      default:
+        return profitObj.sales;
+    }
+  }
+
+  // Find profit data for a specific date
+  double getProfitForDate(DateTime date) {
+    switch (currentFilter) {
+      case "Day":
+        final profit = dailyProfits.firstWhere(
+          (p) => p.date.year == date.year && p.date.month == date.month && p.date.day == date.day,
+          orElse: () => InventoryMetricDailyProfit(date: date),
+        );
+        return getProfitValue(profit);
+      
+      case "Month":
+        final profit = monthlyProfits.firstWhere(
+          (p) => p.date.year == date.year && p.date.month == date.month,
+          orElse: () => InventoryMetricMonthlyProfit(date: date),
+        );
+        return getProfitValue(profit);
+      
+      case "Year":
+        final profit = yearlyProfits.firstWhere(
+          (p) => p.date.year == date.year,
+          orElse: () => InventoryMetricYearlyProfit(date: date),
+        );
+        return getProfitValue(profit);
+      
+      default:
+        return 0;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LineChart(
+      LineChartData(
+        gridData: FlGridData(
+          show: false,
+        ),
+        titlesData: FlTitlesData(
+          show: true,
+          rightTitles: AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          topTitles: AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+            drawBelowEverything: true,
+          axisNameSize: 100,
+            axisNameWidget: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ChartHeaderChooser(),
+              Row(
+                children: [
+                  Container(
+                    width: 150,
+                    margin: const EdgeInsets.only(right: 8),
+                    child: CustomTextField.dropdown(
+                      ["Sales", "Profit","Expenses"], 
+                      ["Sales", "Profit","Expenses"], 
+                      profitTypeTec, 
+                      "",
+                      initOption: profitType, 
+                      onChanged: (value) {
+                        if (value != null && value != profitType) {
+                          setState(() {
+                            profitType = value;
+                          });
+                        }
+                      }
+                    ),
+                  ),
+                  Container(
+                    width: 150,
+                    child: CustomTextField.dropdown(
+                      ["Month", "Day", "Year"], 
+                      ["Month", "Day", "Year"], 
+                      filterTec, 
+                      "",
+                      initOption: currentFilter, 
+                      onChanged: (value) {
+                        if (value != null && value != currentFilter) {
+                          setState(() {
+                            currentFilter = value;
+                            updateChartData();
+                          });
+                        }
+                      }
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 30,
+              interval: 1,
+              getTitlesWidget: (value, meta) {
+                if (value.toInt() >= datePoints.length || value.toInt() < 0) {
+                  return const SizedBox();
+                }
+                
+                String text;
+                switch(currentFilter) {
+                  case "Month":
+                    text = DateFormat("MMM yyyy").format(datePoints[value.toInt()]);
+                    break;
+                  case "Day":
+                    text = DateFormat("dd MMM ").format(datePoints[value.toInt()]);
+                    break;
+                  case "Year":
+                    text = DateFormat("yyyy").format(datePoints[value.toInt()]);
+                    break;
+                  default:
+                    text = "";
+                }
+                
+                return SideTitleWidget(
+                  axisSide: meta.axisSide,
+                  space: 8,
+                  child: AppText.bold(text, fontSize: 14),
+                );
+              },
+            ),
+          ),
+          // leftTitles: AxisTitles(
+          //   sideTitles: SideTitles(
+          //     showTitles: true,
+          //     interval: 1,
+          //     reservedSize: 42,
+          //     getTitlesWidget: (value, meta) {
+          //       return SideTitleWidget(
+          //         axisSide: meta.axisSide,
+          //         space: 8,
+          //         child: AppText.bold(
+          //           '${value.toInt()}',
+          //           fontSize: 12,
+          //           color: Colors.grey,
+          //         ),
+          //       );
+          //     },
+          //   ),
+          // ),
+        ),
+        borderData: FlBorderData(
+          show: true,
+          border: Border(
+      left: BorderSide(color: Colors.grey.withOpacity(0.5)),
+      bottom: BorderSide(color: Colors.grey.withOpacity(0.5)),
+    ),
+        ),
+        minX: 0,
+        maxX: datePoints.length - 1.0,
+        minY: 0,
+        backgroundColor: AppColors.primaryColorLight.withOpacity(0.2),
+        lineBarsData: [
+          LineChartBarData(
+            spots: datePoints.asMap().entries.map((entry) {
+              return FlSpot(
+                entry.key.toDouble(),
+                getProfitForDate(entry.value),
+              );
+            }).toList(),
+            isCurved: false,
+            color: AppColors.primaryColor,
+            barWidth: 3,
+            isStrokeCapRound: true,
+            dotData: FlDotData(
+              show: true,
+              getDotPainter: (spot, percent, barData, index) {
+                return FlDotCirclePainter(
+                  radius: 5,
+                  color: AppColors.primaryColor,
+                  strokeWidth: 1,
+                  strokeColor: Colors.white,
+                );
+              },
+            ),
+            belowBarData: BarAreaData(
+              show: true,
+              color: AppColors.primaryColor.withOpacity(0.2),
+              gradient: LinearGradient(
+                colors: gradientColors
+                    .map((color) => color.withOpacity(0.3))
+                    .toList(),
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+        ],
+        lineTouchData: LineTouchData(
+          touchTooltipData: LineTouchTooltipData(
+            tooltipBgColor: Colors.blueGrey,
+            tooltipRoundedRadius: 8,
+            getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
+              return touchedBarSpots.map((barSpot) {
+                final date = datePoints[barSpot.x.toInt()];
+                String formattedDate;
+                
+                switch(currentFilter) {
+                  case "Month":
+                    formattedDate = DateFormat("MMM yyyy").format(date);
+                    break;
+                  case "Day":
+                    formattedDate = DateFormat("dd MMM yyyy").format(date);
+                    break;
+                  case "Year":
+                    formattedDate = DateFormat("yyyy").format(date);
+                    break;
+                  default:
+                    formattedDate = "";
+                }
+                
+                return LineTooltipItem(
+                  "$formattedDate\nTotal ${profitType}: ${barSpot.y.toCurrency()}",
+                  const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+              }).toList();
+            },
+          ),
+          handleBuiltInTouches: true,
+        ),
+      ),
+    );
+  }
 }

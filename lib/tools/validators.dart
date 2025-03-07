@@ -40,10 +40,10 @@ abstract class Validators {
   }
 
   static String? validateNum(dynamic value) {
-    if (value != null && value!.length > 5 && GetUtils.isNumericOnly(value!)) {
+    if (value != null && GetUtils.isNumericOnly(value!)) {
       return null;
     }
-    return "Invalid Code";
+    return "Invalid number";
   }
 
   static String? emptyFieldValidator(dynamic value) {

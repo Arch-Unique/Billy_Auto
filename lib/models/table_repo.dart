@@ -157,8 +157,6 @@ class AllTables {
           "id",
           "name",
           "code",
-          "cost",
-          "sellingPrice",
           "type",
           "category",
           "createdAt"
@@ -170,8 +168,6 @@ class AllTables {
         ],
         Product(
             name: "",
-            cost: 0,
-            sellingPrice: 0,
             productCategoryId: 0,
             productTypeId: 0,
             supplierId: 0)),
@@ -226,5 +222,14 @@ class AllTables {
       FilterModel("Device", "device", 0),
       
     ], LoginHistory(),),
+     Invoice: TableModel([
+      "id",
+      "order",
+      "labourCost",
+      "totalCost",
+      "createdAt"
+    ], [
+      
+    ], Invoice(productsUsed: [], servicesUsed: []),),
   };
 }

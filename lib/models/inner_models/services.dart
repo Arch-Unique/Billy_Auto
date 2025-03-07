@@ -4,11 +4,13 @@ class BillyServices extends BaseModel{
   
   String name;
   String image;
+  double cost;
   
   
 
   BillyServices({
     super.id = 0,
+    this.cost = 0,
     required this.name,
     required this.image,
     super.createdAt,
@@ -18,7 +20,7 @@ class BillyServices extends BaseModel{
   // Convert Services object to JSON
   @override
 Map<String, dynamic> toJson() {
-    return {'name': name, 'image': image};
+    return {'name': name, 'image': image,'cost':cost};
   }
 
       @override
@@ -37,6 +39,7 @@ List<dynamic> toTableRows(){
       id: json['id'] ?? 0,
       name: json['name'],
       image: json['image'] ?? "",
+      cost: double.tryParse(json['cost'].toString()) ?? 0,
       createdAt: DateTime.tryParse(json['createdAt']),
       updatedAt: DateTime.tryParse(json['updatedAt']),
     );

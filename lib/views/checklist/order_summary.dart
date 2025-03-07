@@ -8,7 +8,10 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:inventory/controllers/app_controller.dart';
+import 'package:inventory/repo/app_repo.dart';
 import 'package:inventory/tools/colors.dart';
+import 'package:inventory/tools/enums.dart';
+import 'package:inventory/tools/extensions.dart';
 import 'package:inventory/views/auth/auth_page.dart';
 import 'package:inventory/views/checklist/shared2.dart';
 import 'package:inventory/views/explorer/explorer.dart';
@@ -34,73 +37,26 @@ class _OrderSummaryState extends State<OrderSummary> {
   // final controller = Get.find<AppController>();
   final frameId = "archpage";
   bool isSaving = false;
-  // ExportDelegate exd = ExportDelegate(
-  //   ttfFonts: {
-  //     "Raleway": "assets/fonts/Raleway-Regular.ttf",
-  //   },
-  //     options: ExportOptions(
-  //         textFieldOptions: TextFieldOptions.uniform(
-  //           interactive: false,
-  //         ),
-  //         checkboxOptions: CheckboxOptions.uniform(
-  //           interactive: false,
-  //         ),
+  Rx<Invoice> invoice = Invoice(productsUsed: [], servicesUsed: []).obs;
 
-  //         pageFormatOptions: PageFormatOptions.a4()));
+  @override
+  void initState() {
+    // TODO: implement initState
+    invoice.value.orderId = widget.order.id;
+    if (widget.order.id != 0) {
+      final fg = Get.find<AppController>()
+          .allInvoices
+          .where((test) => test.orderId == widget.order.id);
+      if (fg.isNotEmpty) {
+        invoice.value = fg.first;
+      }
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar:
-      // AppBar(
-      //   actions: [
-      //     Padding(
-      //       padding: const EdgeInsets.only(right: 32.0),
-      //       child: GestureDetector(
-      //           onTap: () async {
-      //             setState(() {
-      //               isSaving = true;
-      //             });
-      //             final pdf = await imageController.capture();
-      //             await controller.saveFile(pdf!, 'static-example');
-      //             setState(() {
-      //               isSaving = false;
-      //             });
-      //           },
-      //           child: CircleAvatar(
-      //               backgroundColor: AppColors.primaryColor,
-      //               radius: 24,
-      //               child: Center(
-      //                   child: AppIcon(
-      //                 Icons.print,
-      //                 color: AppColors.white,
-      //               )))),
-      //     ),
-      //     Padding(
-      //       padding: const EdgeInsets.only(right: 32.0),
-      //       child: GestureDetector(
-      //           onTap: () {
-      //             Get.to(CustomOrderPDFPage());
-      //             // setState(() {
-      //             //   isSaving = true;
-      //             // });
-      //             // final pdf = await imageController.capture();
-      //             // await controller.saveFile(pdf!, 'static-example');
-      //             // setState(() {
-      //             //   isSaving = false;
-      //             // });
-      //           },
-      //           child: CircleAvatar(
-      //               backgroundColor: AppColors.primaryColor,
-      //               radius: 24,
-      //               child: Center(
-      //                   child: AppIcon(
-      //                 Icons.upload,
-      //                 color: AppColors.green,
-      //               )))),
-      //     )
-      //   ],
-      // ),
       body: SingleChildScrollView(
         // padding: EdgeInsets.all(24),
         child: Builder(builder: (context) {
@@ -109,8 +65,7 @@ class _OrderSummaryState extends State<OrderSummary> {
               : "Service Order Summary";
           final toreturn = Column(
             children: [
-              
-                Ui.boxWidth(24),
+              Ui.boxWidth(24),
               LogoWidget(144),
               AppText.medium(title,
                   fontSize: 32,
@@ -154,6 +109,7 @@ class _OrderSummaryState extends State<OrderSummary> {
                           widget.order.createdAt ?? DateTime.now(),
                           order: widget.order,
                           orderFinished: widget.order.dispatchedAt,
+                          invoice: widget.order.isDispatched ? invoice.value : null,
                           sigUint: widget.sig,
                         ));
                       },
@@ -184,7 +140,7 @@ class _OrderSummaryState extends State<OrderSummary> {
                           widget.order.customerDetails?.customerType),
                     ],
                   )),
-                  imageContainer(true),
+              imageContainer(true),
               serviceItem(
                   "VEHICLE",
                   Column(
@@ -224,7 +180,7 @@ class _OrderSummaryState extends State<OrderSummary> {
                           "Additonal Observations", widget.order.observations),
                     ],
                   )),
-                  imageContainer(false),
+              imageContainer(false),
 
               serviceItem(
                   "SERVICE PLAN",
@@ -285,10 +241,10 @@ class _OrderSummaryState extends State<OrderSummary> {
                       Get.dialog(AppDialog.normal("Submit Service Order",
                           "Are youy sure you want to submit this service order ?, NB: this will send an email to the customer if any email was provided.",
                           titleA: "Yes", titleB: "No", onPressedA: () async {
-                        final f = await Get.find<AppController>().submitServiceOrder();
-                        if(f){
-                        Get.offAll(ChoosePage());
-
+                        final f = await Get.find<AppController>()
+                            .submitServiceOrder();
+                        if (f) {
+                          Get.offAll(ChoosePage());
                         }
                       }, onPressedB: () {
                         Get.back();
@@ -297,22 +253,30 @@ class _OrderSummaryState extends State<OrderSummary> {
                     text: "Submit",
                   ),
                 ),
+              if (widget.order.id != 0) InvoiceList(invoice),
               if (widget.order.id != 0 && !widget.order.isDispatched)
                 SizedBox(
                   width: wideUi(context),
                   child: AppButton(
                     onPressed: () {
-                      Get.dialog(AppDialog.normal("Dispatch Order",
-                          "Are youy sure you want to dispatch this service order ?, NB: this will send an email to the customer if any email was provided.",
-                          titleA: "Yes", titleB: "No", onPressedA: () async {
-                        final f = await Get.find<AppController>()
-                            .dispatchOrder(widget.order);
-                        if (f) {
-                          Get.offAll(ChoosePage());
-                        }
-                      }, onPressedB: () {
-                        Get.back();
-                      }));
+                      invoice.value.orderId = widget.order.id;
+                      invoice.value.totalCost = invoice.value.rawTotalCost;
+                      if (invoice.value.validate()) {
+                        Get.dialog(AppDialog.normal("Dispatch Order",
+                            "Are youy sure you want to dispatch this service order ?, NB: this will send an email to the customer if any email was provided.",
+                            titleA: "Yes", titleB: "No", onPressedA: () async {
+                          final f = await Get.find<AppController>()
+                              .dispatchOrder(widget.order, invoice.value);
+                          if (f) {
+                            Get.offAll(ChoosePage());
+                          }
+                        }, onPressedB: () {
+                          Get.back();
+                        }));
+                      } else {
+                        Ui.showError(
+                            "Please check the Services/Products Section, None values are not acceptable");
+                      }
                     },
                     text: "Dispatch",
                   ),
@@ -358,7 +322,9 @@ class _OrderSummaryState extends State<OrderSummary> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: min(1200,Ui.width(context)-48)),child: toreturn),
+                          constraints: BoxConstraints(
+                              maxWidth: min(1200, Ui.width(context) - 48)),
+                          child: toreturn),
                     ],
                   ),
                   if (widget.order.id != 0)
@@ -406,33 +372,33 @@ class _OrderSummaryState extends State<OrderSummary> {
               alignment: Alignment.centerLeft,
               child: Padding(
                 padding: const EdgeInsets.only(left: 0.0, bottom: 8),
-                child: AppText.thin(g ? "Image of Customer/Driver" : "Vehicle Dashboard Image"),
+                child: AppText.thin(
+                    g ? "Image of Customer/Driver" : "Vehicle Dashboard Image"),
               )),
         );
       }),
       ConstrainedBox(
-            constraints: BoxConstraints(
-                minWidth: wideUi(context),
-                maxWidth: wideUi(context),
-                minHeight: 128),
-            child: CurvedContainer(
-                border: Border.all(color: AppColors.grey),
-                
-                margin: EdgeInsets.symmetric(horizontal: 8),
-                child: widget.order.id == 0
-                    ? Image.file(
-                        File(img),
-                        fit: BoxFit.cover,
-                      )
-                    : Transform.rotate(
-                      angle: pi/2,
-                      child: Image.network(
-                        "${AppUrls.baseURL}${AppUrls.upload}/all/$img",
-                        fit: BoxFit.contain,
-                      ),
-                    ),),
-          ),
-
+        constraints: BoxConstraints(
+            minWidth: wideUi(context),
+            maxWidth: wideUi(context),
+            minHeight: 128),
+        child: CurvedContainer(
+          border: Border.all(color: AppColors.grey),
+          margin: EdgeInsets.symmetric(horizontal: 8),
+          child: widget.order.id == 0
+              ? Image.file(
+                  File(img),
+                  fit: BoxFit.cover,
+                )
+              : Transform.rotate(
+                  angle: pi / 2,
+                  child: Image.network(
+                    "${AppUrls.baseURL}${AppUrls.upload}/all/$img",
+                    fit: BoxFit.contain,
+                  ),
+                ),
+        ),
+      ),
       Ui.boxHeight(24),
     ]);
   }
@@ -492,11 +458,16 @@ class _OrderSummaryState extends State<OrderSummary> {
 
 class CustomOrderPDFPage extends StatefulWidget {
   const CustomOrderPDFPage(this.title, this.orderDate,
-      {this.orderFinished, required this.order, this.sigUint, super.key});
+      {this.orderFinished,
+      required this.order,
+      this.invoice,
+      this.sigUint,
+      super.key});
   final DateTime orderDate;
   final DateTime? orderFinished;
   final String title;
   final Order order;
+  final Invoice? invoice;
   final Uint8List? sigUint;
 
   @override
@@ -506,7 +477,7 @@ class CustomOrderPDFPage extends StatefulWidget {
 class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
   late pw.Font defFontReg, defFontMedium, defFontBold, segoe;
   late pw.ImageProvider logo, bg;
-  pw.ImageProvider? sig;
+  pw.ImageProvider? sig, ssig;
   pw.Document? cpdf;
 
   @override
@@ -525,6 +496,11 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
     if (widget.order.customerDetails?.signature.isNotEmpty ?? false) {
       sig = await networkImage(
           "${AppUrls.baseURL}${AppUrls.upload}/all/${widget.order.customerDetails!.signature}");
+    }
+    print(widget.order.serviceAdvisorDetails?.signature);
+    if (widget.order.serviceAdvisorDetails?.signature.isNotEmpty ?? false) {
+      ssig = await networkImage(
+          "${AppUrls.baseURL}${AppUrls.upload}/all/${widget.order.serviceAdvisorDetails!.signature}");
     }
     if (widget.sigUint != null && (widget.sigUint?.isNotEmpty ?? false)) {
       sig = pw.MemoryImage(widget.sigUint!);
@@ -548,7 +524,7 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
   doPDFPage() {
     final pdf = pw.Document();
     // final controller = Get.find<AppController>();
-
+    //summary
     pdf.addPage(pw.Page(
       pageFormat: PdfPageFormat.a4,
       margin: pw.EdgeInsets.symmetric(vertical: 0, horizontal: 0),
@@ -589,18 +565,14 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
                       mainAxisSize: pw.MainAxisSize.min,
                       children: [
                         pw.Text(
-                            "Generated On : " +
-                                DateFormat("dd/MM/yyyy hh:mm:aa")
-                                    .format(DateTime.now()),
+                            "Generated On : ${DateFormat("dd/MM/yyyy hh:mm:aa").format(DateTime.now())}",
                             style: pw.TextStyle(
                               font: defFontMedium,
                               fontSize: 8,
                             )),
                         pw.SizedBox(height: 4),
                         pw.Text(
-                            "Order Created On : " +
-                                DateFormat("dd/MM/yyyy hh:mm:aa")
-                                    .format(widget.orderDate),
+                            "Order Created On : ${DateFormat("dd/MM/yyyy hh:mm:aa").format(widget.orderDate)}",
                             style: pw.TextStyle(
                               font: defFontMedium,
                               fontSize: 8,
@@ -608,9 +580,7 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
                         pw.SizedBox(height: 4),
                         if (widget.orderFinished != null)
                           pw.Text(
-                              "Order Finished On : " +
-                                  DateFormat("dd/MM/yyyy hh:mm:aa")
-                                      .format(widget.orderFinished!),
+                              "Order Finished On : ${DateFormat("dd/MM/yyyy hh:mm:aa").format(widget.orderFinished!)}",
                               style: pw.TextStyle(
                                 font: defFontMedium,
                                 fontSize: 8,
@@ -770,17 +740,175 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
                       fit: pw.BoxFit.cover,
                       height: PdfPageFormat.a4.height,
                       width: PdfPageFormat.a4.width)),
-                      pw.Container(
-                        height: PdfPageFormat.a4.height,
-                      width: PdfPageFormat.a4.width,
-                      color: PdfColor.fromInt(0x88FFFFFF)
-                      ),
+              pw.Container(
+                  height: PdfPageFormat.a4.height,
+                  width: PdfPageFormat.a4.width,
+                  color: PdfColor.fromInt(0x88FFFFFF)),
               pw.Padding(
                   padding: pw.EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   child: pf)
             ]);
       },
     ));
+
+    //invoice
+    if (widget.invoice != null) {
+      pdf.addPage(pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: pw.EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+        build: (context) {
+          Map<String, String> productUsed = {};
+          Map<String, String> serviceUsed = {};
+          final ap = Get.find<AppController>().allProducts;
+          final sp = Get.find<AppController>().allBillyServices;
+          for (var element in widget.invoice!.productsUsed) {
+            final app = ap.where((test) => test.id == element.id).first;
+            productUsed[
+                    "${app.name} - ${element.qty} - ${element.unitPrice.toCurrency()}"] =
+                element.totalPrice.toCurrency();
+          }
+          for (var element in widget.invoice!.servicesUsed) {
+            serviceUsed[sp.where((test) => test.id == element.id).first.name] =
+                element.totalPrice.toCurrency();
+          }
+          final pf = pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                // HEADER
+                pw.Row(children: [
+                  pw.Expanded(child: pw.SizedBox()),
+                  pw.Expanded(
+                      child: pw.Column(
+                          mainAxisSize: pw.MainAxisSize.min,
+                          children: [
+                        pw.Align(
+                          alignment: pw.Alignment.center,
+                          child: pw.Image(logo, width: 72, height: 72),
+                        ),
+                        pw.Align(
+                          alignment: pw.Alignment.center,
+                          child: pw.Text("MRS COCO Station, Alapere,Lagos",
+                              style: pw.TextStyle(
+                                font: defFontReg,
+                                fontSize: 8,
+                              )),
+                        ),
+                        pw.Align(
+                          alignment: pw.Alignment.center,
+                          child: pw.Text("Bill/Cash Receipt",
+                              style: pw.TextStyle(
+                                font: defFontBold,
+                                fontSize: 16,
+                              )),
+                        ),
+                      ])),
+                  pw.Expanded(child: pw.SizedBox()),
+                ]),
+
+                // Labour Charge
+                ...descText("Labour", {
+                  "Charge": widget.invoice!.labourCost.toCurrency(),
+                }),
+
+                // Products Charge
+                ...descText(
+                  "Products Used",
+                  productUsed,
+                ),
+
+                // Products Charge
+                ...descText(
+                  "Services",
+                  serviceUsed,
+                ),
+
+                // Total Charge
+                ...descText("TOTAL", {
+                  "Grand Total": widget.invoice!.totalCost.toCurrency(),
+                  "In Words": amountToWords(widget.invoice!.totalCost)
+                }),
+
+                // SERVICE
+                pw.SizedBox(height: 16),
+                pw.Row(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Column(
+                          mainAxisSize: pw.MainAxisSize.min,
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            titleText("Customer/Driver Signature",
+                                hasBottomMargin: true, width: 200),
+                            pw.Container(
+                                height: 32,
+                                width: 200,
+                                padding: pw.EdgeInsets.only(bottom: 4),
+                                decoration: pw.BoxDecoration(
+                                    border: pw.Border(bottom: pw.BorderSide())),
+                                child: pw.SizedBox(
+                                    height: 50,
+                                    width: 200,
+                                    child: sig == null
+                                        ? pw.SizedBox()
+                                        : pw.Image(sig!))),
+                            pw.SizedBox(height: 8),
+                            pw.Text("Customer Name:  ${widget.order.customer}",
+                                style: pw.TextStyle(
+                                    font: defFontReg,
+                                    fontSize: 8,
+                                    color: PdfColor.fromInt(0xFF1E1E1E))),
+                          ]),
+                      pw.Spacer(),
+                      pw.Column(
+                          mainAxisSize: pw.MainAxisSize.min,
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            titleText("Attendant Signature",
+                                hasBottomMargin: true, width: 200),
+                            pw.Container(
+                                height: 32,
+                                width: 200,
+                                padding: pw.EdgeInsets.only(bottom: 4),
+                                decoration: pw.BoxDecoration(
+                                    border: pw.Border(bottom: pw.BorderSide())),
+                                child: pw.SizedBox(
+                                    height: 50,
+                                    width: 200,
+                                    child: ssig == null
+                                        ? pw.SizedBox()
+                                        : pw.Image(ssig!))),
+                            pw.SizedBox(height: 8),
+                            pw.Text(
+                                "Attendant Name:  ${widget.order.serviceAdvisor}",
+                                style: pw.TextStyle(
+                                    font: defFontReg,
+                                    fontSize: 8,
+                                    color: PdfColor.fromInt(0xFF1E1E1E))),
+                          ]),
+                    ])
+              ]);
+
+          return pw.Stack(
+              // overflow: pw.Overflow.clip,
+              children: [
+                pw.Opacity(
+                    opacity: 0.17,
+                    child: pw.Image(bg,
+                        fit: pw.BoxFit.cover,
+                        height: PdfPageFormat.a4.height,
+                        width: PdfPageFormat.a4.width)),
+                pw.Container(
+                    height: PdfPageFormat.a4.height,
+                    width: PdfPageFormat.a4.width,
+                    color: PdfColor.fromInt(0x88FFFFFF)),
+                pw.Padding(
+                    padding:
+                        pw.EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    child: pf)
+              ]);
+        },
+      ));
+    }
 
     setState(() {
       cpdf = pdf;
@@ -861,4 +989,406 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
     fg.addAll(fgg);
     return fg;
   }
+}
+
+class InvoiceList extends StatelessWidget {
+  const InvoiceList(this.invoice, {this.isOwn = true, super.key});
+  final Rx<Invoice> invoice;
+  final bool isOwn;
+
+  @override
+  Widget build(BuildContext context) {
+    final ltec = TextEditingController(
+      text: "7000",
+    );
+    invoice.value.labourCost = double.tryParse(ltec.text) ?? 0;
+    ltec.addListener(() {
+      invoice.value.labourCost = double.tryParse(ltec.text) ?? 0;
+      invoice.refresh();
+    });
+    return Column(
+      children: [
+        if (isOwn)
+          AppText.bold("BILL/CASH RECEIPT",
+              fontSize: 24, fontFamily: Assets.appFontFamily2),
+        if (isOwn) Ui.boxHeight(24),
+        InvoiceItemWidget(
+            title: "Labour Charge",
+            isEnabled: invoice.value.id == 0 || !isOwn,
+            labourTec: ltec),
+        Ui.boxHeight(32),
+        //Products
+        AppDivider(),
+        Ui.align(child: AppText.bold("Products")),
+        Ui.boxHeight(8),
+        Obx(() {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: invoice.value.productsUsed
+                .map((e) => InvoiceItemWidget(
+                      item: e,
+                      isProduct: true,
+                      isEnabled: invoice.value.id == 0 || !isOwn,
+                      titles: Get.find<AppController>()
+                          .filterOptions["productId2"]!
+                          .titles,
+                      values: Get.find<AppController>()
+                          .filterOptions["productId2"]!
+                          .values as List<int>,
+                    ))
+                .toList(),
+          );
+        }),
+        if (invoice.value.id == 0 || !isOwn)
+          InvoiceItemCounter(() {
+            invoice.value.productsUsed.add(InvoiceItem());
+            invoice.refresh();
+          }, () {
+            if (invoice.value.productsUsed.isNotEmpty) {
+              invoice.value.productsUsed.removeLast();
+            }
+            invoice.refresh();
+          }),
+
+        Ui.boxHeight(24),
+        //Services
+        AppDivider(),
+        Ui.align(child: AppText.bold("Services")),
+        Ui.boxHeight(8),
+        Obx(() {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: invoice.value.servicesUsed
+                .map((e) => InvoiceItemWidget(
+                      item: e,
+                      isEnabled: invoice.value.id == 0 || !isOwn,
+                      titles: Get.find<AppController>()
+                          .filterOptions["billyServiceId"]!
+                          .titles,
+                      values: Get.find<AppController>()
+                          .filterOptions["billyServiceId"]!
+                          .values as List<int>,
+                    ))
+                .toList(),
+          );
+        }),
+        if (invoice.value.id == 0 || !isOwn)
+          InvoiceItemCounter(() {
+            invoice.value.servicesUsed.add(InvoiceItem());
+            invoice.refresh();
+          }, () {
+            if (invoice.value.servicesUsed.isNotEmpty) {
+              invoice.value.servicesUsed.removeLast();
+            }
+            invoice.refresh();
+          }),
+        Ui.boxHeight(48),
+
+        AppDivider(),
+        Obx(() {
+          return InvoiceItemWidget(
+              title: "TOTAL CHARGES",
+              isEnabled: false,
+              labourTec: TextEditingController(
+                text: invoice.value.rawTotalCost.toCurrency(),
+              ));
+        }),
+        Ui.boxHeight(48),
+      ],
+    );
+  }
+}
+
+class InvoiceItemCounter extends StatelessWidget {
+  const InvoiceItemCounter(this.onAdd, this.onRemove, {super.key});
+  final VoidCallback onAdd, onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppIcon(
+              Icons.add_circle_outline,
+              color: AppColors.primaryColor,
+              onTap: onAdd,
+            ),
+            Ui.boxWidth(24),
+            AppIcon(
+              Icons.remove_circle_outline,
+              color: AppColors.primaryColor,
+              onTap: onRemove,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class InvoiceItemWidget extends StatelessWidget {
+  const InvoiceItemWidget(
+      {this.item,
+      this.title = "",
+      this.titles = const [],
+      this.values = const [],
+      this.isEnabled = true,
+      this.isProduct = false,
+      this.labourTec,
+      super.key});
+  final List<String> titles;
+  final List<int> values;
+  final InvoiceItem? item;
+  final bool isEnabled, isProduct;
+  final String title;
+  final TextEditingController? labourTec;
+
+  @override
+  Widget build(BuildContext context) {
+    final qtyTec = TextEditingController();
+    final upTec = TextEditingController();
+    if (item != null) {
+      qtyTec.text = item!.rawQty.value.toString();
+      upTec.text = item!.rawUnitPrice.value.toString();
+    }
+    return SizedBox(
+      width: Ui.width(context),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+        if (item == null) Expanded(flex: 4, child: AppText.bold(title)),
+        if (item == null)
+          Expanded(
+              flex: 1,
+              child: CustomTextField(
+                "",
+                labourTec!,
+                hasBottomPadding: false,
+                varl: FPL.number,
+                readOnly: !isEnabled,
+                textAlign: TextAlign.right,
+              )),
+        if (item != null)
+          Expanded(
+              flex: 2,
+              child: CustomTextField.dropdown(
+                  titles, values, TextEditingController(), "",
+                  isEnabled: isEnabled,
+                  initOption: item!.rawId.value, onChanged: (p0) {
+                item!.rawId.value = p0;
+                if (p0 != 0) {
+                  try {
+                    if (isProduct) {
+                      item!.rawUnitPrice.value = Get.find<AppController>()
+                          .allProductsCurrentPrice
+                          .where((test) => test.productId == p0)
+                          .first
+                          .cost;
+                    } else {
+                      item!.rawUnitPrice.value = Get.find<AppController>()
+                          .allBillyServices
+                          .where((test) => test.id == p0)
+                          .first
+                          .cost;
+                    }
+
+                    upTec.text = item!.rawUnitPrice.value.toString();
+                  } catch (e) {
+                    // TODO
+                  }
+                }
+              })),
+        if (item != null)
+          Expanded(
+            flex: 1,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 12.0),
+              child: Obx(() {
+                return TextField(
+                    controller: qtyTec,
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.next,
+                    readOnly: !isEnabled,
+                    enabled: item!.rawId.value > 0,
+                    textAlign: TextAlign.center,
+                    decoration: InputDecoration(hintText: "Qty"),
+                    onChanged: (_) {
+                      item!.rawQty.value =
+                          int.tryParse(qtyTec.text) ?? item!.qty;
+                    });
+              }),
+            ),
+          ),
+        if (item != null)
+          Expanded(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 12.0),
+                child: Obx(() {
+                  return TextField(
+                      controller: upTec,
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.next,
+                      readOnly: !isEnabled,
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(hintText: "Unit Price"),
+                      enabled: item!.rawId.value > 0,
+                      onChanged: (_) {
+                        item!.rawUnitPrice.value =
+                            double.tryParse(upTec.text) ?? item!.unitPrice;
+                      });
+                }),
+              )),
+        if (item != null)
+          Expanded(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: Obx(() {
+                  return AppText.thin(item!.totalPrice.toCurrency(),
+                      fontSize: 16, alignment: TextAlign.right);
+                }),
+              )),
+      ]),
+    );
+  }
+}
+
+String numberToWords(int number) {
+  // Handle zero as a special case
+  if (number == 0) {
+    return 'Zero';
+  }
+
+  // Handle negative numbers
+  if (number < 0) {
+    return 'Negative ${numberToWords(number.abs())}';
+  }
+
+  // Define word lists
+  final List<String> ones = [
+    '',
+    'One',
+    'Two',
+    'Three',
+    'Four',
+    'Five',
+    'Six',
+    'Seven',
+    'Eight',
+    'Nine',
+    'Ten',
+    'Eleven',
+    'Twelve',
+    'Thirteen',
+    'Fourteen',
+    'Fifteen',
+    'Sixteen',
+    'Seventeen',
+    'Eighteen',
+    'Nineteen'
+  ];
+
+  final List<String> tens = [
+    '',
+    '',
+    'Twenty',
+    'Thirty',
+    'Forty',
+    'Fifty',
+    'Sixty',
+    'Seventy',
+    'Eighty',
+    'Ninety'
+  ];
+
+  final List<String> scales = ['', 'Thousand', 'Million', 'Billion'];
+
+  // Function to convert three-digit groups
+  String convertLessThanOneThousand(int n) {
+    if (n == 0) {
+      return '';
+    }
+
+    String result = '';
+
+    if (n >= 100) {
+      result += '${ones[n ~/ 100]} Hundred';
+      if (n % 100 != 0) {
+        result += ' ';
+      }
+    }
+
+    n %= 100;
+    if (n > 0) {
+      if (n < 20) {
+        result += ones[n];
+      } else {
+        result += tens[n ~/ 10];
+        if (n % 10 != 0) {
+          result += '-${ones[n % 10].toLowerCase()}';
+        }
+      }
+    }
+
+    return result;
+  }
+
+  // Check if number is within range
+  if (number > 999999999999) {
+    return 'Number too large (exceeds 12 digits)';
+  }
+
+  String result = '';
+  int scaleIndex = 0;
+
+  while (number > 0) {
+    int n = number % 1000;
+    if (n != 0) {
+      String groupText = convertLessThanOneThousand(n);
+      if (scaleIndex > 0 && groupText.isNotEmpty) {
+        result =
+            '$groupText ${scales[scaleIndex]}${result.isEmpty ? '' : ' $result'}';
+      } else {
+        result = groupText + (result.isEmpty ? '' : ' $result');
+      }
+    }
+    number ~/= 1000;
+    scaleIndex++;
+  }
+
+  return result;
+}
+
+// Extended function that supports decimal places
+String amountToWords(double amount,
+    {String currency = 'Naira', String subCurrency = 'Kobo'}) {
+  // Extract the integer and decimal parts
+  int integerPart = amount.floor();
+  int decimalPart = ((amount - integerPart) * 100).round();
+
+  String result = numberToWords(integerPart);
+
+  // Add currency
+  if (integerPart == 1) {
+    result += ' $currency';
+  } else {
+    result += ' $currency';
+  }
+
+  // Add decimal part if it exists
+  if (decimalPart > 0) {
+    result += ' and ${numberToWords(decimalPart)}';
+
+    // Add sub-currency
+    if (decimalPart == 1) {
+      result += ' $subCurrency';
+    } else {
+      result += ' ${subCurrency}s';
+    }
+  }
+
+  return result;
 }

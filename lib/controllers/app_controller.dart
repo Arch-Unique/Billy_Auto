@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -21,6 +22,7 @@ import '../repo/app_repo.dart';
 class AppController extends GetxController {
   Rx<DashboardModes> currentDashboardMode = DashboardModes.dashboard.obs;
   Rx<ChecklistModes> currentChecklistMode = ChecklistModes.customer.obs;
+  RxInt currentChart = 0.obs;
 
   /// 0 - full name
   /// 1 - email
@@ -89,14 +91,29 @@ class AppController extends GetxController {
   RxList<User> allServiceAdvisor = <User>[].obs;
   RxList<User> allTechnicians = <User>[].obs;
   RxList<User> allUsers = <User>[].obs;
-  RxList<LoginHistory> allLoginHistory = <LoginHistory>[].obs;
+  // RxList<LoginHistory> allLoginHistory = <LoginHistory>[].obs;
   RxList<Inventory> allInventory = <Inventory>[].obs;
   RxList<Order> allOrders = <Order>[].obs;
+  RxList<Invoice> allInvoices = <Invoice>[].obs;
   RxList<String> userRoles = <String>[].obs;
   RxList<String> customerTypes = <String>[].obs;
   RxList<String> inventoryStatus = <String>[].obs;
   RxList<String> inventoryTransactionTypes = <String>[].obs;
   RxList<String> allDevices = <String>[].obs;
+
+  //CHART
+  RxList<InventoryMetricStockBalances> allStockBalances =
+      <InventoryMetricStockBalances>[].obs;
+  RxList<InventoryMetricStockBalancesCost> allStockBalancesCost =
+      <InventoryMetricStockBalancesCost>[].obs;
+  RxList<InventoryMetricDailyProfit> allDailyProfit =
+      <InventoryMetricDailyProfit>[].obs;
+  RxList<InventoryMetricMonthlyProfit> allMonthlyProfit =
+      <InventoryMetricMonthlyProfit>[].obs;
+  RxList<InventoryMetricYearlyProfit> allYearlyProfit =
+      <InventoryMetricYearlyProfit>[].obs;
+  RxList<InventoryMetricProductPrice> allProductsCurrentPrice =
+      <InventoryMetricProductPrice>[].obs;
 
   //TABLE
   Rx<TableModelDataSource> tmds = TableModelDataSource([]).obs;
@@ -105,6 +122,7 @@ class AppController extends GetxController {
   Rx<Order> currentOrder = Order(customerId: 0).obs;
 
   Map<String, FilterOptionsModel> filterOptions = {};
+  Timer? timer;
 
   //ORDERS
   List<Order> get allPendingOrders =>
@@ -123,10 +141,17 @@ class AppController extends GetxController {
     filterOptions["productTypeId"] = FilterOptionsModel(
         allProductType.map((element) => element.name).toList(),
         allProductType.map((element) => element.id).toList());
+    filterOptions["billyServiceId"] = FilterOptionsModel(
+        allBillyServices.map((element) => element.name).toList(),
+        allBillyServices.map((element) => element.id).toList());
 
     filterOptions["productId"] = FilterOptionsModel(
         allProducts.map((element) => element.name).toList(),
         allProducts.map((element) => element.id).toList());
+    filterOptions["productId2"] = FilterOptionsModel(
+        allStockBalances.map((element) => element.productName).toList(),
+        allStockBalances.map((element) => element.productId).toList());
+
     filterOptions["supplierId"] = FilterOptionsModel(
         allSuppliers.map((element) => element.fullName).toList(),
         allSuppliers.map((element) => element.id).toList());
@@ -165,6 +190,9 @@ class AppController extends GetxController {
         allUsers.map((element) => element.username).toList(),
         allUsers.map((element) => element.id).toList());
     filterOptions["device"] = FilterOptionsModel(allDevices, allDevices);
+    filterOptions["orderId"] = FilterOptionsModel(
+        allOrders.map((element) => element.title).toList(),
+        allOrders.map((element) => element.id).toList());
   }
 
   initApp() async {
@@ -200,12 +228,20 @@ class AppController extends GetxController {
     }
   }
 
+  refreshAllData() async {
+    timer?.cancel();
+    timer = Timer.periodic(Duration(hours: 1), (t) async {
+      await refreshModels();
+    });
+  }
+
   refreshModels() async {
     userRoles.value = ["admin", "user", "technician", "service-advisor"];
     customerTypes.value = ["Individual", "Corporate"];
     inventoryStatus.value = ["Inbound", "Outbound", "Transfer"];
     inventoryTransactionTypes.value = ["a", "b"];
     allDevices.value = ["mobile", "pc"];
+    await initMetrics();
     allBillyServices.value = await _getAll<BillyServices>();
     allBillyConditionCategories.value = await _getAll<BillyConditionCategory>();
     allBillyConditions.value = await _getAll<BillyConditions>();
@@ -219,10 +255,13 @@ class AppController extends GetxController {
     allProducts.value = await _getAll<Product>();
     allSuppliers.value = await _getAll<Supplier>();
     allInventory.value = await _getAll<Inventory>();
-    allLoginHistory.value = await _getAll<LoginHistory>();
+    // allLoginHistory.value = await _getAll<LoginHistory>();
+    allInvoices.value = await _getAll<Invoice>();
     allUsers.value = await _getAll<User>();
-    allTechnicians.value = allUsers.where((test) => test.role == userRoles[2]).toList();
-    allServiceAdvisor.value = allUsers.where((test) => test.role == userRoles[3]).toList();
+    allTechnicians.value =
+        allUsers.where((test) => test.role == userRoles[2]).toList();
+    allServiceAdvisor.value =
+        allUsers.where((test) => test.role == userRoles[3]).toList();
     updateOrderWithInfo();
 
     totalConditionsHeaders =
@@ -231,6 +270,21 @@ class AppController extends GetxController {
         totalConditionsHeaders.map((e) => true).toList();
 
     initFilterOptions();
+  }
+
+  initMetrics() async {
+    allStockBalances.value =
+        await appRepo.getAllMetricData<InventoryMetricStockBalances>();
+    allStockBalancesCost.value =
+        await appRepo.getAllMetricData<InventoryMetricStockBalancesCost>();
+    allDailyProfit.value =
+        await appRepo.getAllMetricData<InventoryMetricDailyProfit>();
+    allMonthlyProfit.value =
+        await appRepo.getAllMetricData<InventoryMetricMonthlyProfit>();
+    allYearlyProfit.value =
+        await appRepo.getAllMetricData<InventoryMetricYearlyProfit>();
+    allProductsCurrentPrice.value =
+        await appRepo.getAllMetricData<InventoryMetricProductPrice>();
   }
 
   Future<List<T>> _getAll<T>({List<FilterModel> fm = const [], T? bm}) async {
@@ -319,6 +373,8 @@ class AppController extends GetxController {
 
     order.customerCar = car;
     order.customerDetails = customer;
+    order.serviceAdvisorDetails = allServiceAdvisor
+        .firstWhereOrNull((p0) => p0.id == order.serviceAdvisorId);
     order.allServices = allBillyServices
         .where((p0) => order.servicesPerformed.contains(p0.id))
         .toList();
@@ -337,6 +393,8 @@ class AppController extends GetxController {
       element.serviceAdvisor = allServiceAdvisor
           .firstWhere((e) => e.id == element.serviceAdvisorId)
           .fullName;
+          element.serviceAdvisorDetails = allServiceAdvisor
+          .firstWhere((e) => e.id == element.serviceAdvisorId);
       element.technician = allTechnicians
           .firstWhere((e) => e.id == element.technicianId)
           .fullName;
@@ -388,8 +446,10 @@ class AppController extends GetxController {
     }
   }
 
-  Future<bool> dispatchOrder(Order order) async {
+  Future<bool> dispatchOrder(Order order, Invoice invoice) async {
     try {
+      final f = await _createInvoice(invoice);
+      if (!f) return false;
       order.dispatchedAt = DateTime.now();
       await appRepo.patch(order);
       Ui.showInfo("Successfully Dispatched Order");
@@ -397,6 +457,16 @@ class AppController extends GetxController {
       return true;
     } catch (e) {
       Ui.showInfo(e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> _createInvoice(Invoice invoice) async {
+    try {
+      await appRepo.create<Invoice>(invoice);
+      return true;
+    } catch (e) {
+      print(e);
       return false;
     }
   }
@@ -514,6 +584,7 @@ class AppController extends GetxController {
         json[ik] = await appRepo.uploadPhoto(json[ik]);
       }
     }
+    print(json);
     BaseModel mp = appRepo.factories[currentBaseModel.value.runtimeType]!(json);
     try {
       if (mp.validate()) {

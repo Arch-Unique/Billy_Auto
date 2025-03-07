@@ -24,6 +24,7 @@ class Order extends BaseModel{
   String customer, car;
 
   Customer? customerDetails;
+  User? serviceAdvisorDetails;
   CustomerCar? customerCar;
   String? technician,serviceAdvisor;
   List<BillyServices> allServices = [];
@@ -31,7 +32,7 @@ class Order extends BaseModel{
   bool get isDispatched => dispatchedAt != null;
   String get rdesc => "Customer: $customer\nVehicle: $car\nConcern: $customerConcerns";
   String get desc => rdesc.trim();
-  String get title => "ORD-${id.toString().padLeft(4,"0")}-${customerId.toString().padLeft(4,"0")}";
+  String get title => "ORD-${id.toString().padLeft(4,"0")}";
 
   Order({
     required this.customerId,
