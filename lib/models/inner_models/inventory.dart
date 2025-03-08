@@ -162,13 +162,14 @@ class InventoryMetricStockBalancesCost {
 
 class InventoryMetricDailyProfit{
   final DateTime date;
-  final double productProfit,serviceProfit,laborProfit,productCost,totalProfit;
+  final double productProfit,serviceProfit,laborProfit,productCost,totalProfit,expenses;
 
   double get sales => serviceProfit+laborProfit+productProfit;
-  double get profit => serviceProfit+laborProfit+productProfit;
+  double get cost => expenses+productCost;
+  double get profit => sales-cost;
 
 
-  InventoryMetricDailyProfit({required this.date,this.productProfit=0,this.serviceProfit=0,this.laborProfit=0,this.productCost=0,this.totalProfit=0});
+  InventoryMetricDailyProfit({required this.date,this.productProfit=0,this.serviceProfit=0,this.expenses=0,this.laborProfit=0,this.productCost=0,this.totalProfit=0});
 
   factory InventoryMetricDailyProfit.fromJson(Map<String, dynamic> json) {
     return InventoryMetricDailyProfit(
@@ -178,18 +179,20 @@ class InventoryMetricDailyProfit{
      laborProfit: double.tryParse(json['labor_profit'].toString()) ?? 0,
      productCost: double.tryParse(json['productCost'].toString()) ?? 0,
      totalProfit: double.tryParse(json['totalProfit'].toString()) ?? 0,
+     expenses: double.tryParse(json['expenses'].toString()) ?? 0,
     );
   }
 }
 
 class InventoryMetricMonthlyProfit{
   final DateTime date;
-  final double productProfit,serviceProfit,laborProfit,productCost,totalProfit;
+  final double productProfit,serviceProfit,laborProfit,productCost,totalProfit,expenses;
 
   double get sales => serviceProfit+laborProfit+productProfit;
-  double get profit => serviceProfit+laborProfit+productProfit;
+  double get cost => expenses+productCost;
+  double get profit => sales-cost;
 
-  InventoryMetricMonthlyProfit({required this.date,this.productProfit=0,this.serviceProfit=0,this.laborProfit=0,this.productCost=0,this.totalProfit=0});
+  InventoryMetricMonthlyProfit({required this.date,this.productProfit=0,this.serviceProfit=0,this.expenses=0,this.laborProfit=0,this.productCost=0,this.totalProfit=0});
 
   factory InventoryMetricMonthlyProfit.fromJson(Map<String, dynamic> json) {
     
@@ -200,18 +203,20 @@ class InventoryMetricMonthlyProfit{
      laborProfit: double.tryParse(json['labor_profit'].toString()) ?? 0,
      productCost: double.tryParse(json['productCost'].toString()) ?? 0,
      totalProfit: double.tryParse(json['totalProfit'].toString()) ?? 0,
+     expenses: double.tryParse(json['expenses'].toString()) ?? 0,
     );
   }
 }
 
 class InventoryMetricYearlyProfit{
   final DateTime date;
-  final double productProfit,serviceProfit,laborProfit,productCost,totalProfit;
+  final double productProfit,serviceProfit,laborProfit,productCost,totalProfit,expenses;
 
   double get sales => serviceProfit+laborProfit+productProfit;
-  double get profit => serviceProfit+laborProfit+productProfit;
+  double get cost => expenses+productCost;
+  double get profit => sales-cost;
 
-  InventoryMetricYearlyProfit({required this.date,this.productProfit=0,this.serviceProfit=0,this.laborProfit=0,this.productCost=0,this.totalProfit=0});
+  InventoryMetricYearlyProfit({required this.date,this.productProfit=0,this.serviceProfit=0,this.expenses=0,this.laborProfit=0,this.productCost=0,this.totalProfit=0});
 
   factory InventoryMetricYearlyProfit.fromJson(Map<String, dynamic> json) {
     return InventoryMetricYearlyProfit(
@@ -221,6 +226,7 @@ class InventoryMetricYearlyProfit{
      laborProfit: double.tryParse(json['labor_profit'].toString()) ?? 0,
      productCost: double.tryParse(json['productCost'].toString()) ?? 0,
      totalProfit: double.tryParse(json['totalProfit'].toString()) ?? 0,
+     expenses: double.tryParse(json['expenses'].toString()) ?? 0,
     );
   }
 }

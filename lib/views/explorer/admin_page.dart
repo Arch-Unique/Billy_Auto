@@ -13,6 +13,7 @@ import 'package:inventory/repo/app_repo.dart';
 import 'package:inventory/tools/assets.dart';
 import 'package:inventory/tools/colors.dart';
 import 'package:inventory/tools/enums.dart';
+import 'package:inventory/tools/extensions.dart';
 import 'package:inventory/views/checklist/order_summary.dart';
 import 'package:inventory/views/checklist/shared2.dart';
 
@@ -75,13 +76,23 @@ class _CustomTableState extends State<CustomTable> {
               child: AppIcon(
                 Icons.add,
                 color: AppColors.white,
-                onTap: () {
+                onTap: () async {
                   if (!Get.find<AppService>()
                       .currentUser
                       .value
                       .isServiceAdvisor) {
                     Ui.showError("Not enough permissions");
                     return;
+                  }
+                  if (controller.currentBaseModel.value.runtimeType ==
+                      BulkExpenses) {
+                    (controller.currentBaseModel.value as BulkExpenses)
+                        .expenses = (await Get.find<AppRepo>().getAll<Expenses>(
+                            date: (controller.currentBaseModel.value
+                                    as BulkExpenses)
+                                .date
+                                .toIso8601String()))
+                        .data;
                   }
                   Get.dialog(AppDialog(
                       title: AppText.medium("Add New Record"),
@@ -212,6 +223,48 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
   List<String> tm;
   TableModelDataSource(this.tm);
 
+  editRecord(BaseModel bm) async {
+    if (!Get.find<AppService>().currentUser.value.isServiceAdvisor) {
+      Ui.showError("Not enough permissions");
+      return;
+    }
+    if (T == BulkExpenses) {
+      (bm as BulkExpenses).expenses = (await Get.find<AppRepo>()
+              .getAll<Expenses>(date: bm.date.toIso8601String()))
+          .data;
+    }
+    Get.find<AppController>().currentBaseModel = bm.obs;
+    Get.dialog(AppDialog(
+        title: AppText.medium("Edit Record"),
+        content: Obx(() {
+          return DynamicFormGenerator(
+              model: Get.find<AppController>().currentBaseModel.value,
+              onSave: (v) async {
+                await Get.find<AppController>().editExisitingRecord(v);
+              });
+        })));
+  }
+
+  deleteRecord(BaseModel bm) async {
+    if (!Get.find<AppService>().currentUser.value.isServiceAdvisor) {
+      Ui.showError("Not enough permissions");
+      return;
+    }
+    Get.dialog(AppDialog.normal(
+      "Delete Record",
+      "Are you sure you want to remove this record from the database ?",
+      titleA: "Yes",
+      titleB: "No",
+      onPressedA: () async {
+        await Get.find<AppController>()
+            .deleteExisitingRecord<T>(bm.id.toString());
+      },
+      onPressedB: () {
+        Get.back();
+      },
+    ));
+  }
+
   @override
   Future<AsyncRowsResponse> getRows(int startIndex, int count) async {
     final appRepo = Get.find<AppRepo>();
@@ -233,20 +286,8 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
             final bm = bms[index];
 
             return DataRow2(
-                onTap: () {
-                  Get.find<AppController>().currentBaseModel = bm.obs;
-                  Get.dialog(AppDialog(
-                      title: AppText.medium("Edit Record"),
-                      content: Obx(() {
-                        return DynamicFormGenerator(
-                            model: Get.find<AppController>()
-                                .currentBaseModel
-                                .value,
-                            onSave: (v) async {
-                              await Get.find<AppController>()
-                                  .editExisitingRecord(v);
-                            });
-                      })));
+                onTap: () async {
+                  await editRecord(bm);
                 },
                 cells: Ui.width(Get.context!) < 975
                     ? [
@@ -276,28 +317,8 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                               AppIcon(
                                 Icons.edit,
                                 color: AppColors.green,
-                                onTap: () {
-                                  if (!Get.find<AppService>()
-                                      .currentUser
-                                      .value
-                                      .isServiceAdvisor) {
-                                    Ui.showError("Not enough permissions");
-                                    return;
-                                  }
-                                  Get.find<AppController>().currentBaseModel =
-                                      bm.obs;
-                                  Get.dialog(AppDialog(
-                                      title: AppText.medium("Edit Record"),
-                                      content: Obx(() {
-                                        return DynamicFormGenerator(
-                                            model: Get.find<AppController>()
-                                                .currentBaseModel
-                                                .value,
-                                            onSave: (v) async {
-                                              await Get.find<AppController>()
-                                                  .editExisitingRecord(v);
-                                            });
-                                      })));
+                                onTap: () async {
+                                  await editRecord(bm);
                                 },
                               ),
                               Ui.boxWidth(12),
@@ -305,27 +326,7 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                                 Icons.delete,
                                 color: Colors.red,
                                 onTap: () {
-                                  if (!Get.find<AppService>()
-                                      .currentUser
-                                      .value
-                                      .isServiceAdvisor) {
-                                    Ui.showError("Not enough permissions");
-                                    return;
-                                  }
-                                  Get.dialog(AppDialog.normal(
-                                    "Delete Record",
-                                    "Are you sure you want to remove this record from the database ?",
-                                    titleA: "Yes",
-                                    titleB: "No",
-                                    onPressedA: () async {
-                                      await Get.find<AppController>()
-                                          .deleteExisitingRecord<T>(
-                                              bm.id.toString());
-                                    },
-                                    onPressedB: () {
-                                      Get.back();
-                                    },
-                                  ));
+                                  deleteRecord(bm);
                                 },
                               ),
                             ],
@@ -345,58 +346,19 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                               AppIcon(
                                 Icons.edit,
                                 color: AppColors.green,
-                                onTap: () {
-                                  if (!Get.find<AppService>()
-                                      .currentUser
-                                      .value
-                                      .isServiceAdvisor) {
-                                    Ui.showError("Not enough permissions");
-                                    return;
-                                  }
-                                  Get.find<AppController>().currentBaseModel =
-                                      bm.obs;
-                                  Get.dialog(AppDialog(
-                                      title: AppText.medium("Edit Record"),
-                                      content: Obx(() {
-                                        return DynamicFormGenerator(
-                                            model: Get.find<AppController>()
-                                                .currentBaseModel
-                                                .value,
-                                            onSave: (v) async {
-                                              await Get.find<AppController>()
-                                                  .editExisitingRecord(v);
-                                            });
-                                      })));
+                                onTap: () async {
+                                  await editRecord(bm);
                                 },
                               ),
                               Ui.boxWidth(12),
-                              AppIcon(
-                                Icons.delete,
-                                color: Colors.red,
-                                onTap: () {
-                                  if (!Get.find<AppService>()
-                                      .currentUser
-                                      .value
-                                      .isServiceAdvisor) {
-                                    Ui.showError("Not enough permissions");
-                                    return;
-                                  }
-                                  Get.dialog(AppDialog.normal(
-                                    "Delete Record",
-                                    "Are you sure you want to remove this record from the database ?",
-                                    titleA: "Yes",
-                                    titleB: "No",
-                                    onPressedA: () async {
-                                      await Get.find<AppController>()
-                                          .deleteExisitingRecord<T>(
-                                              bm.id.toString());
-                                    },
-                                    onPressedB: () {
-                                      Get.back();
-                                    },
-                                  ));
-                                },
-                              ),
+                              if (T != BulkExpenses)
+                                AppIcon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                  onTap: () {
+                                    deleteRecord(bm);
+                                  },
+                                ),
                             ],
                           ));
                         }
@@ -514,7 +476,7 @@ class _CustomTablePageState extends State<CustomTablePage> {
 }
 
 class HeaderChooser extends StatelessWidget {
-  const HeaderChooser(this.hi, {this.i = 0,super.key});
+  const HeaderChooser(this.hi, {this.i = 0, super.key});
   final List<HeaderItem> hi;
   final int i;
 
@@ -615,13 +577,47 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
     if (fieldName.endsWith("Id") ||
         fieldName.endsWith("Type") ||
         fieldName.endsWith("role")) {
+      if ((widget.model.runtimeType == Product &&
+              fieldName == "productCategoryId") ||
+          (widget.model.runtimeType == Inventory &&
+              (fieldName == "productCategoryId" ||
+                  fieldName == "productTypeId"))) {
+        return SizedBox();
+      }
       return CustomTextField.dropdown(
           Get.find<AppController>().filterOptions[fieldName]?.titles ??
               ["None"],
           Get.find<AppController>().filterOptions[fieldName]?.values ?? [0],
           _controllers[fieldName]!,
           "Select ${_formatFieldName(fieldName).replaceAll(" id", "")}",
-          initOption: value);
+          initOption: value, onChanged: (a) {
+        try {
+          if (widget.model.runtimeType == Product) {
+            _controllers["productCategoryId"]!.text = Get.find<AppController>()
+                .allProducts
+                .where((test) => test.id == a)
+                .first
+                .productCategoryId
+                .toString();
+          } else if (widget.model.runtimeType == Inventory) {
+            _controllers["productCategoryId"]!.text = Get.find<AppController>()
+                .allProducts
+                .where((test) => test.id == a)
+                .first
+                .productCategoryId
+                .toString();
+            _controllers["productTypeId"]!.text = Get.find<AppController>()
+                .allProducts
+                .where((test) => test.id == a)
+                .first
+                .productTypeId
+                .toString();
+          }
+        } catch (e) {
+          // TODO
+          print(e);
+        }
+      });
     }
 
     if (fieldName.endsWith("signature")) {
@@ -743,6 +739,13 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
     return CustomTextField(
       _formatFieldName(fieldName),
       _controllers[fieldName]!,
+      customOnChanged: () {
+        if (widget.model.runtimeType == Expenses &&
+            fieldName.toLowerCase().endsWith("cost")) {
+          (widget.model as Expenses).rawCost.value =
+              double.tryParse(_controllers[fieldName]!.text) ?? 0;
+        }
+      },
       varl: fieldName.toLowerCase().endsWith("cost") ||
               fieldName.toLowerCase().endsWith("price")
           ? FPL.number
@@ -788,10 +791,10 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
     Map<String, dynamic> jsonMap = widget.model.toJson();
     if (widget.model.runtimeType == Invoice) {
       Rx<Invoice> inv = (widget.model as Invoice).obs;
-      if(widget.isNew){
-        inv.value = Invoice(servicesUsed: [],productsUsed: []);
+      if (widget.isNew) {
+        inv.value = Invoice(servicesUsed: [], productsUsed: []);
       }
-      
+
       return SingleChildScrollView(
         child: Column(
           children: [
@@ -800,19 +803,57 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
                   TextEditingController(text: _formData['id'].toString()),
                   readOnly: true),
             _buildField("orderId", jsonMap["orderId"]),
-            InvoiceList(inv, isOwn: false,),
-            AppButton(onPressed: () async {
-              inv.value.orderId = int.tryParse(_controllers["orderId"]!.text) ?? 0;
-                      inv.value.totalCost = inv.value.rawTotalCost;
-              if (inv.value.validate()) {
-                final gh = inv.value.toRawJson();
-                gh["id"] = inv.value.id;
-                await widget.onSave(gh);
-              } else {
-                Ui.showError(
-                    "Please check the Services/Products Section, None values are not acceptable");
-              }
-            },text: "Save",)
+            InvoiceList(
+              inv,
+              isOwn: false,
+            ),
+            AppButton(
+              onPressed: () async {
+                inv.value.orderId =
+                    int.tryParse(_controllers["orderId"]!.text) ?? 0;
+                inv.value.totalCost = inv.value.rawTotalCost;
+                if (inv.value.validate()) {
+                  final gh = inv.value.toRawJson();
+                  gh["id"] = inv.value.id;
+                  await widget.onSave(gh);
+                } else {
+                  Ui.showError(
+                      "Please check the Services/Products Section, None values are not acceptable");
+                }
+              },
+              text: "Save",
+            )
+          ],
+        ),
+      );
+    }
+
+    if (widget.model.runtimeType == BulkExpenses) {
+      Rx<BulkExpenses> inv = (widget.model as BulkExpenses).obs;
+      if (widget.isNew) {
+        inv.value = BulkExpenses(date: DateTime.now());
+        inv.value.expenses = [];
+      }
+
+      return SingleChildScrollView(
+        child: Column(
+          children: [
+            if (!widget.isNew)
+              CustomTextField(_formatFieldName("id"),
+                  TextEditingController(text: _formData['id'].toString()),
+                  readOnly: true),
+            ExpensesList(inv),
+            AppButton(
+              onPressed: () async {
+                if (inv.value.validate()) {
+                  await Get.find<AppController>().syncExpenses(
+                      inv.value.toJson(), inv.value.date.toIso8601String());
+                } else {
+                  Ui.showError("None values are not acceptable");
+                }
+              },
+              text: "Save",
+            )
           ],
         ),
       );
@@ -899,5 +940,104 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
   void dispose() {
     _controllers.forEach((_, controller) => controller.dispose());
     super.dispose();
+  }
+}
+
+class ExpensesList extends StatelessWidget {
+  const ExpensesList(this.bulkExpenses, {super.key});
+  final Rx<BulkExpenses> bulkExpenses;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Ui.align(child: AppText.bold("Expenses")),
+        Ui.boxHeight(8),
+        Obx(() {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: bulkExpenses.value.expenses
+                .map((e) => ExpensesItemWidget(e))
+                .toList(),
+          );
+        }),
+        InvoiceItemCounter(() {
+          bulkExpenses.value.expenses.add(Expenses());
+          bulkExpenses.refresh();
+        }, () {
+          if (bulkExpenses.value.expenses.isNotEmpty) {
+            bulkExpenses.value.expenses.removeLast();
+          }
+          bulkExpenses.refresh();
+        }),
+        AppDivider(),
+        Obx(() {
+          return ExpensesItemWidget(Expenses(),
+              title: "TOTAL Expenses",
+              desc: bulkExpenses.value.rawTotalCost.toCurrency());
+        }),
+        Ui.boxHeight(48),
+      ],
+    );
+  }
+}
+
+class ExpensesItemWidget extends StatelessWidget {
+  const ExpensesItemWidget(this.expense,
+      {this.title = "", this.desc = "", super.key});
+  final Expenses expense;
+  final String title, desc;
+
+  @override
+  Widget build(BuildContext context) {
+    final qtyTec = TextEditingController(text: expense.cost.toString());
+
+    return SizedBox(
+      width: Ui.width(context),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+        if (title.isNotEmpty) Expanded(flex: 3, child: AppText.bold(title)),
+        if (title.isNotEmpty)
+          Expanded(
+              flex: 1,
+              child: CustomTextField(
+                "",
+                TextEditingController(text: desc),
+                hasBottomPadding: false,
+                varl: FPL.number,
+                readOnly: true,
+                textAlign: TextAlign.right,
+              )),
+        if (title.isEmpty)
+          Expanded(
+              flex: 3,
+              child: CustomTextField.dropdown(
+                  Get.find<AppController>()
+                      .filterOptions["expensesTypeId"]!
+                      .titles,
+                  Get.find<AppController>()
+                      .filterOptions["expensesTypeId"]!
+                      .values,
+                  TextEditingController(),
+                  "",
+                  initOption: expense.expensesTypeId, onChanged: (v) {
+                expense.expensesTypeId = v;
+              })),
+        if (title.isEmpty)
+          Expanded(
+            flex: 1,
+            child: Padding(
+                padding: const EdgeInsets.only(left: 12.0),
+                child: TextField(
+                    controller: qtyTec,
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.next,
+                    textAlign: TextAlign.center,
+                    decoration: InputDecoration(hintText: "Amount"),
+                    onChanged: (v) {
+                      expense.rawCost.value = double.tryParse(qtyTec.text) ?? 0;
+                    })),
+          ),
+      ]),
+    );
   }
 }

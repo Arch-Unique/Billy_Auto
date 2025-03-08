@@ -95,6 +95,9 @@ class AppController extends GetxController {
   RxList<Inventory> allInventory = <Inventory>[].obs;
   RxList<Order> allOrders = <Order>[].obs;
   RxList<Invoice> allInvoices = <Invoice>[].obs;
+
+  RxList<ExpensesType> allExpensesTypes = <ExpensesType>[].obs;
+
   RxList<String> userRoles = <String>[].obs;
   RxList<String> customerTypes = <String>[].obs;
   RxList<String> inventoryStatus = <String>[].obs;
@@ -193,6 +196,9 @@ class AppController extends GetxController {
     filterOptions["orderId"] = FilterOptionsModel(
         allOrders.map((element) => element.title).toList(),
         allOrders.map((element) => element.id).toList());
+        filterOptions["expensesTypeId"] = FilterOptionsModel(
+        allExpensesTypes.map((element) => element.name).toList(),
+        allExpensesTypes.map((element) => element.id).toList());
   }
 
   initApp() async {
@@ -255,6 +261,7 @@ class AppController extends GetxController {
     allProducts.value = await _getAll<Product>();
     allSuppliers.value = await _getAll<Supplier>();
     allInventory.value = await _getAll<Inventory>();
+    allExpensesTypes.value = await _getAll<ExpensesType>();
     // allLoginHistory.value = await _getAll<LoginHistory>();
     allInvoices.value = await _getAll<Invoice>();
     allUsers.value = await _getAll<User>();
@@ -594,6 +601,19 @@ class AppController extends GetxController {
         await refreshModels();
         tmds.value.refreshDatasource();
       }
+    } catch (e) {
+      print(e);
+      Ui.showError(e.toString());
+    }
+  }
+
+  syncExpenses(Map<String, dynamic> json, String dt) async {
+    try {
+      await appRepo.syncExpenses(json, dt);
+      Get.back();
+        Ui.showInfo("Successfully Updated Existing Record");
+        await refreshModels();
+        tmds.value.refreshDatasource();
     } catch (e) {
       print(e);
       Ui.showError(e.toString());

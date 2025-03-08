@@ -67,9 +67,19 @@ class _ExplorerPageState extends State<ExplorerPage> {
           HeaderItem("Inventory", vb: () {
             controller.setCurrentTypeTable<Inventory>();
           }),
-          HeaderItem("Location", vb: () {
-            // controller.setCurrentTypeTable<Inventory>();
+           HeaderItem("Expenses", vb: () {
+            controller.setCurrentTypeTable<Expenses>();
           }),
+           HeaderItem("Bulk Expenses", vb: () {
+            controller.setCurrentTypeTable<BulkExpenses>();
+          }),
+           HeaderItem("Expenses Types", vb: () {
+            controller.setCurrentTypeTable<ExpensesType>();
+          }),
+          
+          // HeaderItem("Location", vb: () {
+          //   // controller.setCurrentTypeTable<Inventory>();
+          // }),
         ],
       ),
       CustomTablePage([

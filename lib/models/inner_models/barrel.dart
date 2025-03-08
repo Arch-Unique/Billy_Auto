@@ -10,3 +10,4 @@ export 'supplier.dart';
 export 'user.dart';
 export 'loginHistory.dart';
 export 'invoice.dart';
+export 'expenses.dart';

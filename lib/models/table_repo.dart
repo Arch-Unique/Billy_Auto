@@ -169,8 +169,7 @@ class AllTables {
         Product(
             name: "",
             productCategoryId: 0,
-            productTypeId: 0,
-            supplierId: 0)),
+            productTypeId: 0,)),
     Inventory: TableModel(
         [
           "id",
@@ -231,5 +230,32 @@ class AllTables {
     ], [
       
     ], Invoice(productsUsed: [], servicesUsed: []),),
+
+    ExpensesType: TableModel([
+      "id",
+      "name",
+      "code",
+      "createdAt"
+    ], [
+      
+    ], ExpensesType(name: "",code: ""),),
+    Expenses: TableModel([
+      "id",
+      "expensesType",
+      "cost",
+      "createdAt"
+    ], [
+      
+      FilterModel("Expenses", "expensesTypeId", 0),
+    ], Expenses(),),
+    BulkExpenses: TableModel([
+      "id",
+      "date",
+      "expenses",
+      "totalCost",
+    ], [
+      
+      FilterModel("Expenses", "expensesTypeId", 0),
+    ], BulkExpenses(date: DateTime.now()),),
   };
 }

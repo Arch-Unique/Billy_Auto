@@ -8,14 +8,13 @@ class Product extends BaseModel{
   String image;
   
   
-  int productTypeId,supplierId;
+  int productTypeId;
   String productCategory, productType;
 
   Product({
     super.id = 0,
     required this.name,
     required this.productCategoryId,
-    required this.supplierId,
     this.productCategory="",
     this.code="",
     this.image="",
@@ -33,7 +32,6 @@ Map<String, dynamic> toJson() {
       'productCategoryId': productCategoryId,
       'code': code,
       'image': image,
-      'supplierId': supplierId,
       'productTypeId': productTypeId,
     };
   }
@@ -61,7 +59,6 @@ List<dynamic> toTableRows(){
       createdAt: DateTime.tryParse(json['createdAt']),
       updatedAt: DateTime.tryParse(json['updatedAt']),
       productTypeId: int.tryParse(json['productTypeId'].toString()) ?? 0,
-      supplierId: int.tryParse(json['supplierId'].toString()) ?? 0,
       productType: json['productType'] ?? "",
     );
   }

@@ -66,6 +66,9 @@ class AppRepo extends GetxController {
     BillyConditionCategory: BillyConditionCategory.fromJson,
     BillyServices: BillyServices.fromJson,
     LoginHistory: LoginHistory.fromJson,
+    Expenses: Expenses.fromJson,
+    ExpensesType: ExpensesType.fromJson,
+    BulkExpenses: BulkExpenses.fromJson,
     Invoice: Invoice.fromJson,
     InventoryMetricStockBalances: InventoryMetricStockBalances.fromJson,
     InventoryMetricStockBalancesCost: InventoryMetricStockBalancesCost.fromJson,
@@ -91,6 +94,9 @@ class AppRepo extends GetxController {
     BillyConditionCategory: AppUrls.conditionCategory,
     BillyServices: AppUrls.service,
     LoginHistory: AppUrls.loginHistory,
+    Expenses: AppUrls.expenses,
+    ExpensesType: AppUrls.expensesTypes,
+    BulkExpenses: AppUrls.expensesMetric,
     Invoice: AppUrls.invoice,
     InventoryMetricStockBalances: "${AppUrls.metrics}/1",
     InventoryMetricStockBalancesCost: "${AppUrls.metrics}/2",
@@ -109,7 +115,8 @@ class AppRepo extends GetxController {
   }
 
   Future<int> create<T extends BaseModel>(T data) async {
-    final res = await apiService.post("${urls[data.runtimeType]!}/add", data: data.toJson());
+    final res = await apiService.post("${urls[data.runtimeType]!}/add",
+        data: data.toJson());
     if (!res.statusCode!.isSuccess()) {
       throw res.data["error"];
     }
@@ -117,7 +124,8 @@ class AppRepo extends GetxController {
   }
 
   Future<String> patch<T extends BaseModel>(T data) async {
-    final res = await apiService.patch("${urls[data.runtimeType]!}/${data.id}", data: data.toJson());
+    final res = await apiService.patch("${urls[data.runtimeType]!}/${data.id}",
+        data: data.toJson());
     if (!res.statusCode!.isSuccess()) {
       throw res.data["error"];
     }
@@ -125,7 +133,8 @@ class AppRepo extends GetxController {
   }
 
   Future<T?> getOne<T>(String id) async {
-    final res = await apiService.post("${urls[T]!}/$id/get",data: {"filter":{}});
+    final res =
+        await apiService.post("${urls[T]!}/$id/get", data: {"filter": {}});
     return getOf<T>(res);
   }
 
@@ -133,6 +142,7 @@ class AppRepo extends GetxController {
       {List<FilterModel> fm = const [],
       int page = 1,
       int limit = 10,
+      String date = "",
       String query = ""}) async {
     Map<String, String> ffm = {};
     for (var i = 0; i < fm.length; i++) {
@@ -146,6 +156,7 @@ class AppRepo extends GetxController {
       'page': page.toString(),
       'limit': limit.toString(),
       'q': query,
+      'date': date,
     };
 
     // Remove null or empty values
@@ -158,7 +169,7 @@ class AppRepo extends GetxController {
     // Construct full URL
     final url = '${urls[T]!}/get?$queryString';
 
-    final res = await apiService.post(url,data: {"filter":ffm});
+    final res = await apiService.post(url, data: {"filter": ffm});
     return getListOf<T>(res);
   }
 
@@ -171,10 +182,24 @@ class AppRepo extends GetxController {
   }
 
   login(String username, String password) async {
-    final res = await apiService.post(AppUrls.login,
-        data: {"username": username, "password": password,"device":GetPlatform.isMobile ? "mobile":"pc"});
+    final res = await apiService.post(AppUrls.login, data: {
+      "username": username,
+      "password": password,
+      "device": GetPlatform.isMobile ? "mobile" : "pc"
+    });
     if (res.statusCode!.isSuccess()) {
       await appService.loginUser(res.data["data"]["jwt"]);
+    } else {
+      throw res.data["error"];
+    }
+  }
+
+  syncExpenses(Map<String, dynamic> json, String dt) async {
+    final res = await apiService.post("${AppUrls.expensesMetric}/add/$dt",
+        data: json["data"]);
+    if (res.statusCode!.isSuccess()) {
+      return;
+      // await appService.loginUser(res.data["data"]["jwt"]);
     } else {
       throw res.data["error"];
     }
@@ -190,9 +215,10 @@ class AppRepo extends GetxController {
     }
   }
 
-  changePassword(String password,String npassword) async {
-    final res = await apiService.post("${AppUrls.changePassword}/${appService.currentUser.value.id}",
-        data: {"password": password,"npassword": npassword});
+  changePassword(String password, String npassword) async {
+    final res = await apiService.post(
+        "${AppUrls.changePassword}/${appService.currentUser.value.id}",
+        data: {"password": password, "npassword": npassword});
     if (res.statusCode!.isSuccess()) {
       // await appService.loginUser(res.data["data"]["jwt"]);
     } else {
@@ -201,8 +227,8 @@ class AppRepo extends GetxController {
   }
 
   Future<String?> uploadPhoto(String? imagePath) async {
-    if(imagePath == null) return null;
-    if(imagePath.isEmpty) return null;
+    if (imagePath == null) return null;
+    if (imagePath.isEmpty) return null;
     final res = await apiService.post(AppUrls.upload,
         data: dio.FormData.fromMap({
           'file': await dio.MultipartFile.fromFile(

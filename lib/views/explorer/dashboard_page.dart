@@ -111,7 +111,7 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
   Widget itemDataWidget(String title, String value, Color color,
       {String desc = ""}) {
     final cc = CurvedContainer(
-      height: 160,
+      height: 120,
       padding: EdgeInsets.all(16),
       margin: EdgeInsets.all(16),
       color: color,
@@ -656,7 +656,7 @@ class _ProfitChartState extends State<ProfitChart> {
       // case "Labor":
       //   return profitObj.laborProfit;
       case "Expenses":
-        return profitObj.productCost;
+        return profitObj.cost;
       default:
         return profitObj.sales;
     }
