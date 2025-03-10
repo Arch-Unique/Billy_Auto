@@ -1093,7 +1093,10 @@ class CustomTextField extends StatelessWidget {
 
   static dropdown(List<String> optionss, List<dynamic> valuess,
       TextEditingController cont, String label,
-      {Function(dynamic)? onChanged, dynamic initOption, double? w,bool isEnabled=true}) {
+      {Function(dynamic)? onChanged,
+      dynamic initOption,
+      double? w,
+      bool isEnabled = true}) {
     dynamic curOption;
 
     final options = List.from(optionss);
@@ -1113,68 +1116,70 @@ class CustomTextField extends StatelessWidget {
     }
 
     cont.text = curOption.toString();
+    return CustomMultiDropdown(optionss, valuess, cont, label,initValues: [curOption],singleOnly: true,onChanged: onChanged,isEnable: true,);
 
-    return StatefulBuilder(builder: (context, setState) {
-      return SizedBox(
-        width: w ?? Ui.width(context) - 48,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (label.isNotEmpty) AppText.thin(label),
-            if (label.isNotEmpty)
-              const SizedBox(
-                height: 8,
-              ),
-            CurvedContainer(
-              color: AppColors.white,
-              padding: EdgeInsets.symmetric(horizontal: 10,vertical: 0),
-              border: Border.all(color: Colors.grey),
-              child: DropdownButton<dynamic>(
-                  value: curOption,
-                  isExpanded: true,
-                  elevation: 0,
-                  hint: AppText.thin(options[!values.contains(curOption)
-                      ? 0
-                      : values.indexOf(curOption)]),
-                  underline: SizedBox(),
-                  // underline: Padding(
-                  //   padding: const EdgeInsets.only(top: 16.0),
-                  //   child: Divider(
-                  //     color: AppColors.white,
-                  //   ),
-                  // ),
-                  padding: EdgeInsets.all(6),
-
-                  icon: Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    color: AppColors.primaryColor,
-                  ),
-                  dropdownColor: AppColors.white,
-                  isDense: true,
-                  items: values
-                      .map((e) => DropdownMenuItem<dynamic>(
-                          value: e,
-                          child: AppText.thin(options[values.indexOf(e)])))
-                      .toList(),
-                  onChanged: !isEnabled ? null : (value) {
-                    setState(() {
-                      curOption = value!;
-                      cont.text = curOption.toString();
-                    });
-                    if (onChanged != null) {
-                      onChanged(curOption);
-                    }
-                  }),
-            ),
-            if (label.isNotEmpty)
-              const SizedBox(
-                height: 32,
-              )
-          ],
-        ),
-      );
-    });
+    // return StatefulBuilder(builder: (context, setState) {
+    //   return SizedBox(
+    //     width: w ?? Ui.width(context) - 48,
+    //     child: Column(
+    //       mainAxisSize: MainAxisSize.min,
+    //       crossAxisAlignment: CrossAxisAlignment.start,
+    //       children: [
+    //         if (label.isNotEmpty) AppText.thin(label),
+    //         if (label.isNotEmpty)
+    //           const SizedBox(
+    //             height: 8,
+    //           ),
+    //         CurvedContainer(
+    //           color: AppColors.white,
+    //           padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+    //           border: Border.all(color: Colors.grey),
+    //           child: DropdownButton<dynamic>(
+    //               value: curOption,
+    //               isExpanded: true,
+    //               elevation: 0,
+    //               hint: AppText.thin(options[!values.contains(curOption)
+    //                   ? 0
+    //                   : values.indexOf(curOption)]),
+    //               underline: SizedBox(),
+    //               // underline: Padding(
+    //               //   padding: const EdgeInsets.only(top: 16.0),
+    //               //   child: Divider(
+    //               //     color: AppColors.white,
+    //               //   ),
+    //               // ),
+    //               padding: EdgeInsets.all(6),
+    //               icon: Icon(
+    //                 Icons.keyboard_arrow_down_rounded,
+    //                 color: AppColors.primaryColor,
+    //               ),
+    //               dropdownColor: AppColors.white,
+    //               isDense: true,
+    //               items: values
+    //                   .map((e) => DropdownMenuItem<dynamic>(
+    //                       value: e,
+    //                       child: AppText.thin(options[values.indexOf(e)])))
+    //                   .toList(),
+    //               onChanged: !isEnabled
+    //                   ? null
+    //                   : (value) {
+    //                       setState(() {
+    //                         curOption = value!;
+    //                         cont.text = curOption.toString();
+    //                       });
+    //                       if (onChanged != null) {
+    //                         onChanged(curOption);
+    //                       }
+    //                     }),
+    //         ),
+    //         if (label.isNotEmpty)
+    //           const SizedBox(
+    //             height: 32,
+    //           )
+    //       ],
+    //     ),
+    //   );
+    // });
   }
 }
 
@@ -1305,10 +1310,15 @@ class CustomMultiDropdown extends StatefulWidget {
   final List<dynamic> initValues;
   final TextEditingController controller;
   final String title;
-  final bool isEnable;
+  final bool isEnable, singleOnly;
+  final Function(dynamic)? onChanged;
   const CustomMultiDropdown(
       this.options, this.values, this.controller, this.title,
-      {this.initValues = const [], this.isEnable = true, super.key});
+      {this.initValues = const [],
+      this.isEnable = true,
+      this.onChanged,
+      this.singleOnly = false,
+      super.key});
 
   @override
   State<CustomMultiDropdown> createState() => _CustomMultiDropdownState();
@@ -1361,7 +1371,7 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
       selectedTextColor: AppColors.white,
     );
     final fdec = FieldDecoration(
-        hintText: "Select ${widget.title}",
+        hintText: "${widget.title}",
         suffixIcon: Icon(
           Icons.keyboard_arrow_down_rounded,
           color: AppColors.primaryColor,
@@ -1375,14 +1385,22 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
       searchEnabled: true,
       controller: mdcont,
       enabled: widget.isEnable,
-      
+      singleSelect: widget.singleOnly,
+      maxSelections: widget.singleOnly ? 1 : 0,
       dropdownItemDecoration: ddec,
       fieldDecoration: fdec,
       onSelectionChange: (selectedItems) {
         if (selectedItems.isEmpty) {
           widget.controller.text = "";
+        }else{
+          if (widget.singleOnly) {
+            widget.controller.text = selectedItems[0].toString();
+            widget.onChanged!(selectedItems[0]);
+          } else {
+            widget.controller.text = selectedItems.join(",");
+          }
         }
-        widget.controller.text = selectedItems.join(",");
+        
       },
     );
   }
@@ -1706,6 +1724,46 @@ class ConnectivityWidget extends StatelessWidget {
               ),
             ),
           ],
+        );
+      }
+      return child;
+    });
+  }
+}
+
+class LoadingWidget extends StatelessWidget {
+  const LoadingWidget({required this.child, super.key});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.find<AppController>();
+
+    return Obx(() {
+      final ic = controller.isLoading.value;
+      if (ic) {
+        return GestureDetector(
+          onTap: controller.stopLoading,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              AbsorbPointer(child: child),
+              BackdropFilter(
+                filter: ui.ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+                child: CurvedContainer(
+                  padding: EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AppText.bold("Loading...",
+                          fontFamily: Assets.appFontFamily2, fontSize: 24),
+                      CircularProgressIndicator()
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       }
       return child;

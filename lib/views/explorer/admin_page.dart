@@ -34,97 +34,104 @@ class _CustomTableState extends State<CustomTable> {
   final controller = Get.find<AppController>();
   @override
   Widget build(BuildContext context) {
-    return CurvedContainer(
-      width: Ui.width(context) < 975
-          ? wideUi(context)
-          : ((Ui.width(context) * 0.75) - 24),
-      height: Ui.width(context) < 975 ? null : double.maxFinite,
-      border: Border.all(color: AppColors.primaryColorLight),
-      color: AppColors.white.withOpacity(0.6),
-      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: Obx(() {
-        return AsyncPaginatedDataTable2(
-          minWidth: Ui.width(context) < 975
-              ? wideUi(context)
-              : ((Ui.width(context) * 0.75) - 56),
-          // border: TableBorder.all(),
+    return LoadingWidget(
+      child: CurvedContainer(
+        width: Ui.width(context) < 975
+            ? wideUi(context)
+            : ((Ui.width(context) * 0.75) - 24),
+        height: Ui.width(context) < 975 ? null : double.maxFinite,
+        border: Border.all(color: AppColors.primaryColorLight),
+        color: AppColors.white.withOpacity(0.6),
+        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: Obx(() {
+          return AsyncPaginatedDataTable2(
+            minWidth: Ui.width(context) < 975
+                ? wideUi(context)
+                : ((Ui.width(context) * 0.75) - 56),
+            // border: TableBorder.all(),
 
-          onRowsPerPageChanged: (value) {
-            print('Row per page changed to $value');
-          },
-// autoRowsToHeight: true,
-          columnSpacing: 0,
-          showCheckboxColumn: false,
-          // onSelectAll: (v) {
-          //   print(v);
-          // },
-          // controller: controller.paginatorController.value,
-          headingRowHeight: Ui.width(context) < 975 ? 8 : 56,
-          dataRowHeight:
-              Ui.width(context) < 975 ? 156 : kMinInteractiveDimension,
-          header: AppText.medium("Records",
-              fontFamily: Assets.appFontFamily2, fontSize: 16),
-          headingRowColor: WidgetStatePropertyAll<Color>(
-              AppColors.primaryColorLight.withOpacity(0.5)),
-          actions: [
-            Material(
-              color: AppColors.green,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: AppIcon(
-                Icons.add,
-                color: AppColors.white,
-                onTap: () async {
-                  if (!Get.find<AppService>()
-                      .currentUser
-                      .value
-                      .isServiceAdvisor) {
-                    Ui.showError("Not enough permissions");
-                    return;
-                  }
-                  if (controller.currentBaseModel.value.runtimeType ==
-                      BulkExpenses) {
-                    (controller.currentBaseModel.value as BulkExpenses)
-                        .expenses = (await Get.find<AppRepo>().getAll<Expenses>(
-                            date: (controller.currentBaseModel.value
-                                    as BulkExpenses)
-                                .date
-                                .toIso8601String()))
-                        .data;
-                  }
-                  Get.dialog(AppDialog(
-                      title: AppText.medium("Add New Record"),
-                      content: Obx(() {
-                        return DynamicFormGenerator(
-                            model: controller.currentBaseModel.value,
-                            isNew: true,
-                            onSave: (v) async {
-                              await controller.saveNewRecord(v);
-                            });
-                      })));
-                },
-                size: 40,
-              ),
-            ), //add new
-          ],
-          columns: Ui.width(context) < 975
-              ? [
-                  DataColumn2(
-                      label: AppText.bold("",
-                          fontSize: 8, fontFamily: Assets.appFontFamily2),
-                      size: ColumnSize.S)
-                ]
-              : controller.currentHeaders
-                  .map((e) => DataColumn2(
-                      label: AppText.bold(e,
-                          fontSize: 14, fontFamily: Assets.appFontFamily2),
-                      size: ColumnSize.S))
-                  .toList(),
-          source: controller.tmds.value,
-        );
-      }),
+            onRowsPerPageChanged: (value) {
+              print('Row per page changed to $value');
+            },
+            // autoRowsToHeight: true,
+            columnSpacing: 0,
+            showCheckboxColumn: false,
+            // onSelectAll: (v) {
+            //   print(v);
+            // },
+            // controller: controller.paginatorController.value,
+            headingRowHeight: Ui.width(context) < 975 ? 8 : 56,
+            dataRowHeight:
+                Ui.width(context) < 975 ? 156 : kMinInteractiveDimension,
+            header: AppText.medium("Records",
+                fontFamily: Assets.appFontFamily2, fontSize: 16),
+            headingRowColor: WidgetStatePropertyAll<Color>(
+                AppColors.primaryColorLight.withOpacity(0.5)),
+            actions: [
+              Material(
+                color: AppColors.green,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: AppIcon(
+                  Icons.add,
+                  color: AppColors.white,
+                  onTap: () async {
+                    if (!Get.find<AppService>()
+                        .currentUser
+                        .value
+                        .isServiceAdvisor) {
+                      Ui.showError("Not enough permissions");
+                      return;
+                    }
+                    Get.find<AppController>().startLoading();
+                    if (controller.currentBaseModel.value.runtimeType ==
+                        BulkExpenses) {
+                      (controller.currentBaseModel.value as BulkExpenses)
+                          .expenses = (await Get.find<AppRepo>()
+                              .getAll<Expenses>(
+                                  rurl: AppUrls.expensesMetric,
+                                  date: (controller.currentBaseModel.value
+                                          as BulkExpenses)
+                                      .date
+                                      .toSQLDate()))
+                          .data;
+                    }
+
+                    Get.find<AppController>().stopLoading();
+                    Get.dialog(AppDialog(
+                        title: AppText.medium("Add New Record"),
+                        content: Obx(() {
+                          return DynamicFormGenerator(
+                              model: controller.currentBaseModel.value,
+                              isNew: true,
+                              onSave: (v) async {
+                                await controller.saveNewRecord(v);
+                              });
+                        })));
+                  },
+                  size: 40,
+                ),
+              ), //add new
+            ],
+            columns: Ui.width(context) < 975
+                ? [
+                    DataColumn2(
+                        label: AppText.bold("",
+                            fontSize: 8, fontFamily: Assets.appFontFamily2),
+                        size: ColumnSize.S)
+                  ]
+                : controller.currentHeaders
+                    .map((e) => DataColumn2(
+                        label: AppText.bold(e,
+                            fontSize: 14, fontFamily: Assets.appFontFamily2),
+                        size: ColumnSize.S))
+                    .toList(),
+            source: controller.tmds.value,
+          );
+        }),
+      ),
     );
   }
 }
@@ -228,11 +235,16 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
       Ui.showError("Not enough permissions");
       return;
     }
+    Get.find<AppController>().startLoading();
     if (T == BulkExpenses) {
-      (bm as BulkExpenses).expenses = (await Get.find<AppRepo>()
-              .getAll<Expenses>(date: bm.date.toIso8601String()))
-          .data;
+      (bm as BulkExpenses).expenses =
+          (await Get.find<AppRepo>().getAll<Expenses>(
+        date: bm.date.toSQLDate(),
+        rurl: AppUrls.expensesMetric,
+      ))
+              .data;
     }
+    Get.find<AppController>().stopLoading();
     Get.find<AppController>().currentBaseModel = bm.obs;
     Get.dialog(AppDialog(
         title: AppText.medium("Edit Record"),
@@ -245,7 +257,7 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
         })));
   }
 
-  deleteRecord(BaseModel bm) async {
+  deleteRecord(BaseModel bm) {
     if (!Get.find<AppService>().currentUser.value.isServiceAdvisor) {
       Ui.showError("Not enough permissions");
       return;
@@ -322,13 +334,14 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                                 },
                               ),
                               Ui.boxWidth(12),
-                              AppIcon(
-                                Icons.delete,
-                                color: Colors.red,
-                                onTap: () {
-                                  deleteRecord(bm);
-                                },
-                              ),
+                              if (T != BulkExpenses)
+                                AppIcon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                  onTap: () {
+                                    deleteRecord(bm);
+                                  },
+                                ),
                             ],
                           ),
                         ))
@@ -560,10 +573,10 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
 
     // Create controllers for each field
     _formData['id'] = widget.model.id;
-    _formData['createdAt'] = widget.model.createdAt?.toIso8601String() ??
-        DateTime.now().toIso8601String();
-    _formData['updatedAt'] = widget.model.updatedAt?.toIso8601String() ??
-        DateTime.now().toIso8601String();
+    _formData['createdAt'] =
+        widget.model.createdAt?.toString() ?? DateTime.now().toString();
+    _formData['updatedAt'] =
+        widget.model.updatedAt?.toString() ?? DateTime.now().toString();
     jsonMap.forEach((key, value) {
       if (!['id', 'createdAt', 'updatedAt'].contains(key)) {
         _controllers[key] = TextEditingController(
@@ -592,14 +605,15 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
           "Select ${_formatFieldName(fieldName).replaceAll(" id", "")}",
           initOption: value, onChanged: (a) {
         try {
-          if (widget.model.runtimeType == Product) {
+          if (widget.model.runtimeType == Product  && fieldName == "productTypeId") {
+            print(a);
             _controllers["productCategoryId"]!.text = Get.find<AppController>()
-                .allProducts
+                .allProductType
                 .where((test) => test.id == a)
                 .first
                 .productCategoryId
                 .toString();
-          } else if (widget.model.runtimeType == Inventory) {
+          } else if (widget.model.runtimeType == Inventory && fieldName == "productId") {
             _controllers["productCategoryId"]!.text = Get.find<AppController>()
                 .allProducts
                 .where((test) => test.id == a)
@@ -615,6 +629,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
           }
         } catch (e) {
           // TODO
+        
           print(e);
         }
       });
@@ -847,7 +862,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
               onPressed: () async {
                 if (inv.value.validate()) {
                   await Get.find<AppController>().syncExpenses(
-                      inv.value.toJson(), inv.value.date.toIso8601String());
+                      inv.value.toJson(), inv.value.date.toSQLDate());
                 } else {
                   Ui.showError("None values are not acceptable");
                 }

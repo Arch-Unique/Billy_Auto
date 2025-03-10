@@ -125,6 +125,7 @@ class AppController extends GetxController {
   Rx<Order> currentOrder = Order(customerId: 0).obs;
 
   Map<String, FilterOptionsModel> filterOptions = {};
+  RxBool isLoading = false.obs;
   Timer? timer;
 
   //ORDERS
@@ -136,6 +137,14 @@ class AppController extends GetxController {
   Type currentType = User;
 
   final appRepo = Get.find<AppRepo>();
+
+  startLoading() {
+    isLoading.value = true;
+  }
+
+  stopLoading() {
+    isLoading.value = false;
+  }
 
   initFilterOptions() {
     filterOptions["productCategoryId"] = FilterOptionsModel(
@@ -196,7 +205,7 @@ class AppController extends GetxController {
     filterOptions["orderId"] = FilterOptionsModel(
         allOrders.map((element) => element.title).toList(),
         allOrders.map((element) => element.id).toList());
-        filterOptions["expensesTypeId"] = FilterOptionsModel(
+    filterOptions["expensesTypeId"] = FilterOptionsModel(
         allExpensesTypes.map((element) => element.name).toList(),
         allExpensesTypes.map((element) => element.id).toList());
   }
@@ -400,8 +409,8 @@ class AppController extends GetxController {
       element.serviceAdvisor = allServiceAdvisor
           .firstWhere((e) => e.id == element.serviceAdvisorId)
           .fullName;
-          element.serviceAdvisorDetails = allServiceAdvisor
-          .firstWhere((e) => e.id == element.serviceAdvisorId);
+      element.serviceAdvisorDetails =
+          allServiceAdvisor.firstWhere((e) => e.id == element.serviceAdvisorId);
       element.technician = allTechnicians
           .firstWhere((e) => e.id == element.technicianId)
           .fullName;
@@ -611,9 +620,9 @@ class AppController extends GetxController {
     try {
       await appRepo.syncExpenses(json, dt);
       Get.back();
-        Ui.showInfo("Successfully Updated Existing Record");
-        await refreshModels();
-        tmds.value.refreshDatasource();
+      Ui.showInfo("Successfully Updated Existing Record");
+      await refreshModels();
+      tmds.value.refreshDatasource();
     } catch (e) {
       print(e);
       Ui.showError(e.toString());

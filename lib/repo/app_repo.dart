@@ -143,6 +143,7 @@ class AppRepo extends GetxController {
       int page = 1,
       int limit = 10,
       String date = "",
+      String? rurl,
       String query = ""}) async {
     Map<String, String> ffm = {};
     for (var i = 0; i < fm.length; i++) {
@@ -167,7 +168,7 @@ class AppRepo extends GetxController {
     String queryString = Uri(queryParameters: queryParams).query;
 
     // Construct full URL
-    final url = '${urls[T]!}/get?$queryString';
+    final url = '${rurl ?? urls[T]!}/get?$queryString';
 
     final res = await apiService.post(url, data: {"filter": ffm});
     return getListOf<T>(res);

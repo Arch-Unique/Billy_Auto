@@ -40,7 +40,7 @@ abstract class Validators {
   }
 
   static String? validateNum(dynamic value) {
-    if (value != null && GetUtils.isNumericOnly(value!)) {
+    if (value != null && GetUtils.isNum(value!)) {
       return null;
     }
     return "Invalid number";

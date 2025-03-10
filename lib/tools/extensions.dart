@@ -50,3 +50,9 @@ extension NumExtension on num {
     return (this / 100).ceil() * 100;
   }
 }
+
+extension DateExtension on DateTime {
+  String toSQLDate() {
+    return DateFormat("yyyy-MM-dd hh:mm:ss").format(this);
+  }
+}

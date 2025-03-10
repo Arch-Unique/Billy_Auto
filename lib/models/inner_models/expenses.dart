@@ -114,6 +114,7 @@ class BulkExpenses extends BaseModel {
 
   @override
   Map<String, dynamic> toJson() {
+    print(expenses.map((e) => e.toJson()).toList());
     return {"data": expenses.map((e) => e.toJson()).toList()};
   }
 
@@ -131,8 +132,8 @@ class BulkExpenses extends BaseModel {
   factory BulkExpenses.fromJson(Map<String, dynamic> json) {
     return BulkExpenses(
       id: json["id"] ?? 0,
-        rawExpensesId: json['expenseTypeId'] ?? "",
-        rawExpenses: json['expenseTypes'] ?? "",
+        rawExpensesId: json['expensesTypeId'] ?? "",
+        rawExpenses: json['expensesTypes'] ?? "",
         totalCost: double.tryParse(json['totalCost'].toString()) ?? 0,
         date: DateTime.parse(json['date']));
   }
