@@ -1,3 +1,6 @@
+import 'package:intl/intl.dart';
+import 'package:inventory/tools/extensions.dart';
+
 import 'base_model.dart';
 
 class Inventory extends BaseModel {
@@ -100,7 +103,7 @@ class Inventory extends BaseModel {
   }
 }
 
-class InventoryMetricStockBalances extends BaseModel {
+class InventoryMetricStockBalances extends UneditableModel {
   final String productName, location;
   final int productId, quantity;
 
@@ -118,17 +121,17 @@ class InventoryMetricStockBalances extends BaseModel {
       quantity: int.tryParse(json['quantity'].toString()) ?? 0,
     );
   }
-  
+
   @override
   Map<String, dynamic> toJson() {
     return {};
   }
-  
+
   @override
   List toTableRows() {
-    return [productName,quantity];
+    return [productName, quantity];
   }
-  
+
   @override
   bool validate() {
     return true;
@@ -141,14 +144,10 @@ class InventoryMetricProductPrice {
   final double cost;
 
   InventoryMetricProductPrice(
-      {
-      this.productId = 0,
-      this.productName = "",
-      this.cost = 0});
+      {this.productId = 0, this.productName = "", this.cost = 0});
 
   factory InventoryMetricProductPrice.fromJson(Map<String, dynamic> json) {
     return InventoryMetricProductPrice(
-      
       productId: json["productId"] ?? 0,
       productName: json["productName"],
       cost: double.tryParse(json['lastCost'].toString()) ?? 0,
@@ -186,7 +185,7 @@ class InventoryMetricStockBalancesCost {
   }
 }
 
-class InventoryMetricDailyProfit {
+class InventoryMetricDailyProfit extends UneditableModel {
   final DateTime date;
   final double productProfit,
       serviceProfit,
@@ -198,6 +197,7 @@ class InventoryMetricDailyProfit {
   double get sales => serviceProfit + laborProfit + productProfit;
   double get cost => expenses + productCost;
   double get profit => sales - cost;
+  String get dateRaw => DateFormat("dd/MM/yyyy hh:mm:ssa").format(date);
 
   InventoryMetricDailyProfit(
       {required this.date,
@@ -219,9 +219,24 @@ class InventoryMetricDailyProfit {
       expenses: double.tryParse(json['expenses'].toString()) ?? 0,
     );
   }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {};
+  }
+
+  @override
+  List toTableRows() {
+    return [dateRaw,sales.toCurrency(),expenses.toCurrency(),productCost.toCurrency(),profit.toCurrency()];
+  }
+
+  @override
+  bool validate() {
+    return true;
+  }
 }
 
-class InventoryMetricMonthlyProfit {
+class InventoryMetricMonthlyProfit extends UneditableModel{
   final DateTime date;
   final double productProfit,
       serviceProfit,
@@ -233,6 +248,7 @@ class InventoryMetricMonthlyProfit {
   double get sales => serviceProfit + laborProfit + productProfit;
   double get cost => expenses + productCost;
   double get profit => sales - cost;
+  String get dateRaw => DateFormat("dd/MM/yyyy hh:mm:ssa").format(date);
 
   InventoryMetricMonthlyProfit(
       {required this.date,
@@ -254,9 +270,24 @@ class InventoryMetricMonthlyProfit {
       expenses: double.tryParse(json['expenses'].toString()) ?? 0,
     );
   }
+
+    @override
+  Map<String, dynamic> toJson() {
+    return {};
+  }
+
+  @override
+  List toTableRows() {
+    return [dateRaw,sales,expenses,productCost,profit];
+  }
+
+  @override
+  bool validate() {
+    return true;
+  }
 }
 
-class InventoryMetricYearlyProfit {
+class InventoryMetricYearlyProfit extends UneditableModel{
   final DateTime date;
   final double productProfit,
       serviceProfit,
@@ -268,6 +299,7 @@ class InventoryMetricYearlyProfit {
   double get sales => serviceProfit + laborProfit + productProfit;
   double get cost => expenses + productCost;
   double get profit => sales - cost;
+  String get dateRaw => DateFormat("dd/MM/yyyy hh:mm:ssa").format(date);
 
   InventoryMetricYearlyProfit(
       {required this.date,
@@ -288,5 +320,20 @@ class InventoryMetricYearlyProfit {
       totalProfit: double.tryParse(json['totalProfit'].toString()) ?? 0,
       expenses: double.tryParse(json['expenses'].toString()) ?? 0,
     );
+  }
+
+    @override
+  Map<String, dynamic> toJson() {
+    return {};
+  }
+
+  @override
+  List toTableRows() {
+    return [dateRaw,sales,expenses,productCost,profit];
+  }
+
+  @override
+  bool validate() {
+    return true;
   }
 }

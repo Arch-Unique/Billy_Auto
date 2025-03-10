@@ -22,3 +22,7 @@ abstract class BaseModel {
     throw UnimplementedError();
   }
 }
+
+abstract class UneditableModel extends BaseModel {
+  
+}

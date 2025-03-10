@@ -257,6 +257,7 @@ class AllTables {
       
       FilterModel("Expenses", "expensesTypeId", 0),
     ], BulkExpenses(date: DateTime.now()),),
-    InventoryMetricStockBalances: TableModel(["product","quantity"], [], InventoryMetricStockBalances())
+    InventoryMetricStockBalances: TableModel(["product","quantity"], [], InventoryMetricStockBalances()),
+    InventoryMetricDailyProfit: TableModel(["date","revenue","expenses","productCost","profit"], [], InventoryMetricDailyProfit(date: DateTime.now())),
   };
 }

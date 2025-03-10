@@ -26,7 +26,6 @@ class ExpDashboardPage extends StatefulWidget {
 
 class _ExpDashboardPageState extends State<ExpDashboardPage> {
   final controller = Get.find<AppController>();
-  
 
   @override
   Widget build(BuildContext context) {
@@ -52,28 +51,30 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
             Colors.red[100]!.withOpacity(0.7)),
         itemDataWidget("Total Revenue", controller.totalSales.toCurrency(),
             Colors.lightGreen[100]!.withOpacity(0.7)),
-        itemDataWidget("Total Operating Expenses", controller.totalExpenses.toCurrency(),
+        itemDataWidget(
+            "Total Operating Expenses",
+            controller.totalExpenses.toCurrency(),
             Colors.lightGreen[100]!.withOpacity(0.7)),
-        itemDataWidget("Total Cost Of Goods Sold", controller.totalProductCost.toCurrency(),
+        itemDataWidget(
+            "Total Cost Of Goods Sold",
+            controller.totalProductCost.toCurrency(),
             Colors.lightGreen[100]!.withOpacity(0.7)),
-        itemDataWidget("Total Gross Profit", controller.totalProfit.toCurrency(),
-            controller.totalProfit <= 0 ? Colors.red[100]!.withOpacity(0.7): Colors.lightGreen[100]!.withOpacity(0.7)),
-            
-
+        itemDataWidget(
+            "Total Gross Profit",
+            controller.totalProfit.toCurrency(),
+            controller.totalProfit <= 0
+                ? Colors.red[100]!.withOpacity(0.7)
+                : Colors.lightGreen[100]!.withOpacity(0.7)),
       ];
       return Ui.width(context) < 975
-          ? Expanded(
-            child: SingleChildScrollView(
-              child: Wrap(
-                  children: cf
-                      .map((e) => SizedBox(
-                            width: (Ui.width(context) - 48) / 2,
-                            child: e,
-                          ))
-                      .toList(),
-                ),
-            ),
-          )
+          ? Wrap(
+              children: cf
+                  .map((e) => SizedBox(
+                        width: (Ui.width(context) - 48) / 2,
+                        child: e,
+                      ))
+                  .toList(),
+            )
           : Wrap(
               children: cf
                   .map((e) => SizedBox(
@@ -83,47 +84,59 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
                   .toList(),
             );
     });
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Ui.boxWidth(Ui.width(context)),
-          Row(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AppText.bold(
-                      "Welcome back, ${controller.appRepo.appService.currentUser.value.fullName} 👋",
-                      fontSize: 32,
-                      fontFamily: Assets.appFontFamily2),
-                  AppText.thin(
-                      "Here are the current status of your inventory and orders.")
-                ],
-              ),
-            ],
-          ),
-          Ui.boxHeight(24),
-          cl,
-          if (Ui.width(context) >= 975)
-            Expanded(
-                child: Row(
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Ui.boxWidth(Ui.width(context)),
+            Row(
               children: [
-                Obx(
-                   () {
-                    return Expanded(child: controller.currentChart.value == 0 ? MyBarChart() : ProfitChart());
-                  }
-                ),
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(child: recentOrders()),
-                    // Expanded(child: recentInventory()),
+                    AppText.bold(
+                        "Welcome back, ${controller.appRepo.appService.currentUser.value.fullName} 👋",
+                        fontSize: 32,
+                        fontFamily: Assets.appFontFamily2),
+                    AppText.thin(
+                        "Here are the current status of your inventory and orders.")
                   ],
-                )
+                ),
               ],
-            ))
-        ],
+            ),
+            Ui.boxHeight(24),
+            cl,
+            if (Ui.width(context) >= 975)
+              SizedBox(
+                  height: Ui.height(context),
+                  child: Row(
+                    children: [
+                      Column(
+                        children: [
+                          SizedBox(
+                            height: Ui.height(context) / 2,
+                            width: (Ui.width(context) * 0.6) - 48,
+                            child: MyBarChart(),
+                          ),
+                          SizedBox(
+                            height: Ui.height(context) / 2,
+                            width: (Ui.width(context) * 0.6) - 48,
+                            child: ProfitChart(),
+                          )
+                        ],
+                      ),
+                      // Obx(
+                      //    () {
+                      //     return Expanded(child: controller.currentChart.value == 0 ? MyBarChart() : ProfitChart());
+                      //   }
+                      // ),
+                      recentOrders()
+                    ],
+                  ))
+          ],
+        ),
       ),
     );
   }
@@ -131,16 +144,17 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
   Widget itemDataWidget(String title, String value, Color color,
       {String desc = ""}) {
     final cc = CurvedContainer(
-      height: 140,
+      height: 100,
       padding: EdgeInsets.all(12),
       margin: EdgeInsets.all(16),
       color: color,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText.thin(title, fontSize: 16, fontFamily: Assets.appFontFamily2,att: true),
-          Ui.spacer(),
-          AppText.bold(value, fontSize: 44,att: true),
+          AppText.thin(title,
+              fontSize: 16, fontFamily: Assets.appFontFamily2, att: true),
+          // Ui.spacer(),
+          AppText.bold(value, fontSize: 36, att: true),
           // if (desc.isNotEmpty) AppText.thin(desc)
         ],
       ),
@@ -156,6 +170,7 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
   Widget recentOrders() {
     return SizedBox(
       width: (Ui.width(context) * 0.4),
+      height: Ui.height(context),
       child: AsyncPaginatedDataTable2(
         minWidth: (Ui.width(context) * 0.4) - 56,
         hidePaginator: true,
@@ -282,7 +297,6 @@ class RecentInventoryDS<Inventory> extends AsyncDataTableSource {
   }
 }
 
-
 class MyBarChart extends StatefulWidget {
   const MyBarChart({super.key});
 
@@ -325,10 +339,7 @@ class _MyBarChartState extends State<MyBarChart> {
     groupedOrdersByDay = {};
     for (var order in Get.find<AppController>().allOrders) {
       DateTime day = DateTime(
-        order.createdAt!.year, 
-        order.createdAt!.month, 
-        order.createdAt!.day
-      );
+          order.createdAt!.year, order.createdAt!.month, order.createdAt!.day);
       if (groupedOrdersByDay.containsKey(day)) {
         groupedOrdersByDay[day] = groupedOrdersByDay[day]! + 1;
       } else {
@@ -351,7 +362,7 @@ class _MyBarChartState extends State<MyBarChart> {
   void updateChartData() {
     datePoints = [];
     orderCnt = [];
-    
+
     if (currentFilter == "Month") {
       datePoints = getLast6Months();
     } else if (currentFilter == "Day") {
@@ -380,11 +391,8 @@ class _MyBarChartState extends State<MyBarChart> {
     orderCnt = [];
 
     for (int i = 5; i >= 0; i--) {
-      DateTime day = DateTime(
-        currentDate.year, 
-        currentDate.month, 
-        currentDate.day - i
-      );
+      DateTime day =
+          DateTime(currentDate.year, currentDate.month, currentDate.day - i);
       last6Days.add(day);
       orderCnt.add(groupedOrdersByDay[day] ?? 0);
     }
@@ -446,9 +454,9 @@ class _MyBarChartState extends State<MyBarChart> {
     if (value.toInt() >= datePoints.length) {
       return const SizedBox();
     }
-    
+
     String text;
-    switch(currentFilter) {
+    switch (currentFilter) {
       case "Month":
         text = DateFormat("MMM yyyy").format(datePoints[value.toInt()]);
         break;
@@ -461,7 +469,7 @@ class _MyBarChartState extends State<MyBarChart> {
       default:
         text = "";
     }
-    
+
     return SideTitleWidget(
       axisSide: AxisSide.bottom,
       space: 4,
@@ -494,24 +502,19 @@ class _MyBarChartState extends State<MyBarChart> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ChartHeaderChooser(),
+                ChartHeaderChooser("Service Order Metrics"),
                 Container(
                   width: 150,
-                  child: CustomTextField.dropdown(
-                    ["Month", "Day", "Year"], 
-                    ["Month", "Day", "Year"], 
-                    filterTec, 
-                    "",
-                    initOption: currentFilter, 
-                    onChanged: (value) {
-                      if (value != null && value != currentFilter) {
-                        setState(() {
-                          currentFilter = value;
-                          updateChartData();
-                        });
-                      }
+                  child: CustomTextField.dropdown(["Month", "Day", "Year"],
+                      ["Month", "Day", "Year"], filterTec, "",
+                      initOption: currentFilter, onChanged: (value) {
+                    if (value != null && value != currentFilter) {
+                      setState(() {
+                        currentFilter = value;
+                        updateChartData();
+                      });
                     }
-                  ),
+                  }),
                 )
               ],
             ),
@@ -552,21 +555,21 @@ class _MyBarChartState extends State<MyBarChart> {
 }
 
 class ChartHeaderChooser extends StatelessWidget {
-  const ChartHeaderChooser({super.key});
+  const ChartHeaderChooser(this.title,{super.key});
+  final String title;
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-       () {
-        return HeaderChooser([
-          HeaderItem("Service Order Metrics",vb: (){
-        Get.find<AppController>().currentChart.value=0;
-          },),
-          HeaderItem("Profit Metrics",vb: (){
-        Get.find<AppController>().currentChart.value=1;
-          }),
-        ],i: Get.find<AppController>().currentChart.value,);
-      }
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+          color: AppColors.primaryColor),
+      child: AppText.medium(
+        title,
+        fontSize: 16,
+        color: AppColors.white,
+      ),
     );
   }
 }
@@ -614,7 +617,7 @@ class _ProfitChartState extends State<ProfitChart> {
 
   void updateChartData() {
     datePoints = [];
-    
+
     switch (currentFilter) {
       case "Month":
         datePoints = getLast6Months();
@@ -644,11 +647,8 @@ class _ProfitChartState extends State<ProfitChart> {
     List<DateTime> last6Days = [];
 
     for (int i = 5; i >= 0; i--) {
-      DateTime day = DateTime(
-        currentDate.year, 
-        currentDate.month, 
-        currentDate.day - i
-      );
+      DateTime day =
+          DateTime(currentDate.year, currentDate.month, currentDate.day - i);
       last6Days.add(day);
     }
     return last6Days;
@@ -688,25 +688,28 @@ class _ProfitChartState extends State<ProfitChart> {
     switch (currentFilter) {
       case "Day":
         final profit = dailyProfits.firstWhere(
-          (p) => p.date.year == date.year && p.date.month == date.month && p.date.day == date.day,
+          (p) =>
+              p.date.year == date.year &&
+              p.date.month == date.month &&
+              p.date.day == date.day,
           orElse: () => InventoryMetricDailyProfit(date: date),
         );
         return getProfitValue(profit);
-      
+
       case "Month":
         final profit = monthlyProfits.firstWhere(
           (p) => p.date.year == date.year && p.date.month == date.month,
           orElse: () => InventoryMetricMonthlyProfit(date: date),
         );
         return getProfitValue(profit);
-      
+
       case "Year":
         final profit = yearlyProfits.firstWhere(
           (p) => p.date.year == date.year,
           orElse: () => InventoryMetricYearlyProfit(date: date),
         );
         return getProfitValue(profit);
-      
+
       default:
         return 0;
     }
@@ -727,56 +730,52 @@ class _ProfitChartState extends State<ProfitChart> {
           topTitles: AxisTitles(
             sideTitles: SideTitles(showTitles: false),
             drawBelowEverything: true,
-          axisNameSize: 100,
+            axisNameSize: 100,
             axisNameWidget: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              ChartHeaderChooser(),
-              Row(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    width: 150,
-                    margin: const EdgeInsets.only(right: 8),
-                    child: CustomTextField.dropdown(
-                      ["Sales", "Profit","Expenses"], 
-                      ["Sales", "Profit","Expenses"], 
-                      profitTypeTec, 
-                      "",
-                      initOption: profitType, 
-                      onChanged: (value) {
-                        if (value != null && value != profitType) {
-                          setState(() {
-                            profitType = value;
-                          });
-                        }
-                      }
-                    ),
-                  ),
-                  Container(
-                    width: 150,
-                    child: CustomTextField.dropdown(
-                      ["Month", "Day", "Year"], 
-                      ["Month", "Day", "Year"], 
-                      filterTec, 
-                      "",
-                      initOption: currentFilter, 
-                      onChanged: (value) {
-                        if (value != null && value != currentFilter) {
-                          setState(() {
-                            currentFilter = value;
-                            updateChartData();
-                          });
-                        }
-                      }
-                    ),
+                  ChartHeaderChooser("Finance Metrics"),
+                  Row(
+                    children: [
+                      Container(
+                        width: 150,
+                        margin: const EdgeInsets.only(right: 8),
+                        child: CustomTextField.dropdown(
+                            ["Sales", "Profit", "Expenses"],
+                            ["Sales", "Profit", "Expenses"],
+                            profitTypeTec,
+                            "",
+                            initOption: profitType, onChanged: (value) {
+                          if (value != null && value != profitType) {
+                            setState(() {
+                              profitType = value;
+                            });
+                          }
+                        }),
+                      ),
+                      Container(
+                        width: 150,
+                        child: CustomTextField.dropdown(
+                            ["Month", "Day", "Year"],
+                            ["Month", "Day", "Year"],
+                            filterTec,
+                            "",
+                            initOption: currentFilter, onChanged: (value) {
+                          if (value != null && value != currentFilter) {
+                            setState(() {
+                              currentFilter = value;
+                              updateChartData();
+                            });
+                          }
+                        }),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
+            ),
           ),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
@@ -787,14 +786,16 @@ class _ProfitChartState extends State<ProfitChart> {
                 if (value.toInt() >= datePoints.length || value.toInt() < 0) {
                   return const SizedBox();
                 }
-                
+
                 String text;
-                switch(currentFilter) {
+                switch (currentFilter) {
                   case "Month":
-                    text = DateFormat("MMM yyyy").format(datePoints[value.toInt()]);
+                    text = DateFormat("MMM yyyy")
+                        .format(datePoints[value.toInt()]);
                     break;
                   case "Day":
-                    text = DateFormat("dd MMM ").format(datePoints[value.toInt()]);
+                    text =
+                        DateFormat("dd MMM ").format(datePoints[value.toInt()]);
                     break;
                   case "Year":
                     text = DateFormat("yyyy").format(datePoints[value.toInt()]);
@@ -802,7 +803,7 @@ class _ProfitChartState extends State<ProfitChart> {
                   default:
                     text = "";
                 }
-                
+
                 return SideTitleWidget(
                   axisSide: meta.axisSide,
                   space: 8,
@@ -833,9 +834,9 @@ class _ProfitChartState extends State<ProfitChart> {
         borderData: FlBorderData(
           show: true,
           border: Border(
-      left: BorderSide(color: Colors.grey.withOpacity(0.5)),
-      bottom: BorderSide(color: Colors.grey.withOpacity(0.5)),
-    ),
+            left: BorderSide(color: Colors.grey.withOpacity(0.5)),
+            bottom: BorderSide(color: Colors.grey.withOpacity(0.5)),
+          ),
         ),
         minX: 0,
         maxX: datePoints.length - 1.0,
@@ -885,8 +886,8 @@ class _ProfitChartState extends State<ProfitChart> {
               return touchedBarSpots.map((barSpot) {
                 final date = datePoints[barSpot.x.toInt()];
                 String formattedDate;
-                
-                switch(currentFilter) {
+
+                switch (currentFilter) {
                   case "Month":
                     formattedDate = DateFormat("MMM yyyy").format(date);
                     break;
@@ -899,7 +900,7 @@ class _ProfitChartState extends State<ProfitChart> {
                   default:
                     formattedDate = "";
                 }
-                
+
                 return LineTooltipItem(
                   "$formattedDate\nTotal ${profitType}: ${barSpot.y.toCurrency()}",
                   const TextStyle(

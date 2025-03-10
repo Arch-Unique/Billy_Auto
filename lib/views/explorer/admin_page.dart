@@ -78,6 +78,7 @@ class _CustomTableState extends State<CustomTable> {
                   Icons.add,
                   color: AppColors.white,
                   onTap: () async {
+                    if (controller.currentBaseModel.value.runtimeType == InventoryMetricStockBalances || controller.currentBaseModel.value.runtimeType == InventoryMetricDailyProfit) return;
                     if (!Get.find<AppService>()
                         .currentUser
                         .value
@@ -231,7 +232,7 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
   TableModelDataSource(this.tm);
 
   editRecord(BaseModel bm) async {
-    if (T == InventoryMetricStockBalances) return;
+    if (T == InventoryMetricStockBalances || T == InventoryMetricDailyProfit) return;
     if (!Get.find<AppService>().currentUser.value.isServiceAdvisor) {
       Ui.showError("Not enough permissions");
       return;
@@ -259,7 +260,7 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
   }
 
   deleteRecord(BaseModel bm) {
-    if (T == InventoryMetricStockBalances) return;
+    if (T == InventoryMetricStockBalances || T == InventoryMetricDailyProfit) return;
     if (!Get.find<AppService>().currentUser.value.isServiceAdvisor) {
       Ui.showError("Not enough permissions");
       return;
@@ -293,6 +294,12 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
         res = TotalResponse<T>(
             Get.find<AppController>().allStockBalances.length,
             Get.find<AppController>().allStockBalances.cast<T>());
+      } else if( T == InventoryMetricDailyProfit){
+        await Get.find<AppController>().initMetrics();
+        res = TotalResponse<T>(
+            Get.find<AppController>().allDailyProfit.length,
+            Get.find<AppController>().allDailyProfit.cast<T>());
+            
       } else {
         res = await appRepo.getAll<T>(
             page: page,
