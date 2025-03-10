@@ -9,6 +9,7 @@ import 'package:inventory/views/onboarding/splashscreen.dart';
 
 import 'controllers/dependency.dart';
 import 'tools/urls.dart';
+// import 'views/test.dart';
 
 void main() async {
   final wd = WidgetsFlutterBinding.ensureInitialized();

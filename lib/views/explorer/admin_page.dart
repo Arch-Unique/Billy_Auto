@@ -231,6 +231,7 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
   TableModelDataSource(this.tm);
 
   editRecord(BaseModel bm) async {
+    if (T == InventoryMetricStockBalances) return;
     if (!Get.find<AppService>().currentUser.value.isServiceAdvisor) {
       Ui.showError("Not enough permissions");
       return;
@@ -258,6 +259,7 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
   }
 
   deleteRecord(BaseModel bm) {
+    if (T == InventoryMetricStockBalances) return;
     if (!Get.find<AppService>().currentUser.value.isServiceAdvisor) {
       Ui.showError("Not enough permissions");
       return;
@@ -283,13 +285,23 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
     int page = (startIndex ~/ count) + 1;
 
     try {
-      final res = await appRepo.getAll<T>(
-          page: page,
-          limit: count,
-          fm: Get.find<AppController>().currentFilters);
-      List<T> bms = res.data;
-      List<List<dynamic>> tvals =
-          res.data.map((e) => (e as BaseModel).toTableRows()).toList();
+      List<T> bms = [];
+      List<List<dynamic>> tvals = [];
+      TotalResponse<T> res;
+      if (T == InventoryMetricStockBalances) {
+        await Get.find<AppController>().initMetrics();
+        res = TotalResponse<T>(
+            Get.find<AppController>().allStockBalances.length,
+            Get.find<AppController>().allStockBalances.cast<T>());
+      } else {
+        res = await appRepo.getAll<T>(
+            page: page,
+            limit: count,
+            fm: Get.find<AppController>().currentFilters);
+      }
+
+      bms = res.data;
+      tvals = res.data.map((e) => (e as BaseModel).toTableRows()).toList();
 
       return AsyncRowsResponse(
           res.total,
@@ -299,6 +311,7 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
 
             return DataRow2(
                 onTap: () async {
+                  
                   await editRecord(bm);
                 },
                 cells: Ui.width(Get.context!) < 975
@@ -589,12 +602,14 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
     // Determine field type based on value
     if (fieldName.endsWith("Id") ||
         fieldName.endsWith("Type") ||
+        fieldName.endsWith("status") ||
         fieldName.endsWith("role")) {
       if ((widget.model.runtimeType == Product &&
               fieldName == "productCategoryId") ||
           (widget.model.runtimeType == Inventory &&
               (fieldName == "productCategoryId" ||
-                  fieldName == "productTypeId"))) {
+                  fieldName == "productTypeId" ||
+                  fieldName == "status"))) {
         return SizedBox();
       }
       return CustomTextField.dropdown(
@@ -603,17 +618,19 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
           Get.find<AppController>().filterOptions[fieldName]?.values ?? [0],
           _controllers[fieldName]!,
           "Select ${_formatFieldName(fieldName).replaceAll(" id", "")}",
+          useOld: false,
           initOption: value, onChanged: (a) {
         try {
-          if (widget.model.runtimeType == Product  && fieldName == "productTypeId") {
-            print(a);
+          if (widget.model.runtimeType == Product &&
+              fieldName == "productTypeId") {
             _controllers["productCategoryId"]!.text = Get.find<AppController>()
                 .allProductType
                 .where((test) => test.id == a)
                 .first
                 .productCategoryId
                 .toString();
-          } else if (widget.model.runtimeType == Inventory && fieldName == "productId") {
+          } else if (widget.model.runtimeType == Inventory &&
+              fieldName == "productId") {
             _controllers["productCategoryId"]!.text = Get.find<AppController>()
                 .allProducts
                 .where((test) => test.id == a)
@@ -626,10 +643,13 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
                 .first
                 .productTypeId
                 .toString();
+          } else if (widget.model.runtimeType == Inventory &&
+              fieldName == "transactionType") {
+            _controllers["status"]!.text = a;
           }
         } catch (e) {
           // TODO
-        
+
           print(e);
         }
       });
@@ -828,6 +848,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
                     int.tryParse(_controllers["orderId"]!.text) ?? 0;
                 inv.value.totalCost = inv.value.rawTotalCost;
                 if (inv.value.validate()) {
+                  inv.value.orderCreatedAt = Get.find<AppController>().allOrders.where((test) => test.id == inv.value.orderId).firstOrNull?.createdAt ?? DateTime.now();
                   final gh = inv.value.toRawJson();
                   gh["id"] = inv.value.id;
                   await widget.onSave(gh);
@@ -845,7 +866,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
 
     if (widget.model.runtimeType == BulkExpenses) {
       Rx<BulkExpenses> inv = (widget.model as BulkExpenses).obs;
-      if (widget.isNew) {
+      if (widget.isNew && inv.value.expenses.isEmpty) {
         inv.value = BulkExpenses(date: DateTime.now());
         inv.value.expenses = [];
       }
@@ -853,10 +874,18 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
       return SingleChildScrollView(
         child: Column(
           children: [
-            if (!widget.isNew)
+            if (inv.value.expenses.isNotEmpty)
               CustomTextField(_formatFieldName("id"),
                   TextEditingController(text: _formData['id'].toString()),
                   readOnly: true),
+            if (inv.value.expenses.isNotEmpty)
+              CustomTextField(
+                _formatFieldName("createdAt"),
+                TextEditingController(
+                    text: DateFormat("dd/MM/yyyy hh:mm:ss")
+                        .format(DateTime.parse(_formData['createdAt']))),
+                readOnly: true,
+              ),
             ExpensesList(inv),
             AppButton(
               onPressed: () async {
@@ -1005,7 +1034,7 @@ class ExpensesItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final qtyTec = TextEditingController(text: expense.cost.toString());
+    final qtyTec = TextEditingController(text: expense.rawCost.toString());
 
     return SizedBox(
       width: Ui.width(context),

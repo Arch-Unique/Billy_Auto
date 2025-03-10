@@ -1200,7 +1200,7 @@ class InvoiceItemWidget extends StatelessWidget {
                   }
                 }
               })),
-        if (item != null)
+        if (item != null && isProduct)
           Expanded(
             flex: 1,
             child: Padding(
@@ -1215,8 +1215,14 @@ class InvoiceItemWidget extends StatelessWidget {
                     textAlign: TextAlign.center,
                     decoration: InputDecoration(hintText: "Qty"),
                     onChanged: (_) {
+                      final maxQty = (Get.find<AppController>().allStockBalances.where((test) => test.productId == item!.rawId.value).firstOrNull?.quantity ?? 0);
                       item!.rawQty.value =
                           int.tryParse(qtyTec.text) ?? item!.qty;
+                          if(item!.rawQty.value > maxQty){
+                            item!.rawQty.value = maxQty;
+                            qtyTec.text = maxQty.toString();
+                            Ui.showError("Qty exceeds available in store");
+                          }
                     });
               }),
             ),

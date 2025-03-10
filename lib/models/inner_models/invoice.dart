@@ -10,8 +10,9 @@ class Invoice extends BaseModel {
   double labourCost, totalCost;
   List<InvoiceItem> servicesUsed;
   List<InvoiceItem> productsUsed;
+  DateTime? orderCreatedAt;
 
-  String get title => "ORD-${orderId.toString().padLeft(4,"0")}";
+  String get title => "ORD-${orderId.toString().padLeft(4, "0")}";
 
   Invoice(
       {this.orderId = 0,
@@ -21,7 +22,9 @@ class Invoice extends BaseModel {
       this.servicesUsed = const [],
       super.id = 0,
       super.createdAt,
-      super.updatedAt});
+      super.updatedAt}){
+        orderCreatedAt = super.createdAt;
+      }
 
   double get rawTotalCost =>
       labourCost +
@@ -30,28 +33,39 @@ class Invoice extends BaseModel {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
+    final mp = {
       "orderId": orderId,
       "labourCost": labourCost,
       "totalCost": totalCost,
       "servicesUsed": jsonEncode(servicesUsed.map((e) => e.toJson()).toList()),
-      "productUsed": jsonEncode(productsUsed.map((e) => e.toJson()).toList())
+      "productUsed": jsonEncode(productsUsed.map((e) => e.toJson()).toList()),
     };
+    if (orderCreatedAt != null) {
+      mp["createdAt"] = orderCreatedAt!.toSQLDate();
+    }
+    return mp;
   }
 
-    Map<String, dynamic> toRawJson() {
+  Map<String, dynamic> toRawJson() {
     return {
       "orderId": orderId,
       "labourCost": labourCost,
       "totalCost": totalCost,
       "servicesUsed": servicesUsed,
-      "productUsed": productsUsed
+      "productUsed": productsUsed,
+      "createdAt": orderCreatedAt?.toSQLDate() ?? ""
     };
   }
 
   @override
   List toTableRows() {
-    return [id, title,labourCost.toCurrency(), totalCost.toCurrency(), createdAt];
+    return [
+      id,
+      title,
+      labourCost.toCurrency(),
+      totalCost.toCurrency(),
+      createdAt
+    ];
   }
 
   @override
@@ -60,13 +74,25 @@ class Invoice extends BaseModel {
   }
 
   removeNullItems() {
-    servicesUsed.removeWhere((test) => test.rawId.value == 0 || test.rawQty.value <= 0 || test.rawUnitPrice.value <= 0);
-    productsUsed.removeWhere((test) => test.rawId.value == 0 || test.rawQty.value <= 0 || test.rawUnitPrice.value <= 0);
+    servicesUsed.removeWhere((test) =>
+        test.rawId.value == 0 ||
+        test.rawQty.value <= 0 ||
+        test.rawUnitPrice.value <= 0);
+    productsUsed.removeWhere((test) =>
+        test.rawId.value == 0 ||
+        test.rawQty.value <= 0 ||
+        test.rawUnitPrice.value <= 0);
   }
 
   bool containsNull() {
-    final a = servicesUsed.any((test) => test.rawId.value == 0 || test.rawQty.value <= 0 || test.rawUnitPrice.value <= 0);
-    final b = productsUsed.any((test) => test.rawId.value == 0 || test.rawQty.value <= 0 || test.rawUnitPrice.value <= 0);
+    final a = servicesUsed.any((test) =>
+        test.rawId.value == 0 ||
+        test.rawQty.value <= 0 ||
+        test.rawUnitPrice.value <= 0);
+    final b = productsUsed.any((test) =>
+        test.rawId.value == 0 ||
+        test.rawQty.value <= 0 ||
+        test.rawUnitPrice.value <= 0);
     return a || b;
   }
 
@@ -75,16 +101,16 @@ class Invoice extends BaseModel {
       id: json["id"] ?? 0,
       orderId: json["orderId"] ?? 0,
       createdAt: DateTime.tryParse(json['createdAt'] ?? ""),
-      updatedAt: DateTime.tryParse(json['updatedAt']?? ""),
+      updatedAt: DateTime.tryParse(json['updatedAt'] ?? ""),
       labourCost: double.parse((json['labourCost'] ?? 0).toString()),
       totalCost: double.parse((json['totalCost'] ?? 0).toString()),
       servicesUsed: json['servicesUsed'] != null
-          ? List<InvoiceItem>.from((json['servicesUsed'] as List)
-              .map((x) => x.runtimeType == InvoiceItem ? x : InvoiceItem.fromJson(x)))
+          ? List<InvoiceItem>.from((json['servicesUsed'] as List).map((x) =>
+              x.runtimeType == InvoiceItem ? x : InvoiceItem.fromJson(x)))
           : [],
       productsUsed: json['productUsed'] != null
-          ? List<InvoiceItem>.from(
-              (json['productUsed'] as List).map((x) => x.runtimeType == InvoiceItem ? x : InvoiceItem.fromJson(x)))
+          ? List<InvoiceItem>.from((json['productUsed'] as List).map((x) =>
+              x.runtimeType == InvoiceItem ? x : InvoiceItem.fromJson(x)))
           : [],
     );
   }

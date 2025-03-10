@@ -124,6 +124,8 @@ class AppRepo extends GetxController {
   }
 
   Future<String> patch<T extends BaseModel>(T data) async {
+    print(data.runtimeType);
+    print(data.toJson());
     final res = await apiService.patch("${urls[data.runtimeType]!}/${data.id}",
         data: data.toJson());
     if (!res.statusCode!.isSuccess()) {

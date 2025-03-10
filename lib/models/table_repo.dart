@@ -183,7 +183,7 @@ class AllTables {
         ],
         [
           FilterModel("Product", "productId", 0),
-          FilterModel("Status", "status", 0),
+          // FilterModel("Status", "status", 0),
           FilterModel("Transaction Type", "transactionType", 0),
           FilterModel("Product Type", "productTypeId", 0),
           FilterModel("Product Category", "productCategoryId", 0),
@@ -257,5 +257,6 @@ class AllTables {
       
       FilterModel("Expenses", "expensesTypeId", 0),
     ], BulkExpenses(date: DateTime.now()),),
+    InventoryMetricStockBalances: TableModel(["product","quantity"], [], InventoryMetricStockBalances())
   };
 }

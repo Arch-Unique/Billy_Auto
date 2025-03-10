@@ -100,7 +100,7 @@ class Inventory extends BaseModel {
   }
 }
 
-class InventoryMetricStockBalances {
+class InventoryMetricStockBalances extends BaseModel {
   final String productName, location;
   final int productId, quantity;
 
@@ -117,6 +117,21 @@ class InventoryMetricStockBalances {
       productName: json["productName"],
       quantity: int.tryParse(json['quantity'].toString()) ?? 0,
     );
+  }
+  
+  @override
+  Map<String, dynamic> toJson() {
+    return {};
+  }
+  
+  @override
+  List toTableRows() {
+    return [productName,quantity];
+  }
+  
+  @override
+  bool validate() {
+    return true;
   }
 }
 
@@ -136,7 +151,7 @@ class InventoryMetricProductPrice {
       
       productId: json["productId"] ?? 0,
       productName: json["productName"],
-      cost: double.tryParse(json['cost'].toString()) ?? 0,
+      cost: double.tryParse(json['lastCost'].toString()) ?? 0,
     );
   }
 }

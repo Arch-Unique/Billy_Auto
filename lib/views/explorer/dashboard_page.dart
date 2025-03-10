@@ -26,6 +26,8 @@ class ExpDashboardPage extends StatefulWidget {
 
 class _ExpDashboardPageState extends State<ExpDashboardPage> {
   final controller = Get.find<AppController>();
+  
+
   @override
   Widget build(BuildContext context) {
     final cl = Obx(() {
@@ -48,19 +50,37 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
             "Pending Orders",
             controller.allPendingOrders.length.toString(),
             Colors.red[100]!.withOpacity(0.7)),
+        itemDataWidget("Total Revenue", controller.totalSales.toCurrency(),
+            Colors.lightGreen[100]!.withOpacity(0.7)),
+        itemDataWidget("Total Operating Expenses", controller.totalExpenses.toCurrency(),
+            Colors.lightGreen[100]!.withOpacity(0.7)),
+        itemDataWidget("Total Cost Of Goods Sold", controller.totalProductCost.toCurrency(),
+            Colors.lightGreen[100]!.withOpacity(0.7)),
+        itemDataWidget("Total Gross Profit", controller.totalProfit.toCurrency(),
+            controller.totalProfit <= 0 ? Colors.red[100]!.withOpacity(0.7): Colors.lightGreen[100]!.withOpacity(0.7)),
+            
+
       ];
       return Ui.width(context) < 975
-          ? Wrap(
+          ? Expanded(
+            child: SingleChildScrollView(
+              child: Wrap(
+                  children: cf
+                      .map((e) => SizedBox(
+                            width: (Ui.width(context) - 48) / 2,
+                            child: e,
+                          ))
+                      .toList(),
+                ),
+            ),
+          )
+          : Wrap(
               children: cf
                   .map((e) => SizedBox(
-                        width: (Ui.width(context) - 48) / 2,
+                        width: (Ui.width(context) - 48) / 5,
                         child: e,
                       ))
                   .toList(),
-            )
-          : Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: cf,
             );
     });
     return Padding(
@@ -111,25 +131,26 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
   Widget itemDataWidget(String title, String value, Color color,
       {String desc = ""}) {
     final cc = CurvedContainer(
-      height: 120,
-      padding: EdgeInsets.all(16),
+      height: 140,
+      padding: EdgeInsets.all(12),
       margin: EdgeInsets.all(16),
       color: color,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText.thin(title, fontSize: 20, fontFamily: Assets.appFontFamily2),
+          AppText.thin(title, fontSize: 16, fontFamily: Assets.appFontFamily2,att: true),
           Ui.spacer(),
-          AppText.bold(value, fontSize: 48),
-          if (desc.isNotEmpty) AppText.thin(desc)
+          AppText.bold(value, fontSize: 44,att: true),
+          // if (desc.isNotEmpty) AppText.thin(desc)
         ],
       ),
     );
-    return Ui.width(Get.context!) < 975
-        ? cc
-        : Expanded(
-            child: cc,
-          );
+    // return Ui.width(Get.context!) < 975
+    //     ? cc
+    //     : Expanded(
+    //         child: cc,
+    //       );
+    return cc;
   }
 
   Widget recentOrders() {

@@ -1096,7 +1096,8 @@ class CustomTextField extends StatelessWidget {
       {Function(dynamic)? onChanged,
       dynamic initOption,
       double? w,
-      bool isEnabled = true}) {
+      bool isEnabled = true,
+      useOld = true}) {
     dynamic curOption;
 
     final options = List.from(optionss);
@@ -1116,70 +1117,81 @@ class CustomTextField extends StatelessWidget {
     }
 
     cont.text = curOption.toString();
-    return CustomMultiDropdown(optionss, valuess, cont, label,initValues: [curOption],singleOnly: true,onChanged: onChanged,isEnable: true,);
+    if (!useOld) {
+      return CustomMultiDropdown(
+        optionss,
+        valuess,
+        cont,
+        label,
+        initValues: [curOption],
+        singleOnly: true,
+        onChanged: onChanged,
+        isEnable: true,
+      );
+    }
 
-    // return StatefulBuilder(builder: (context, setState) {
-    //   return SizedBox(
-    //     width: w ?? Ui.width(context) - 48,
-    //     child: Column(
-    //       mainAxisSize: MainAxisSize.min,
-    //       crossAxisAlignment: CrossAxisAlignment.start,
-    //       children: [
-    //         if (label.isNotEmpty) AppText.thin(label),
-    //         if (label.isNotEmpty)
-    //           const SizedBox(
-    //             height: 8,
-    //           ),
-    //         CurvedContainer(
-    //           color: AppColors.white,
-    //           padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-    //           border: Border.all(color: Colors.grey),
-    //           child: DropdownButton<dynamic>(
-    //               value: curOption,
-    //               isExpanded: true,
-    //               elevation: 0,
-    //               hint: AppText.thin(options[!values.contains(curOption)
-    //                   ? 0
-    //                   : values.indexOf(curOption)]),
-    //               underline: SizedBox(),
-    //               // underline: Padding(
-    //               //   padding: const EdgeInsets.only(top: 16.0),
-    //               //   child: Divider(
-    //               //     color: AppColors.white,
-    //               //   ),
-    //               // ),
-    //               padding: EdgeInsets.all(6),
-    //               icon: Icon(
-    //                 Icons.keyboard_arrow_down_rounded,
-    //                 color: AppColors.primaryColor,
-    //               ),
-    //               dropdownColor: AppColors.white,
-    //               isDense: true,
-    //               items: values
-    //                   .map((e) => DropdownMenuItem<dynamic>(
-    //                       value: e,
-    //                       child: AppText.thin(options[values.indexOf(e)])))
-    //                   .toList(),
-    //               onChanged: !isEnabled
-    //                   ? null
-    //                   : (value) {
-    //                       setState(() {
-    //                         curOption = value!;
-    //                         cont.text = curOption.toString();
-    //                       });
-    //                       if (onChanged != null) {
-    //                         onChanged(curOption);
-    //                       }
-    //                     }),
-    //         ),
-    //         if (label.isNotEmpty)
-    //           const SizedBox(
-    //             height: 32,
-    //           )
-    //       ],
-    //     ),
-    //   );
-    // });
+    return StatefulBuilder(builder: (context, setState) {
+      return SizedBox(
+        width: w ?? Ui.width(context) - 48,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (label.isNotEmpty) AppText.thin(label),
+            if (label.isNotEmpty)
+              const SizedBox(
+                height: 8,
+              ),
+            CurvedContainer(
+              color: AppColors.white,
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+              border: Border.all(color: Colors.grey),
+              child: DropdownButton<dynamic>(
+                  value: curOption,
+                  isExpanded: true,
+                  elevation: 0,
+                  hint: AppText.thin(options[!values.contains(curOption)
+                      ? 0
+                      : values.indexOf(curOption)]),
+                  underline: SizedBox(),
+                  // underline: Padding(
+                  //   padding: const EdgeInsets.only(top: 16.0),
+                  //   child: Divider(
+                  //     color: AppColors.white,
+                  //   ),
+                  // ),
+                  padding: EdgeInsets.all(6),
+                  icon: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: AppColors.primaryColor,
+                  ),
+                  dropdownColor: AppColors.white,
+                  isDense: true,
+                  items: values
+                      .map((e) => DropdownMenuItem<dynamic>(
+                          value: e,
+                          child: AppText.thin(options[values.indexOf(e)])))
+                      .toList(),
+                  onChanged: !isEnabled
+                      ? null
+                      : (value) {
+                          setState(() {
+                            curOption = value!;
+                            cont.text = curOption.toString();
+                          });
+                          if (onChanged != null) {
+                            onChanged(curOption);
+                          }
+                        }),
+            ),
+            if (label.isNotEmpty)
+              const SizedBox(
+                height: 32,
+              )
+          ],
+        ),
+      );
+    });
   }
 }
 
@@ -1358,9 +1370,13 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       for (var element in widget.initValues) {
+        print(mdcont.selectedItems);
+        print(element);
+
         mdcont.selectWhere((p) {
           return element == p.value;
         });
+        print(mdcont.selectedItems);
       }
     });
 
@@ -1392,7 +1408,7 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
       onSelectionChange: (selectedItems) {
         if (selectedItems.isEmpty) {
           widget.controller.text = "";
-        }else{
+        } else {
           if (widget.singleOnly) {
             widget.controller.text = selectedItems[0].toString();
             widget.onChanged!(selectedItems[0]);
@@ -1400,7 +1416,6 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
             widget.controller.text = selectedItems.join(",");
           }
         }
-        
       },
     );
   }

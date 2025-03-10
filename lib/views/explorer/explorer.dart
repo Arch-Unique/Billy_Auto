@@ -76,6 +76,9 @@ class _ExplorerPageState extends State<ExplorerPage> {
            HeaderItem("Expenses Types", vb: () {
             controller.setCurrentTypeTable<ExpensesType>();
           }),
+           HeaderItem("Stock Balances", vb: () {
+            controller.setCurrentTypeTable<InventoryMetricStockBalances>();
+          }),
           
           // HeaderItem("Location", vb: () {
           //   // controller.setCurrentTypeTable<Inventory>();

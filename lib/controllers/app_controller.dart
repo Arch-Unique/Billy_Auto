@@ -97,6 +97,7 @@ class AppController extends GetxController {
   RxList<Invoice> allInvoices = <Invoice>[].obs;
 
   RxList<ExpensesType> allExpensesTypes = <ExpensesType>[].obs;
+  RxList<Expenses> allExpenses = <Expenses>[].obs;
 
   RxList<String> userRoles = <String>[].obs;
   RxList<String> customerTypes = <String>[].obs;
@@ -131,7 +132,11 @@ class AppController extends GetxController {
   //ORDERS
   List<Order> get allPendingOrders =>
       allOrders.where((p0) => !p0.isDispatched).toList();
-
+  double get totalSales => allYearlyProfit.map((f) => f.sales).fold(0, (a,b)  => a+b);
+  double get totalExpenses => allYearlyProfit.map((f) => f.expenses).fold(0, (a,b)  => a+b);
+  double get totalProductCost => allYearlyProfit.map((f) => f.productCost).fold(0, (a,b)  => a+b);
+  // double get totalProductCost => allInventory.where((test) => test.status == "Inbound").map((f) => f.cost * f.qty).fold(0, (a,b)  => a+b);
+  double get totalProfit => totalSales - (totalExpenses+totalProductCost); 
   //PROFILE
   RxBool editOn = false.obs;
   Type currentType = User;
@@ -273,6 +278,7 @@ class AppController extends GetxController {
     allExpensesTypes.value = await _getAll<ExpensesType>();
     // allLoginHistory.value = await _getAll<LoginHistory>();
     allInvoices.value = await _getAll<Invoice>();
+    allExpenses.value = await _getAll<Expenses>();
     allUsers.value = await _getAll<User>();
     allTechnicians.value =
         allUsers.where((test) => test.role == userRoles[2]).toList();
@@ -600,7 +606,6 @@ class AppController extends GetxController {
         json[ik] = await appRepo.uploadPhoto(json[ik]);
       }
     }
-    print(json);
     BaseModel mp = appRepo.factories[currentBaseModel.value.runtimeType]!(json);
     try {
       if (mp.validate()) {
