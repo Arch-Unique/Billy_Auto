@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:auto_size_text/auto_size_text.dart';
@@ -5,6 +6,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -1785,3 +1787,150 @@ class LoadingWidget extends StatelessWidget {
     });
   }
 }
+
+
+class SmartJustifyRow extends MultiChildRenderObjectWidget {
+  final double spacing;
+  final double runSpacing;
+
+  SmartJustifyRow({
+    Key? key,
+    required List<Widget> children,
+    this.spacing = 0,
+    this.runSpacing = 0,
+  }) : super(key: key, children: children);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderSmartJustifyRow(spacing: spacing, runSpacing: runSpacing);
+  }
+
+  @override
+  void updateRenderObject(
+      BuildContext context, RenderSmartJustifyRow renderObject) {
+    renderObject
+      ..spacing = spacing
+      ..runSpacing = runSpacing;
+  }
+}
+
+class RenderSmartJustifyRow extends RenderBox
+    with
+        ContainerRenderObjectMixin<RenderBox, SmartJustifyParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, SmartJustifyParentData> {
+  RenderSmartJustifyRow({
+    required double spacing,
+    required double runSpacing,
+  })  : _spacing = spacing,
+        _runSpacing = runSpacing;
+
+  double get spacing => _spacing;
+  double _spacing;
+  set spacing(double value) {
+    if (_spacing != value) {
+      _spacing = value;
+      markNeedsLayout();
+    }
+  }
+
+  double get runSpacing => _runSpacing;
+  double _runSpacing;
+  set runSpacing(double value) {
+    if (_runSpacing != value) {
+      _runSpacing = value;
+      markNeedsLayout();
+    }
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! SmartJustifyParentData) {
+      child.parentData = SmartJustifyParentData();
+    }
+  }
+
+  @override
+  void performLayout() {
+    final BoxConstraints constraints = this.constraints;
+    double width = constraints.maxWidth;
+    double height = 0;
+    double x = 0;
+    List<RenderBox> rowChildren = [];
+    RenderBox? child = firstChild;
+
+    while (child != null) {
+      final SmartJustifyParentData childParentData =
+          child.parentData! as SmartJustifyParentData;
+      child.layout(BoxConstraints(maxWidth: width), parentUsesSize: true);
+      final double childWidth = child.size.width;
+      final double childHeight = child.size.height;
+
+      if (x + childWidth > width && rowChildren.isNotEmpty) {
+        // Expand children in the current row
+        _expandRowChildren(rowChildren, width);
+        // Move to next row
+        x = 0;
+        height +=
+            rowChildren.map((c) => c.size.height).reduce(max) + runSpacing;
+        rowChildren.clear();
+      }
+
+      rowChildren.add(child);
+      x += childWidth + spacing;
+      height = max(height, childHeight);
+
+      child = childParentData.nextSibling;
+    }
+
+    // Handle last row
+    if (rowChildren.isNotEmpty) {
+      _expandRowChildren(rowChildren, width);
+      height += rowChildren.map((c) => c.size.height).reduce(max);
+    }
+
+    // Set final positions
+    x = 0;
+    double y = 0;
+    child = firstChild;
+    while (child != null) {
+      final SmartJustifyParentData childParentData =
+          child.parentData! as SmartJustifyParentData;
+      if (x + child.size.width > width) {
+        x = 0;
+        y += child.size.height + runSpacing;
+      }
+      childParentData.offset = Offset(x, y);
+      x += child.size.width + spacing;
+      child = childParentData.nextSibling;
+    }
+
+    size = Size(width, height);
+  }
+
+  void _expandRowChildren(List<RenderBox> children, double availableWidth) {
+    double totalWidth =
+        children.fold(0.0, (sum, child) => sum + child.size.width);
+    double totalSpacing = spacing * (children.length - 1);
+    double extraSpace = availableWidth - totalWidth - totalSpacing;
+    if (extraSpace <= 0) return;
+
+    double extraPerChild = extraSpace / children.length;
+    for (var child in children) {
+      final double newWidth = child.size.width + extraPerChild;
+      child.layout(BoxConstraints.tightFor(width: newWidth),
+          parentUsesSize: true);
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    defaultPaint(context, offset);
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    return defaultHitTestChildren(result, position: position);
+  }
+}
+
+class SmartJustifyParentData extends ContainerBoxParentData<RenderBox> {}

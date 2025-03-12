@@ -276,7 +276,32 @@ class _CheckList2PageState extends State<CheckList2Page> {
               CustomTextField2(
                 "Full Name",
                 controller.tecs[0],
-                prefix: Icons.person_4_outlined,
+                prefixController: controller.prefCont,
+                prefix:  Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                              width: 96,
+                              height: 38,
+                              margin: EdgeInsets.only(right: 12),
+                              child:  CustomTextField.dropdown([
+                                "Mr. ",
+                                "Mrs. ",
+                                "Miss. ",
+                                "Ms. ",
+                                "Pst. ",
+                                "Engr. ",
+                                "Alh. "
+                              ], [
+                                "Mr. ",
+                                "Mrs. ",
+                                "Miss. ",
+                                "Ms. ",
+                                "Pst. ",
+                                "Engr. ",
+                                "Alh. "
+                              ], controller.prefCont, "",initOption:  controller.prefCont.text),
+                            ),
+                ),
               ),
               CustomTextField2("Email", controller.tecs[1],
                   varl: FPL.email, prefix: Icons.email_rounded),

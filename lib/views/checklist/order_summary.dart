@@ -38,6 +38,9 @@ class _OrderSummaryState extends State<OrderSummary> {
   final frameId = "archpage";
   bool isSaving = false;
   Rx<Invoice> invoice = Invoice(productsUsed: [], servicesUsed: []).obs;
+  final ltec = TextEditingController(
+      text: "7000",
+    );
 
   @override
   void initState() {
@@ -50,7 +53,9 @@ class _OrderSummaryState extends State<OrderSummary> {
       if (fg.isNotEmpty) {
         invoice.value = fg.first;
       }
+      ltec.text = invoice.value.labourCost.toString();
     }
+    print(ltec.text);
     super.initState();
   }
 
@@ -253,7 +258,7 @@ class _OrderSummaryState extends State<OrderSummary> {
                     text: "Submit",
                   ),
                 ),
-              if (widget.order.id != 0) InvoiceList(invoice),
+              if (widget.order.id != 0) InvoiceList(invoice,ltec),
               if (widget.order.id != 0 && !widget.order.isDispatched)
                 SizedBox(
                   width: wideUi(context),
@@ -992,16 +997,14 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
 }
 
 class InvoiceList extends StatelessWidget {
-  const InvoiceList(this.invoice, {this.isOwn = true, super.key});
+  const InvoiceList(this.invoice,this.ltec, {this.isOwn = true, super.key});
   final Rx<Invoice> invoice;
   final bool isOwn;
+  final TextEditingController ltec;
 
   @override
   Widget build(BuildContext context) {
-    final ltec = TextEditingController(
-      text: "7000",
-    );
-    invoice.value.labourCost = double.tryParse(ltec.text) ?? 0;
+    // invoice.value.labourCost = double.tryParse(ltec.text) ?? 0;
     ltec.addListener(() {
       invoice.value.labourCost = double.tryParse(ltec.text) ?? 0;
       invoice.refresh();

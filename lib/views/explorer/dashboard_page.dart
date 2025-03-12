@@ -66,22 +66,26 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
                 ? Colors.red[100]!.withOpacity(0.7)
                 : Colors.lightGreen[100]!.withOpacity(0.7)),
       ];
-      return Ui.width(context) < 975
-          ? Wrap(
+      return 
+      // Ui.width(context) < 975
+      //     ? Wrap(
+      //         children: cf
+      //             .map((e) => SizedBox(
+      //                   width: (Ui.width(context) - 48) / 2,
+      //                   child: e,
+      //                 ))
+      //             .toList(),
+      //       )
+      //     : 
+          SmartJustifyRow(
+            runSpacing: 16,
+            spacing: 16,
               children: cf
-                  .map((e) => SizedBox(
-                        width: (Ui.width(context) - 48) / 2,
-                        child: e,
-                      ))
-                  .toList(),
-            )
-          : Wrap(
-              children: cf
-                  .map((e) => SizedBox(
-                        width: (Ui.width(context) - 48) / 5,
-                        child: e,
-                      ))
-                  .toList(),
+                  // .map((e) => Flexible(
+                  //       // width: (Ui.width(context) - 48) / 5,
+                  //       child: e,
+                  //     ))
+                  // .toList(),
             );
     });
     return SingleChildScrollView(
@@ -108,32 +112,51 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
             ),
             Ui.boxHeight(24),
             cl,
+            if (Ui.width(context) < 975)
+            Column(
+                          children: [
+                            SizedBox(
+                              height: Ui.height(context) / 2,
+                              width: Ui.width(context)-48,
+                              child: MyBarChart(),
+                            ),
+                            SizedBox(
+                              height: Ui.height(context) / 2,
+                              width: Ui.width(context)-48,
+                              child: ProfitChart(),
+                            )
+                          ],
+                        ),
             if (Ui.width(context) >= 975)
               SizedBox(
                   height: Ui.height(context),
-                  child: Row(
-                    children: [
-                      Column(
-                        children: [
-                          SizedBox(
-                            height: Ui.height(context) / 2,
-                            width: (Ui.width(context) * 0.6) - 48,
-                            child: MyBarChart(),
-                          ),
-                          SizedBox(
-                            height: Ui.height(context) / 2,
-                            width: (Ui.width(context) * 0.6) - 48,
-                            child: ProfitChart(),
-                          )
-                        ],
-                      ),
-                      // Obx(
-                      //    () {
-                      //     return Expanded(child: controller.currentChart.value == 0 ? MyBarChart() : ProfitChart());
-                      //   }
-                      // ),
-                      recentOrders()
-                    ],
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: Row(
+                      
+                      children: [
+                        Column(
+                          children: [
+                            SizedBox(
+                              height: Ui.height(context) / 2,
+                              width: (Ui.width(context) * 0.6) - 48,
+                              child: MyBarChart(),
+                            ),
+                            SizedBox(
+                              height: Ui.height(context) / 2,
+                              width: (Ui.width(context) * 0.6) - 48,
+                              child: ProfitChart(),
+                            )
+                          ],
+                        ),
+                        // Obx(
+                        //    () {
+                        //     return Expanded(child: controller.currentChart.value == 0 ? MyBarChart() : ProfitChart());
+                        //   }
+                        // ),
+                        recentOrders()
+                      ],
+                    ),
                   ))
           ],
         ),
@@ -144,16 +167,18 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
   Widget itemDataWidget(String title, String value, Color color,
       {String desc = ""}) {
     final cc = CurvedContainer(
-      height: 100,
+      height: 64,
       padding: EdgeInsets.all(12),
-      margin: EdgeInsets.all(16),
       color: color,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        // crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           AppText.thin(title,
-              fontSize: 16, fontFamily: Assets.appFontFamily2, att: true),
+              fontSize: 14, fontFamily: Assets.appFontFamily2, att: true),
           // Ui.spacer(),
+          Ui.boxWidth(24),
           AppText.bold(value, fontSize: 36, att: true),
           // if (desc.isNotEmpty) AppText.thin(desc)
         ],
@@ -229,7 +254,6 @@ class RecentOrderDS<Order> extends AsyncDataTableSource {
     final tm = ["Date", "Customer", "Car", "Status"];
 // await Future.delayed(Duration(seconds: 1));
     final bms = Get.find<AppController>().allOrders;
-    print(bms.length);
     bms.sort((a, b) => b.id.compareTo(a.id));
     List<List<dynamic>> tvals = bms
         .map((element) => [
@@ -276,7 +300,6 @@ class RecentInventoryDS<Inventory> extends AsyncDataTableSource {
     final tm = ["Date", "Product", "Status", "Qty"];
 // await Future.delayed(Duration(seconds: 1));
     final bms = Get.find<AppController>().allInventory;
-    print(bms.length);
     bms.sort((a, b) => b.id.compareTo(a.id));
     List<List<dynamic>> tvals = bms
         .map((element) =>
@@ -432,7 +455,7 @@ class _MyBarChartState extends State<MyBarChart> {
         touchTooltipData: BarTouchTooltipData(
           tooltipBgColor: Colors.transparent,
           tooltipPadding: const EdgeInsets.only(bottom: 4),
-          tooltipMargin: 8,
+          tooltipMargin: 12,
           getTooltipItem: (
             BarChartGroupData group,
             int groupIndex,
@@ -488,8 +511,9 @@ class _MyBarChartState extends State<MyBarChart> {
         ),
         leftTitles: AxisTitles(
           axisNameWidget: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: AppText.bold("No of Orders per ${currentFilter}",
+            padding: const EdgeInsets.only(bottom: 8),
+            child: AppText.bold("Orders per ${currentFilter}",
+            fontSize: 14,
                 fontFamily: Assets.appFontFamily2),
           ),
           sideTitles: const SideTitles(showTitles: false),
@@ -547,7 +571,7 @@ class _MyBarChartState extends State<MyBarChart> {
               BarChartRodData(
                   toY: orderCnt[index].toDouble(),
                   gradient: _barsGradient,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(8),
                   width: 56)
             ],
             showingTooltipIndicators: [0],

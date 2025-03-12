@@ -56,6 +56,7 @@ class AppController extends GetxController {
   /// 22 - 72 - checks
   List<TextEditingController> tecs =
       List.generate(72, (index) => TextEditingController());
+      TextEditingController prefCont = TextEditingController(text: "Mr. ");
 
   Rx<Uint8List> userSig = Uint8List(0).obs;
   Rx<Uint8List> advSig = Uint8List(0).obs;
@@ -329,7 +330,7 @@ class AppController extends GetxController {
       customer = Customer(
           email: tecs[1].text,
           phone: tecs[2].text,
-          fullName: tecs[0].text,
+          fullName: prefCont.text + tecs[0].text,
           signature: "",
           customerType: tecs[3].text,
           id: int.tryParse(tecs[5].text) ?? currentOrder.value.customerId);

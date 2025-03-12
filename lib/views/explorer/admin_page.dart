@@ -833,6 +833,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
     Map<String, dynamic> jsonMap = widget.model.toJson();
     if (widget.model.runtimeType == Invoice) {
       Rx<Invoice> inv = (widget.model as Invoice).obs;
+      TextEditingController ltec = TextEditingController(text: inv.value.labourCost.toString());
       if (widget.isNew) {
         inv.value = Invoice(servicesUsed: [], productsUsed: []);
       }
@@ -846,7 +847,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
                   readOnly: true),
             _buildField("orderId", jsonMap["orderId"]),
             InvoiceList(
-              inv,
+              inv,ltec,
               isOwn: false,
             ),
             AppButton(

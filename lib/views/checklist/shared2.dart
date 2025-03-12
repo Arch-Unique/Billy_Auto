@@ -21,6 +21,7 @@ import '../shared.dart';
 class CustomTextField2 extends StatelessWidget {
   final String label;
   final TextEditingController controller;
+  final TextEditingController? prefixController;
   final Color col, iconColor;
   final FPL varl;
   final VoidCallback? onTap, customOnChanged;
@@ -49,6 +50,7 @@ class CustomTextField2 extends StatelessWidget {
       this.isWide = true,
       this.autofocus = false,
       this.customOnChanged,
+      this.prefixController,
       this.readOnly = false,
       this.shdValidate = true,
       this.textAlign = TextAlign.start,
@@ -141,6 +143,10 @@ class CustomTextField2 extends StatelessWidget {
                           ? BoxConstraints(minWidth: 24, minHeight: 24)
                           : null,
                       isDense: isDense,
+                      // prefix: prefixController == null
+                      //     ? null
+                      //     :
+                      //    ,
                       prefixIcon: prefix == null
                           ? varl == FPL.phone
                               ? Padding(
@@ -150,7 +156,7 @@ class CustomTextField2 extends StatelessWidget {
                                       color: Color(0xFF667085)),
                                 )
                               : null
-                          : SizedBox(
+                          : prefix.runtimeType == IconData ? SizedBox(
                               width: 48,
                               child: Center(
                                 child: Padding(
@@ -162,7 +168,7 @@ class CustomTextField2 extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                            ),
+                            ) : prefix,
                       suffixIcon: suffix != null || varl == FPL.password
                           ? Padding(
                               padding: EdgeInsets.only(right: 16.0),

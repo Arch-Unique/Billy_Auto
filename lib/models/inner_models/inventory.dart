@@ -197,7 +197,7 @@ class InventoryMetricDailyProfit extends UneditableModel {
   double get sales => serviceProfit + laborProfit + productProfit;
   double get cost => expenses + productCost;
   double get profit => sales - cost;
-  String get dateRaw => DateFormat("dd/MM/yyyy hh:mm:ssa").format(date);
+  String get dateRaw => DateFormat("dd/MM/yyyy").format(date);
 
   InventoryMetricDailyProfit(
       {required this.date,
@@ -210,7 +210,7 @@ class InventoryMetricDailyProfit extends UneditableModel {
 
   factory InventoryMetricDailyProfit.fromJson(Map<String, dynamic> json) {
     return InventoryMetricDailyProfit(
-      date: DateTime.parse(json["date"]),
+      date: DateTime.parse(json["date"]).add(Duration(hours: 1)),
       productProfit: double.tryParse(json['productProfit'].toString()) ?? 0,
       serviceProfit: double.tryParse(json['serviceProfit'].toString()) ?? 0,
       laborProfit: double.tryParse(json['labor_profit'].toString()) ?? 0,
