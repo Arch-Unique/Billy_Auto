@@ -176,7 +176,8 @@ class AllTables {
           "product",
           "qty",
           "status",
-          "location",
+          "unit cost",
+          "total cost",
           // "product Type",
           // "product Category",
           "createdAt"
@@ -196,7 +197,7 @@ class AllTables {
             status: "",
             supplierId: 0,
             productCategoryId: 0,
-            location: "",
+            location: "store 1",
             // shelfLife: DateTime.now(),
             productTypeId: 0)),
     Order: TableModel([

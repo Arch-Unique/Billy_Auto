@@ -5,8 +5,8 @@ enum DashboardModes {
   order("Orders", Icons.calendar_today_sharp),
   product("Products", Icons.work),
   inventory("Inventory", Icons.book),
-
-  settings("Settings", Icons.settings);
+  settings("Configs", Icons.settings),
+  admin("Admin", Icons.admin_panel_settings);
 
   final String title;
   final IconData icon;

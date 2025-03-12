@@ -49,7 +49,7 @@ class Inventory extends BaseModel {
       'status': status,
       'supplierId': supplierId,
       'productCategoryId': productCategoryId,
-      'location': location,
+      'location': location.isEmpty ? "store 1" : location,
       'cost': cost,
       'sellingPrice': sellingPrice,
       // 'shelfLife': shelfLife.toString(),
@@ -70,7 +70,8 @@ class Inventory extends BaseModel {
       qty,
       status,
       // transactionType,
-      location,
+      cost.toCurrency(),
+      (cost*qty).toCurrency(),
       // productType,
       // productCategory,
       createdAt

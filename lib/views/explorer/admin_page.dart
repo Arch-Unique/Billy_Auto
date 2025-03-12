@@ -50,6 +50,7 @@ class _CustomTableState extends State<CustomTable> {
                 ? wideUi(context)
                 : ((Ui.width(context) * 0.75) - 56),
             // border: TableBorder.all(),
+            
 
             onRowsPerPageChanged: (value) {
               print('Row per page changed to $value');
@@ -64,6 +65,8 @@ class _CustomTableState extends State<CustomTable> {
             headingRowHeight: Ui.width(context) < 975 ? 8 : 56,
             dataRowHeight:
                 Ui.width(context) < 975 ? 156 : kMinInteractiveDimension,
+                
+                
             header: AppText.medium("Records",
                 fontFamily: Assets.appFontFamily2, fontSize: 16),
             headingRowColor: WidgetStatePropertyAll<Color>(
@@ -119,14 +122,18 @@ class _CustomTableState extends State<CustomTable> {
             columns: Ui.width(context) < 975
                 ? [
                     DataColumn2(
-                        label: AppText.bold("",
-                            fontSize: 8, fontFamily: Assets.appFontFamily2),
+                        label: Center(
+                          child: AppText.bold("",
+                              fontSize: 8, fontFamily: Assets.appFontFamily2),
+                        ),
                         size: ColumnSize.S)
                   ]
                 : controller.currentHeaders
                     .map((e) => DataColumn2(
-                        label: AppText.bold(e,
-                            fontSize: 14, fontFamily: Assets.appFontFamily2),
+                        label: Center(
+                          child: AppText.bold(e,
+                              fontSize: 14, fontFamily: Assets.appFontFamily2),
+                        ),
                         size: ColumnSize.S))
                     .toList(),
             source: controller.tmds.value,
@@ -368,49 +375,53 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                       ]
                     : List.generate(tm.length, (jindex) {
                         if (jindex == tm.length - 1) {
-                          return DataCell(Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // const AppIcon(
-                              //   Icons.remove_red_eye,
-                              //   color: Colors.brown,
-                              // ),
-                              // Ui.boxWidth(12),
-                              AppIcon(
-                                Icons.edit,
-                                color: AppColors.green,
-                                onTap: () async {
-                                  await editRecord(bm);
-                                },
-                              ),
-                              Ui.boxWidth(12),
-                              if (T != BulkExpenses)
+                          return DataCell(Center(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // const AppIcon(
+                                //   Icons.remove_red_eye,
+                                //   color: Colors.brown,
+                                // ),
+                                // Ui.boxWidth(12),
                                 AppIcon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                  onTap: () {
-                                    deleteRecord(bm);
+                                  Icons.edit,
+                                  color: AppColors.green,
+                                  onTap: () async {
+                                    await editRecord(bm);
                                   },
                                 ),
-                            ],
+                                Ui.boxWidth(12),
+                                if (T != BulkExpenses)
+                                  AppIcon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                    onTap: () {
+                                      deleteRecord(bm);
+                                    },
+                                  ),
+                              ],
+                            ),
                           ));
                         }
                         if (T == Order && jindex == 3) {
-                          return DataCell(Chip(
-                            label: AppText.thin(
-                                tval[jindex] ? "Dispatched" : "In Progress",
-                                color: tval[jindex]
-                                    ? Colors.green
-                                    : Colors.orange[700]!),
-                            shape: RoundedRectangleBorder(
-                                side: BorderSide(
-                                    color: tval[jindex]
-                                        ? Colors.green
-                                        : Colors.orange[700]!),
-                                borderRadius: BorderRadius.circular(8)),
+                          return DataCell(Center(
+                            child: Chip(
+                              label: AppText.thin(
+                                  tval[jindex] ? "Dispatched" : "In Progress",
+                                  color: tval[jindex]
+                                      ? Colors.green
+                                      : Colors.orange[700]!),
+                              shape: RoundedRectangleBorder(
+                                  side: BorderSide(
+                                      color: tval[jindex]
+                                          ? Colors.green
+                                          : Colors.orange[700]!),
+                                  borderRadius: BorderRadius.circular(8)),
+                            ),
                           ));
                         }
-                        return DataCell(AppText.thin(tval[jindex].toString()));
+                        return DataCell(Center(child: AppText.thin(tval[jindex].toString(),att: true,alignment: TextAlign.center)),);
                       }));
           }));
     } catch (e) {
@@ -820,6 +831,12 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
   }
 
   String _formatFieldName(String name) {
+    if(name == "cost"){
+      return "Unit Cost";
+    }
+    if(name == "sellingPrice"){
+      return "Unit Selling Price";
+    }
     return name
         .replaceAllMapped(
           RegExp(r'([A-Z])'),

@@ -73,9 +73,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
            HeaderItem("Bulk Expenses", vb: () {
             controller.setCurrentTypeTable<BulkExpenses>();
           }),
-           HeaderItem("Expenses Types", vb: () {
-            controller.setCurrentTypeTable<ExpensesType>();
-          }),
+           
            HeaderItem("Stock Balances", vb: () {
             controller.setCurrentTypeTable<InventoryMetricStockBalances>();
           }),
@@ -98,11 +96,27 @@ class _ExplorerPageState extends State<ExplorerPage> {
         HeaderItem("Services", vb: () {
           controller.setCurrentTypeTable<BillyServices>();
         }),
+        HeaderItem("Expenses Types", vb: () {
+            controller.setCurrentTypeTable<ExpensesType>();
+          }),
         HeaderItem("Inspection Details", vb: () {
           controller.setCurrentTypeTable<BillyConditions>();
         }),
         HeaderItem("Inspection Category", vb: () {
           controller.setCurrentTypeTable<BillyConditionCategory>();
+        }),
+        
+      ]),
+
+      CustomTablePage([
+        HeaderItem("Markups & Targets", vb: () {
+          controller.setCurrentTypeTable<CarMake>();
+        }),
+        HeaderItem("Purchases", vb: () {
+          controller.setCurrentTypeTable<CarModels>();
+        }),
+        HeaderItem("Reports", vb: () {
+          controller.setCurrentTypeTable<BillyConditions>();
         }),
         if(controller.appRepo.appService.currentUser.value.isAdmin)
         HeaderItem("Users", vb: () {
@@ -112,6 +126,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
         HeaderItem("Login History", vb: () {
           controller.setCurrentTypeTable<LoginHistory>();
         })
+       
       ]),
     ];
     controller.refreshModels();

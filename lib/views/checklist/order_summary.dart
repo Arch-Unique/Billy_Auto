@@ -890,7 +890,40 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
                                     fontSize: 8,
                                     color: PdfColor.fromInt(0xFF1E1E1E))),
                           ]),
-                    ])
+                    ]),
+                    pw.Spacer(),
+                    pw.Align(
+                      alignment: pw.Alignment.center,
+                      child: pw.Column(
+                          mainAxisSize: pw.MainAxisSize.min,
+                          crossAxisAlignment: pw.CrossAxisAlignment.center,
+                          children: [
+                            titleText("Bank Details",
+                                hasBottomMargin: true,width: 78),
+                            
+                            pw.SizedBox(height: 4),
+                            pw.Text(
+                                "Guaranty Trust Bank (GT Bank)",
+                                style: pw.TextStyle(
+                                    font: defFontBold,
+                                    fontSize: 12,
+                                    color: PdfColor.fromInt(0xFF1E1E1E))),
+                                    pw.Text(
+                                "3000920670",
+                                style: pw.TextStyle(
+                                    font: defFontReg,
+                                    fontSize: 10,
+                                    color: PdfColor.fromInt(0xFF1E1E1E))),
+                                    pw.Text(
+                                "B A Plus Ltd",
+                                style: pw.TextStyle(
+                                    font: defFontReg,
+                                    fontSize: 10,
+                                    color: PdfColor.fromInt(0xFF1E1E1E))),
+                          ]),
+                    ),
+
+                    pw.SizedBox(height: 24)
               ]);
 
           return pw.Stack(

@@ -87,6 +87,9 @@ class CustomTextField2 extends StatelessWidget {
                       child: AppText.thin(label,
                           color: AppColors.textColor,
                           fontFamily: Assets.appFontFamily1)),
+                          if(prefixController != null)
+
+                          prefix,
                 Expanded(
                   child: TextFormField(
                     controller: controller,
@@ -168,7 +171,7 @@ class CustomTextField2 extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                            ) : prefix,
+                            ) : null,
                       suffixIcon: suffix != null || varl == FPL.password
                           ? Padding(
                               padding: EdgeInsets.only(right: 16.0),
