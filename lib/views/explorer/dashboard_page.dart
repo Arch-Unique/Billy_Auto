@@ -556,8 +556,9 @@ class _MyBarChartState extends State<MyBarChart> {
 
   LinearGradient get _barsGradient => const LinearGradient(
         colors: [
-          AppColors.primaryColorLight,
+          
           AppColors.primaryColor,
+          AppColors.orange,
         ],
         begin: Alignment.bottomCenter,
         end: Alignment.topCenter,
@@ -617,7 +618,8 @@ class _ProfitChartState extends State<ProfitChart> {
   TextEditingController profitTypeTec = TextEditingController(text: "Sales");
 
   List<Color> gradientColors = [
-    const Color.fromARGB(255, 204, 242, 255),
+    // const Color.fromARGB(255, 204, 242, 255),
+    AppColors.orange,
     AppColors.primaryColor,
   ];
 
@@ -875,7 +877,7 @@ class _ProfitChartState extends State<ProfitChart> {
               );
             }).toList(),
             isCurved: false,
-            color: AppColors.primaryColor,
+            color: AppColors.orange,
             barWidth: 3,
             isStrokeCapRound: true,
             dotData: FlDotData(
@@ -883,7 +885,7 @@ class _ProfitChartState extends State<ProfitChart> {
               getDotPainter: (spot, percent, barData, index) {
                 return FlDotCirclePainter(
                   radius: 5,
-                  color: AppColors.primaryColor,
+                  color: AppColors.orange,
                   strokeWidth: 1,
                   strokeColor: Colors.white,
                 );

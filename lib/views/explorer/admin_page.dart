@@ -34,113 +34,141 @@ class _CustomTableState extends State<CustomTable> {
   final controller = Get.find<AppController>();
   @override
   Widget build(BuildContext context) {
-    return LoadingWidget(
-      child: CurvedContainer(
-        width: Ui.width(context) < 975
-            ? wideUi(context)
-            : ((Ui.width(context) * 0.75) - 24),
-        height: Ui.width(context) < 975 ? null : double.maxFinite,
-        border: Border.all(color: AppColors.primaryColorLight),
-        color: AppColors.white.withOpacity(0.6),
-        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        child: Obx(() {
-          return AsyncPaginatedDataTable2(
-            minWidth: Ui.width(context) < 975
-                ? wideUi(context)
-                : ((Ui.width(context) * 0.75) - 56),
-            // border: TableBorder.all(),
-            
+    return Obx(() {
+      print(controller.changedMode.value);
+      if (controller.currentType == AppConstants) {
+        return MarkupTargetsPage();
+      }
+      return LoadingWidget(
+        child: CurvedContainer(
+          width: Ui.width(context) < 975
+              ? wideUi(context)
+              : ((Ui.width(context) * 0.75) - 24),
+          height: Ui.width(context) < 975 ? null : double.maxFinite,
+          border: Border.all(color: AppColors.primaryColorLight),
+          color: AppColors.white.withOpacity(0.6),
+          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          child: Obx(() {
+            return AsyncPaginatedDataTable2(
+              minWidth: Ui.width(context) < 975
+                  ? wideUi(context)
+                  : ((Ui.width(context) * 0.75) - 56),
+              // border: TableBorder.all(),
 
-            onRowsPerPageChanged: (value) {
-              print('Row per page changed to $value');
-            },
-            // autoRowsToHeight: true,
-            columnSpacing: 0,
-            showCheckboxColumn: false,
-            // onSelectAll: (v) {
-            //   print(v);
-            // },
-            // controller: controller.paginatorController.value,
-            headingRowHeight: Ui.width(context) < 975 ? 8 : 56,
-            dataRowHeight:
-                Ui.width(context) < 975 ? 156 : kMinInteractiveDimension,
-                
-                
-            header: AppText.medium("Records",
-                fontFamily: Assets.appFontFamily2, fontSize: 16),
-            headingRowColor: WidgetStatePropertyAll<Color>(
-                AppColors.primaryColorLight.withOpacity(0.5)),
-            actions: [
-              Material(
-                color: AppColors.green,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: AppIcon(
-                  Icons.add,
-                  color: AppColors.white,
-                  onTap: () async {
-                    if (controller.currentBaseModel.value.runtimeType == InventoryMetricStockBalances || controller.currentBaseModel.value.runtimeType == InventoryMetricDailyProfit) return;
-                    if (!Get.find<AppService>()
-                        .currentUser
-                        .value
-                        .isServiceAdvisor) {
-                      Ui.showError("Not enough permissions");
-                      return;
-                    }
-                    Get.find<AppController>().startLoading();
-                    if (controller.currentBaseModel.value.runtimeType ==
-                        BulkExpenses) {
-                      (controller.currentBaseModel.value as BulkExpenses)
-                          .expenses = (await Get.find<AppRepo>()
-                              .getAll<Expenses>(
-                                  rurl: AppUrls.expensesMetric,
-                                  date: (controller.currentBaseModel.value
-                                          as BulkExpenses)
-                                      .date
-                                      .toSQLDate()))
-                          .data;
-                    }
+              onRowsPerPageChanged: (value) {
+                print('Row per page changed to $value');
+              },
+              // autoRowsToHeight: true,
+              columnSpacing: 0,
+              showCheckboxColumn: false,
+              // onSelectAll: (v) {
+              //   print(v);
+              // },
+              // controller: controller.paginatorController.value,
+              headingRowHeight: Ui.width(context) < 975 ? 8 : 56,
+              dataRowHeight:
+                  Ui.width(context) < 975 ? 156 : kMinInteractiveDimension,
 
-                    Get.find<AppController>().stopLoading();
-                    Get.dialog(AppDialog(
-                        title: AppText.medium("Add New Record"),
-                        content: Obx(() {
-                          return DynamicFormGenerator(
-                              model: controller.currentBaseModel.value,
-                              isNew: true,
-                              onSave: (v) async {
-                                await controller.saveNewRecord(v);
-                              });
-                        })));
-                  },
-                  size: 40,
-                ),
-              ), //add new
-            ],
-            columns: Ui.width(context) < 975
-                ? [
-                    DataColumn2(
-                        label: Center(
-                          child: AppText.bold("",
-                              fontSize: 8, fontFamily: Assets.appFontFamily2),
-                        ),
-                        size: ColumnSize.S)
-                  ]
-                : controller.currentHeaders
-                    .map((e) => DataColumn2(
-                        label: Center(
-                          child: AppText.bold(e,
-                              fontSize: 14, fontFamily: Assets.appFontFamily2),
-                        ),
-                        size: ColumnSize.S))
-                    .toList(),
-            source: controller.tmds.value,
-          );
-        }),
-      ),
-    );
+              header: AppText.medium("Records",
+                  fontFamily: Assets.appFontFamily2, fontSize: 16),
+              headingRowColor: WidgetStatePropertyAll<Color>(
+                  AppColors.primaryColorLight.withOpacity(0.5)),
+              actions: [
+                Material(
+                  color: AppColors.green,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: AppIcon(
+                    Icons.add,
+                    color: AppColors.white,
+                    onTap: () async {
+                      if (controller.currentBaseModel.value.runtimeType ==
+                              InventoryMetricStockBalances ||
+                          controller.currentBaseModel.value.runtimeType ==
+                              InventoryMetricDailyProfit) return;
+                      if (!Get.find<AppService>()
+                          .currentUser
+                          .value
+                          .isServiceAdvisor) {
+                        Ui.showError("Not enough permissions");
+                        return;
+                      }
+                      Get.find<AppController>().startLoading();
+                      if (controller.currentBaseModel.value.runtimeType ==
+                          BulkExpenses) {
+                        (controller.currentBaseModel.value as BulkExpenses)
+                            .expenses = (await Get.find<AppRepo>()
+                                .getAll<Expenses>(
+                                    rurl: AppUrls.expensesMetric,
+                                    date: (controller.currentBaseModel.value
+                                            as BulkExpenses)
+                                        .date
+                                        .toSQLDate()))
+                            .data;
+                      }
+
+                      Get.find<AppController>().stopLoading();
+                      if (controller.currentBaseModel.value.runtimeType ==
+                          BulkExpenses) {
+                        Get.dialog(AppDialog(
+                            title: AppText.medium("Add/Edit New Record"),
+                            content: Obx(() {
+                              return DynamicFormGenerator(
+                                  model: controller.currentBaseModel.value,
+                                  isNew: (controller.currentBaseModel.value
+                                              .runtimeType !=
+                                          BulkExpenses &&
+                                      (controller.currentBaseModel.value
+                                              as BulkExpenses)
+                                          .expenses
+                                          .isEmpty),
+                                  onSave: (v) async {
+                                    await controller.saveNewRecord(v);
+                                  });
+                            })));
+                      } else {
+                        Get.dialog(AppDialog(
+                            title: AppText.medium("Add New Record"),
+                            content: Obx(() {
+                              return DynamicFormGenerator(
+                                  model: controller.currentBaseModel.value,
+                                  isNew: true,
+                                  onSave: (v) async {
+                                    await controller.saveNewRecord(v);
+                                  });
+                            })));
+                      }
+                    },
+                    size: 40,
+                  ),
+                ), //add new
+              ],
+              columns: Ui.width(context) < 975
+                  ? [
+                      DataColumn2(
+                          label: Center(
+                            child: AppText.bold("",
+                                fontSize: 8, fontFamily: Assets.appFontFamily2),
+                          ),
+                          size: ColumnSize.S)
+                    ]
+                  : controller.currentHeaders
+                      .map((e) => DataColumn2(
+                          label: Center(
+                            child: AppText.bold(e,
+                                fontSize: 14,
+                                fontFamily: Assets.appFontFamily2),
+                          ),
+                          size: ColumnSize.S))
+                      .toList(),
+              source: controller.tmds.value,
+            );
+          }),
+        ),
+      );
+    });
   }
 }
 
@@ -150,87 +178,94 @@ class CustomTableFilter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CurvedContainer(
-      width: Ui.width(context) < 975
-          ? wideUi(context)
-          : ((Ui.width(context) * 0.25) - 24),
-      height: Ui.width(context) < 975 ? null : double.maxFinite,
-      color: AppColors.white.withOpacity(0.6),
-      border: Border.all(color: AppColors.primaryColorLight),
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: SingleChildScrollView(
-        child: Obx(() {
-          return Column(
-            children: [
-              AppText.medium("Filters",
-                  fontFamily: Assets.appFontFamily2, fontSize: 16),
-              Ui.boxHeight(24),
-              if (controller.currentFilters.isEmpty) const SizedBox(),
-              ...controller.currentFilters.map((e) {
-                if (e.filterType == 0) {
-                  var iv = [];
-                  if (e.tec != null) {
-                    if (e.tec!.text.trim().isNotEmpty &&
-                        e.tec!.text.trim() != ",") {
-                      if (e.tec!.text.contains(",")) {
-                        iv = e.tec!.text.split(",");
-                      } else {
-                        iv = [e.tec!.text];
+    return Obx(() {
+      print(controller.changedMode.value);
+      if (controller.currentType == AppConstants) {
+        return SizedBox();
+      }
+      return CurvedContainer(
+        width: Ui.width(context) < 975
+            ? wideUi(context)
+            : ((Ui.width(context) * 0.25) - 24),
+        height: Ui.width(context) < 975 ? null : double.maxFinite,
+        color: AppColors.white.withOpacity(0.6),
+        border: Border.all(color: AppColors.primaryColorLight),
+        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: SingleChildScrollView(
+          child: Obx(() {
+            return Column(
+              children: [
+                AppText.medium("Filters",
+                    fontFamily: Assets.appFontFamily2, fontSize: 16),
+                Ui.boxHeight(24),
+                if (controller.currentFilters.isEmpty) const SizedBox(),
+                ...controller.currentFilters.map((e) {
+                  if (e.filterType == 0) {
+                    var iv = [];
+                    if (e.tec != null) {
+                      if (e.tec!.text.trim().isNotEmpty &&
+                          e.tec!.text.trim() != ",") {
+                        if (e.tec!.text.contains(",")) {
+                          iv = e.tec!.text.split(",");
+                        } else {
+                          iv = [e.tec!.text];
+                        }
                       }
                     }
+                    return CustomMultiDropdown(
+                        e.options!.titles, e.options!.values, e.tec!, e.title,
+                        initValues: iv, isEnable: true);
                   }
-                  return CustomMultiDropdown(
-                      e.options!.titles, e.options!.values, e.tec!, e.title,
-                      initValues: iv, isEnable: true);
-                }
-                return CustomTextField(
-                  e.title,
-                  e.tec!,
-                  readOnly: true,
-                  onTap: () async {
-                    final dtr = await showDateRangePicker(
-                        context: context,
-                        firstDate: DateTime(1980),
-                        lastDate: DateTime.now());
-                    if (dtr != null) {
-                      e.tec!.text =
-                          "${DateFormat("dd/MM/yyyy").format(dtr.start)} - ${DateFormat("dd/MM/yyyy").format(dtr.end)}";
-                    }
-                  },
-                );
-              }),
-              Ui.boxHeight(16),
-              if (controller.currentFilters.isEmpty) AppText.thin("No Filters"),
-              if (controller.currentFilters.isNotEmpty)
-                AppButton.row(
-                  "Apply",
-                  () {
-                    controller.applyFilters();
-                    if (Ui.width(context) < 975) {
-                      Get.back();
-                    }
-                  },
-                  "Clear",
-                  () {
-                    controller.resetCurrentFilters();
-                    controller.applyFilters();
-                  },
-                )
-              // AppButton(onPressed: (){
-              //   controller.applyFilters();
-              // },text: "Apply Filters",),
-              // Ui.boxHeight(16),
-              // if (controller.currentFilters.isNotEmpty)
-              // AppButton.outline((){
-              //   controller.resetCurrentFilters();
-              //   controller.applyFilters();
-              // }, "Clear Filters",),
-            ],
-          );
-        }),
-      ),
-    );
+                  return CustomTextField(
+                    e.title,
+                    e.tec!,
+                    readOnly: true,
+                    onTap: () async {
+                      final dtr = await showDateRangePicker(
+                          context: context,
+                          firstDate: DateTime(1980),
+                          lastDate: DateTime.now());
+                      if (dtr != null) {
+                        e.tec!.text =
+                            "${DateFormat("dd/MM/yyyy").format(dtr.start)} - ${DateFormat("dd/MM/yyyy").format(dtr.end)}";
+                      }
+                    },
+                  );
+                }),
+                Ui.boxHeight(16),
+                if (controller.currentFilters.isEmpty)
+                  AppText.thin("No Filters"),
+                if (controller.currentFilters.isNotEmpty)
+                  AppButton.row(
+                    "Apply",
+                    () {
+                      controller.applyFilters();
+                      if (Ui.width(context) < 975) {
+                        Get.back();
+                      }
+                    },
+                    "Clear",
+                    () {
+                      controller.resetCurrentFilters();
+                      controller.applyFilters();
+                    },
+                  )
+                // AppButton(onPressed: (){
+                //   controller.applyFilters();
+                // },text: "Apply Filters",),
+                // Ui.boxHeight(16),
+                // if (controller.currentFilters.isNotEmpty)
+                // AppButton.outline((){
+                //   controller.resetCurrentFilters();
+                //   controller.applyFilters();
+                // }, "Clear Filters",),
+              ],
+            );
+          }),
+        ),
+      );
+    });
   }
 }
 
@@ -239,7 +274,8 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
   TableModelDataSource(this.tm);
 
   editRecord(BaseModel bm) async {
-    if (T == InventoryMetricStockBalances || T == InventoryMetricDailyProfit) return;
+    if (T == InventoryMetricStockBalances || T == InventoryMetricDailyProfit)
+      return;
     if (!Get.find<AppService>().currentUser.value.isServiceAdvisor) {
       Ui.showError("Not enough permissions");
       return;
@@ -267,7 +303,8 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
   }
 
   deleteRecord(BaseModel bm) {
-    if (T == InventoryMetricStockBalances || T == InventoryMetricDailyProfit) return;
+    if (T == InventoryMetricStockBalances || T == InventoryMetricDailyProfit)
+      return;
     if (!Get.find<AppService>().currentUser.value.isServiceAdvisor) {
       Ui.showError("Not enough permissions");
       return;
@@ -301,12 +338,10 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
         res = TotalResponse<T>(
             Get.find<AppController>().allStockBalances.length,
             Get.find<AppController>().allStockBalances.cast<T>());
-      } else if( T == InventoryMetricDailyProfit){
+      } else if (T == InventoryMetricDailyProfit) {
         await Get.find<AppController>().initMetrics();
-        res = TotalResponse<T>(
-            Get.find<AppController>().allDailyProfit.length,
+        res = TotalResponse<T>(Get.find<AppController>().allDailyProfit.length,
             Get.find<AppController>().allDailyProfit.cast<T>());
-            
       } else {
         res = await appRepo.getAll<T>(
             page: page,
@@ -325,7 +360,6 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
 
             return DataRow2(
                 onTap: () async {
-                  
                   await editRecord(bm);
                 },
                 cells: Ui.width(Get.context!) < 975
@@ -421,7 +455,11 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                             ),
                           ));
                         }
-                        return DataCell(Center(child: AppText.thin(tval[jindex].toString(),att: true,alignment: TextAlign.center)),);
+                        return DataCell(
+                          Center(
+                              child: AppText.thin(tval[jindex].toString(),
+                                  att: true, alignment: TextAlign.center)),
+                        );
                       }));
           }));
     } catch (e) {
@@ -535,6 +573,7 @@ class HeaderChooser extends StatelessWidget {
           onTap: () {
             curHeader.value = i;
             if (hi[i].vb != null) hi[i].vb!();
+            Get.find<AppController>().changedMode.value++;
           },
           child: Obx(() {
             return Container(
@@ -618,11 +657,29 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
 
   Widget _buildField(String fieldName, dynamic value) {
     // Determine field type based on value
+    if (widget.model.runtimeType == Product &&
+        (fieldName == "cost" ||
+            fieldName == "markup" ||
+            fieldName == "sellingPrice")) {
+      return SizedBox();
+    }
+    if (!Get.find<AppService>().currentUser.value.isAdmin &&
+        (fieldName == "markup")) {
+      return SizedBox();
+    }
+    if (!Get.find<AppService>().currentUser.value.isAdmin &&
+        (fieldName == "sellingPrice") &&
+        (double.tryParse(_controllers["markup"]!.text) ?? 0) == 0) {
+      return SizedBox();
+    }
     if (fieldName.endsWith("Id") ||
         fieldName.endsWith("Type") ||
         fieldName.endsWith("status") ||
+        fieldName.endsWith("markup") ||
         fieldName.endsWith("role")) {
-      if ((widget.model.runtimeType == Product &&
+      if ((widget.model.runtimeType == Expenses &&
+              fieldName == "expensesCategoryId") ||
+          (widget.model.runtimeType == Product &&
               fieldName == "productCategoryId") ||
           (widget.model.runtimeType == Inventory &&
               (fieldName == "productCategoryId" ||
@@ -661,9 +718,21 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
                 .first
                 .productTypeId
                 .toString();
+          } else if (widget.model.runtimeType == Expenses &&
+              fieldName == "expensesTypeId") {
+            _controllers["expensesCategoryId"]!.text = Get.find<AppController>()
+                .allExpensesTypes
+                .where((test) => test.id == a)
+                .first
+                .category;
           } else if (widget.model.runtimeType == Inventory &&
               fieldName == "transactionType") {
             _controllers["status"]!.text = a;
+          } else if (widget.model.runtimeType == Inventory &&
+              fieldName == "markup") {
+            final pd = double.tryParse(_controllers["cost"]!.text) ?? 0;
+            _controllers["sellingPrice"]!.text =
+                Get.find<AppController>().calcNewSellingPrice(pd, a).toString();
           }
         } catch (e) {
           // TODO
@@ -711,7 +780,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
           .toList();
       List<dynamic> conds = (jsonDecode(value) as List);
       List<int> newConds = [];
-      for (var i = 0; i < conds.length; i++) {
+      for (var i = 0; i < options.length; i++) {
         if (conds[i] as int != 0) {
           newConds.add(values[i]);
         }
@@ -798,7 +867,23 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
           (widget.model as Expenses).rawCost.value =
               double.tryParse(_controllers[fieldName]!.text) ?? 0;
         }
+        if (widget.model.runtimeType == Inventory && fieldName == "cost") {
+          final pd = int.tryParse(_controllers["markup"]!.text) ?? 0;
+          final cd = double.tryParse(_controllers["cost"]!.text) ?? 0;
+          if (pd == 0) {
+            _controllers["sellingPrice"]!.text = 0.toString();
+          } else {
+            _controllers["sellingPrice"]!.text = Get.find<AppController>()
+                .calcNewSellingPrice(cd, pd)
+                .toString();
+          }
+        }
       },
+      isCompulsory: true,
+      readOnly: (!Get.find<AppService>().currentUser.value.isAdmin &&
+          widget.model.runtimeType == Inventory &&
+          (fieldName == "sellingPrice") &&
+          (double.tryParse(_controllers["markup"]!.text) ?? 0) > 0),
       varl: fieldName.toLowerCase().endsWith("cost") ||
               fieldName.toLowerCase().endsWith("price")
           ? FPL.number
@@ -831,10 +916,10 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
   }
 
   String _formatFieldName(String name) {
-    if(name == "cost"){
+    if (name == "cost") {
       return "Unit Cost";
     }
-    if(name == "sellingPrice"){
+    if (name == "sellingPrice") {
       return "Unit Selling Price";
     }
     return name
@@ -850,7 +935,8 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
     Map<String, dynamic> jsonMap = widget.model.toJson();
     if (widget.model.runtimeType == Invoice) {
       Rx<Invoice> inv = (widget.model as Invoice).obs;
-      TextEditingController ltec = TextEditingController(text: inv.value.labourCost.toString());
+      TextEditingController ltec =
+          TextEditingController(text: inv.value.labourCost.toString());
       if (widget.isNew) {
         inv.value = Invoice(servicesUsed: [], productsUsed: []);
       }
@@ -864,7 +950,8 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
                   readOnly: true),
             _buildField("orderId", jsonMap["orderId"]),
             InvoiceList(
-              inv,ltec,
+              inv,
+              ltec,
               isOwn: false,
             ),
             AppButton(
@@ -873,7 +960,12 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
                     int.tryParse(_controllers["orderId"]!.text) ?? 0;
                 inv.value.totalCost = inv.value.rawTotalCost;
                 if (inv.value.validate()) {
-                  inv.value.orderCreatedAt = Get.find<AppController>().allOrders.where((test) => test.id == inv.value.orderId).firstOrNull?.createdAt ?? DateTime.now();
+                  inv.value.orderCreatedAt = Get.find<AppController>()
+                          .allOrders
+                          .where((test) => test.id == inv.value.orderId)
+                          .firstOrNull
+                          ?.createdAt ??
+                      DateTime.now();
                   final gh = inv.value.toRawJson();
                   gh["id"] = inv.value.id;
                   await widget.onSave(gh);
@@ -1108,5 +1200,231 @@ class ExpensesItemWidget extends StatelessWidget {
           ),
       ]),
     );
+  }
+}
+
+class MarkupTargetsPage extends StatelessWidget {
+  MarkupTargetsPage({super.key});
+
+  final controller = Get.find<AppController>();
+
+  @override
+  Widget build(BuildContext context) {
+    DateTime dtt = DateTime.now();
+    final dtrd = DateTime(dtt.year, dtt.month, dtt.day);
+    final dtrm = DateTime(dtt.year, dtt.month);
+    final dtry = DateTime(dtt.year);
+
+    final TextEditingController pidTec = TextEditingController();
+    final TextEditingController pmdTec = TextEditingController();
+    final TextEditingController psdTec = TextEditingController();
+    final TextEditingController pcdTec = TextEditingController();
+    Rx<Product> curProduct =
+        Product(name: "", productCategoryId: 0, productTypeId: 0).obs;
+
+    return CurvedContainer(
+      width:
+          Ui.width(context) < 975 ? wideUi(context) : (Ui.width(context) - 24),
+      height: Ui.width(context) < 975 ? null : double.maxFinite,
+      color: AppColors.white.withOpacity(0.6),
+      border: Border.all(color: AppColors.primaryColorLight),
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: SingleChildScrollView(
+          child: Column(
+        children: [
+          AppText.medium("Targets",
+              fontFamily: Assets.appFontFamily2, fontSize: 24),
+          Ui.boxHeight(24),
+          SmartJustifyRow(runSpacing: 12, spacing: 12, children: [
+            itemDataWidget(
+                "Daily Orders",
+                controller.appConstants.value.dailyOrdersTarget,
+                (controller.groupedOrdersByDay[dtrd] ?? 0).toDouble()),
+            // itemDataWidget("Weekly Orders", controller.appConstants.value.weeklyOrdersTarget, (controller.groupedOrdersByDay[dtrd] ?? 0).toDouble()),
+            itemDataWidget(
+                "Monthly Orders",
+                controller.appConstants.value.monthlyOrdersTarget,
+                (controller.groupedOrdersByMonth[dtrm] ?? 0).toDouble()),
+            itemDataWidget(
+                "Yearly Orders",
+                controller.appConstants.value.yearlyOrdersTarget,
+                (controller.groupedOrdersByYear[dtry] ?? 0).toDouble()),
+          ]),
+          Ui.boxHeight(24),
+          SmartJustifyRow(runSpacing: 12, spacing: 12, children: [
+            itemDataWidget(
+                "Daily Profit",
+                controller.appConstants.value.dailyProfitTarget,
+                (controller.allDailyProfit
+                        .where((test) =>
+                            test.date.year == dtt.year &&
+                            test.date.month == dtt.month &&
+                            test.date.day == dtt.day)
+                        .firstOrNull
+                        ?.profit ??
+                    0),
+                isCost: true),
+            // itemDataWidget("Weekly Profit", controller.appConstants.value.weeklyProfitTarget, (controller.allDailyProfit.where((test) => test.date.year ==dtt.year && test.date.month == dtt.month).firstOrNull?.profit ?? 0),isCost: true),
+            itemDataWidget(
+                "Monthly Profit",
+                controller.appConstants.value.monthlyProfitTarget,
+                (controller.allMonthlyProfit
+                        .where((test) =>
+                            test.date.year == dtt.year &&
+                            test.date.month == dtt.month)
+                        .firstOrNull
+                        ?.profit ??
+                    0),
+                isCost: true),
+            itemDataWidget(
+                "Yearly Profit",
+                controller.appConstants.value.yearlyProfitTarget,
+                (controller.allYearlyProfit
+                        .where((test) => test.date.year == dtt.year)
+                        .firstOrNull
+                        ?.profit ??
+                    0),
+                isCost: true)
+          ]),
+          Ui.boxHeight(24),
+          SmartJustifyRow(children: [
+            itemDataWidget("VAT (%)", controller.appConstants.value.vat,
+                controller.appConstants.value.vat,
+                isMarkup: true),
+          ]),
+          Ui.boxHeight(24),
+          Align(
+            alignment: Alignment.centerRight,
+            child: SizedBox(
+                width: wideUi(context) / 2,
+                child: AppButton(
+                  onPressed: () {
+                    Get.dialog(AppDialog(
+                        title: AppText.medium("Edit Record"),
+                        content: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CustomTextField.dropdown(
+                                controller.filterOptions["productId"]!.titles,
+                                controller.filterOptions["productId"]!.values,
+                                pidTec,
+                                useOld: false,
+                                "Product", onChanged: (v) {
+                              curProduct.value = controller.allProducts
+                                  .where((test) => test.id == v)
+                                  .first;
+                              pmdTec.text = curProduct.value.markup.toString();
+                              pcdTec.text =
+                                  curProduct.value.cost.toStringAsFixed(2);
+                              psdTec.text = curProduct.value.sellingPrice
+                                  .toStringAsFixed(2);
+                              curProduct.refresh();
+                              print(curProduct.value.markup);
+                            }),
+                            CustomTextField(
+                              "Unit Cost",
+                              pcdTec,
+                              readOnly: true,
+                            ),
+                            Obx(() {
+                              print("markup ${curProduct.value.markup}");
+                              return CustomTextField.dropdown(
+                                  controller.filterOptions["markup"]!.titles,
+                                  controller.filterOptions["markup"]!.values,
+                                  pmdTec,
+                                  "Markup",
+                                  initOption: curProduct.value.markup,
+                                   onChanged: (v) {
+                                curProduct.value.markup = v;
+                                final cd = controller.calcNewSellingPrice(
+                                    curProduct.value.cost,
+                                    curProduct.value.markup);
+                                curProduct.value.sellingPrice = cd;
+                                psdTec.text = curProduct.value.sellingPrice
+                                    .toStringAsFixed(2);
+                              });
+                            }),
+                            CustomTextField(
+                              "Selling Price",
+                              psdTec,
+                            ),
+                            SizedBox(
+                                width: Ui.width(context) / 2,
+                                child: AppButton(
+                                    onPressed: () async {
+                                      await controller
+                                          .editProductPrice(curProduct.value);
+                                    },
+                                    text: "Save"))
+                          ],
+                        )));
+                  },
+                  text: "Setup Products Markup",
+                )),
+          ),
+          // Ui.boxHeight(24),
+          // SizedBox(
+          //     width: wideUi(context) / 2,
+          //     child: ),
+          // Ui.boxHeight(24),
+        ],
+      )),
+    );
+  }
+
+  Widget itemDataWidget(String title, double targetValue, double value,
+      {bool isCost = false, isMarkup = false}) {
+    final cc = CurvedContainer(
+      height: isMarkup ? 100 : 108,
+      padding: EdgeInsets.all(12),
+      onPressed: () {
+        controller.currentBaseModel.value = controller.appConstants.value;
+        Get.dialog(AppDialog(
+            title: AppText.medium("Edit Record"),
+            content: Obx(() {
+              return DynamicFormGenerator(
+                  model: controller.currentBaseModel.value,
+                  isNew: false,
+                  onSave: (v) async {
+                    await controller.editExisitingRecord(v);
+                  });
+            })));
+      },
+      color: value > targetValue || isMarkup
+          ? Colors.lightGreen[100]!.withOpacity(0.7)
+          : Colors.red[100]!.withOpacity(0.7),
+      child: Row(
+        // crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          AppText.thin(title,
+              fontSize: 16, fontFamily: Assets.appFontFamily2, att: true),
+          // Ui.spacer(),
+          Ui.boxWidth(24),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              AppText.bold(
+                  isMarkup
+                      ? "${value.toStringAsFixed(2)}%"
+                      : isCost
+                          ? "${value.toCurrency()}/${targetValue.toCurrency()}"
+                          : "${value.toInt()}/${targetValue.toInt()}",
+                  fontSize: 40,
+                  att: true),
+              if (!isMarkup)
+                AppText.thin(
+                    "${(value * 100 / targetValue).toStringAsFixed(2)}%")
+            ],
+          ),
+          // if (desc.isNotEmpty) AppText.thin(desc)
+        ],
+      ),
+    );
+    return cc;
   }
 }

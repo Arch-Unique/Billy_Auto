@@ -70,9 +70,9 @@ class AllTables {
       
     ], User()),
     Supplier: TableModel(
-        ["id", "fullName", "email", "phone", "code", "createdAt"],
+        ["id", "fullName", "email", "phone", "products", "createdAt"],
         [],
-        Supplier(fullName: "", email: "", phone: "", address: "", code: "")),
+        Supplier(fullName: "", email: "", phone: "", address: "", products: "")),
     BillyServices: TableModel(
         ["id", "name", "createdAt"],
         [],
@@ -107,7 +107,7 @@ class AllTables {
           "fullName",
           "phone",
           "email",
-          "customerType",
+        
           "createdAt"
         ],
         [
@@ -139,13 +139,12 @@ class AllTables {
         CustomerCar(
             makeId: 0, modelId: 0, year: "", licenseNo: "", customerId: 0)),
     ProductCategory: TableModel(
-        ["id", "name", "code", "createdAt"],
+        ["id", "name", "createdAt"],
         [],
         ProductCategory(name: "", code: "", image: "")),
     ProductType: TableModel([
       "id",
       "name",
-      "code",
       "category",
       "createdAt"
     ], [
@@ -156,9 +155,8 @@ class AllTables {
         [
           "id",
           "name",
-          "code",
           "type",
-          "category",
+          "sellingPrice",
           "createdAt"
         ],
         [
@@ -235,7 +233,7 @@ class AllTables {
     ExpensesType: TableModel([
       "id",
       "name",
-      "code",
+      "category",
       "createdAt"
     ], [
       
@@ -243,11 +241,13 @@ class AllTables {
     Expenses: TableModel([
       "id",
       "expensesType",
+      "expensesCategory",
       "cost",
       "createdAt"
     ], [
       
-      FilterModel("Expenses", "expensesTypeId", 0),
+      FilterModel("Expenses Type", "expensesTypeId", 0),
+      FilterModel("Expenses Category", "expensesCategoryId", 0),
     ], Expenses(),),
     BulkExpenses: TableModel([
       "id",
@@ -260,5 +260,6 @@ class AllTables {
     ], BulkExpenses(date: DateTime.now()),),
     InventoryMetricStockBalances: TableModel(["product","quantity"], [], InventoryMetricStockBalances()),
     InventoryMetricDailyProfit: TableModel(["date","revenue","expenses","productCost","profit"], [], InventoryMetricDailyProfit(date: DateTime.now())),
+    AppConstants: TableModel(["product"], [], AppConstants()),
   };
 }

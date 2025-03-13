@@ -6,7 +6,7 @@ import 'package:inventory/tools/extensions.dart';
 class Expenses extends BaseModel {
   int expensesTypeId;
   double cost;
-  String expensesType;
+  String expensesType,expensesCategoryId;
   RxDouble rawCost=0.0.obs;
 
   Expenses({
@@ -16,6 +16,7 @@ class Expenses extends BaseModel {
     super.createdAt,
     super.updatedAt,
     this.expensesType = "",
+    this.expensesCategoryId = "OPEX",
   }) {
     rawCost.value = cost;
   }
@@ -23,17 +24,17 @@ class Expenses extends BaseModel {
   // Convert Product object to JSON
   @override
   Map<String, dynamic> toJson() {
-    return {'expensesTypeId': expensesTypeId, 'cost': rawCost.value};
+    return {'expensesTypeId': expensesTypeId, 'cost': rawCost.value,'expensesCategoryId':expensesCategoryId};
   }
 
   @override
   List<dynamic> toTableRows() {
-    return [id, expensesType, cost.toCurrency(), createdAtRaw];
+    return [id, expensesType,expensesCategoryId, cost.toCurrency(), createdAtRaw];
   }
 
   @override
   bool validate() {
-    return cost != 0 && expensesTypeId != 0;
+    return cost != 0 && expensesTypeId != 0 && expensesCategoryId != "";
   }
 
   // Create Product object from JSON
@@ -41,6 +42,7 @@ class Expenses extends BaseModel {
     return Expenses(
       id: json['id'] ?? 0,
       expensesType: json['expensesType'] ?? "",
+      expensesCategoryId: json['expensesCategoryId'] ?? "OPEX",
       expensesTypeId: int.tryParse(json['expensesTypeId'].toString()) ?? 0,
       createdAt: DateTime.tryParse(json['createdAt']),
       updatedAt: DateTime.tryParse(json['updatedAt']),
@@ -51,12 +53,13 @@ class Expenses extends BaseModel {
 
 class ExpensesType extends BaseModel {
   String name;
-  String code;
+  String code,category;
 
   ExpensesType({
     super.id = 0,
     required this.name,
     required this.code,
+    this.category="OPEX",
     super.createdAt,
     super.updatedAt,
   });
@@ -64,17 +67,17 @@ class ExpensesType extends BaseModel {
   // Convert ExpensesType object to JSON
   @override
   Map<String, dynamic> toJson() {
-    return {'name': name, 'code': code};
+    return {'name': name,'category':category};
   }
 
   @override
   List<dynamic> toTableRows() {
-    return [id, name, code, createdAtRaw];
+    return [id, name, category, createdAtRaw];
   }
 
   @override
   bool validate() {
-    return name.isNotEmpty;
+    return name.isNotEmpty && category.isNotEmpty;
   }
 
   // Create ExpensesType object from JSON
@@ -82,6 +85,7 @@ class ExpensesType extends BaseModel {
     return ExpensesType(
       id: json['id'] ?? 0,
       name: json['name'],
+      category: json['category'] ?? "OPEX",
       code: json['code'] ?? "",
       createdAt: DateTime.tryParse(json['createdAt']),
       updatedAt: DateTime.tryParse(json['updatedAt']),

@@ -70,6 +70,7 @@ class AppRepo extends GetxController {
     ExpensesType: ExpensesType.fromJson,
     BulkExpenses: BulkExpenses.fromJson,
     Invoice: Invoice.fromJson,
+    AppConstants: AppConstants.fromJson,
     InventoryMetricStockBalances: InventoryMetricStockBalances.fromJson,
     InventoryMetricStockBalancesCost: InventoryMetricStockBalancesCost.fromJson,
     InventoryMetricDailyProfit: InventoryMetricDailyProfit.fromJson,
@@ -98,6 +99,7 @@ class AppRepo extends GetxController {
     ExpensesType: AppUrls.expensesTypes,
     BulkExpenses: AppUrls.expensesMetric,
     Invoice: AppUrls.invoice,
+    AppConstants: AppUrls.appConstants,
     InventoryMetricStockBalances: "${AppUrls.metrics}/1",
     InventoryMetricStockBalancesCost: "${AppUrls.metrics}/2",
     InventoryMetricDailyProfit: "${AppUrls.metrics}/3",
@@ -136,7 +138,7 @@ class AppRepo extends GetxController {
 
   Future<T?> getOne<T>(String id) async {
     final res =
-        await apiService.post("${urls[T]!}/$id/get", data: {"filter": {}});
+        await apiService.post("${urls[T]!}/get/$id", data: {"filter": {}});
     return getOf<T>(res);
   }
 

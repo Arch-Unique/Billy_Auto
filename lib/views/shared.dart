@@ -923,12 +923,13 @@ class CustomTextField extends StatelessWidget {
   final VoidCallback? onTap, customOnChanged;
   final TextInputAction tia;
   final dynamic suffix, prefix;
-  final bool autofocus, hasBottomPadding, isDense;
+  final bool autofocus, hasBottomPadding, isDense,isCompulsory;
   final double fs;
   final FontWeight fw;
   final bool readOnly, isWide, shdValidate;
   final TextAlign textAlign;
   final String? hint;
+  
   final TextEditingController? oldPass;
   const CustomTextField(this.label, this.controller,
       {this.fs = 16,
@@ -943,6 +944,7 @@ class CustomTextField extends StatelessWidget {
       this.prefix,
       this.oldPass,
       this.onTap,
+      this.isCompulsory=false,
       this.isWide = true,
       this.autofocus = false,
       this.customOnChanged,
@@ -967,7 +969,14 @@ class CustomTextField extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (isLabel) AppText.thin(label, color: Colors.black),
+            if (isLabel) Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppText.thin(label, color: Colors.black),
+                if(isCompulsory)
+                AppText.thin("*", color: Colors.red,fontSize: 24),
+              ],
+            ),
             if (isLabel)
               const SizedBox(
                 height: 4,
@@ -977,6 +986,7 @@ class CustomTextField extends StatelessWidget {
               readOnly: readOnly,
               textAlign: textAlign,
               autofocus: autofocus,
+              
               onChanged: (s) async {
                 // if (s.isNotEmpty) {
                 //   setState(() {
@@ -1016,6 +1026,7 @@ class CustomTextField extends StatelessWidget {
               decoration: InputDecoration(
                 fillColor: readOnly ? Colors.grey[300] : Colors.white,
                 filled: true,
+                
                 enabledBorder: customBorder(color: borderCol),
                 focusedBorder: customBorder(color: borderCol),
                 border: customBorder(color: borderCol),
@@ -1104,7 +1115,7 @@ class CustomTextField extends StatelessWidget {
 
     final options = List.from(optionss);
     final values = List.from(valuess);
-    if (options.isEmpty || options[0] != "None") {
+    if (options.isEmpty || (options[0] != "None" && values[0] != 0)) {
       options.insert(0, "None");
       dynamic defaultValue =
           options.isEmpty ? 0 : (initOption.runtimeType == String ? "" : 0);
@@ -1848,64 +1859,131 @@ class RenderSmartJustifyRow extends RenderBox
       child.parentData = SmartJustifyParentData();
     }
   }
+  
+@override
+void performLayout() {
+  final BoxConstraints constraints = this.constraints;
+  double width = constraints.maxWidth;
+  double height = 0;
+  double x = 0;
+  double rowHeight = 0;
+  List<RenderBox> rowChildren = [];
+  RenderBox? child = firstChild;
 
-  @override
-  void performLayout() {
-    final BoxConstraints constraints = this.constraints;
-    double width = constraints.maxWidth;
-    double height = 0;
-    double x = 0;
-    List<RenderBox> rowChildren = [];
-    RenderBox? child = firstChild;
+  while (child != null) {
+    final SmartJustifyParentData childParentData =
+        child.parentData! as SmartJustifyParentData;
+    child.layout(BoxConstraints(maxWidth: width), parentUsesSize: true);
+    final double childWidth = child.size.width;
+    final double childHeight = child.size.height;
 
-    while (child != null) {
-      final SmartJustifyParentData childParentData =
-          child.parentData! as SmartJustifyParentData;
-      child.layout(BoxConstraints(maxWidth: width), parentUsesSize: true);
-      final double childWidth = child.size.width;
-      final double childHeight = child.size.height;
-
-      if (x + childWidth > width && rowChildren.isNotEmpty) {
-        // Expand children in the current row
-        _expandRowChildren(rowChildren, width);
-        // Move to next row
-        x = 0;
-        height +=
-            rowChildren.map((c) => c.size.height).reduce(max) + runSpacing;
-        rowChildren.clear();
-      }
-
-      rowChildren.add(child);
-      x += childWidth + spacing;
-      height = max(height, childHeight);
-
-      child = childParentData.nextSibling;
-    }
-
-    // Handle last row
-    if (rowChildren.isNotEmpty) {
+    if (x + childWidth > width && rowChildren.isNotEmpty) {
+      // Expand children in the current row
       _expandRowChildren(rowChildren, width);
-      height += rowChildren.map((c) => c.size.height).reduce(max);
+      // Move to next row
+      x = 0;
+      height += rowHeight + runSpacing;
+      rowHeight = 0;
+      rowChildren.clear();
     }
 
-    // Set final positions
-    x = 0;
-    double y = 0;
-    child = firstChild;
-    while (child != null) {
-      final SmartJustifyParentData childParentData =
-          child.parentData! as SmartJustifyParentData;
-      if (x + child.size.width > width) {
-        x = 0;
-        y += child.size.height + runSpacing;
-      }
-      childParentData.offset = Offset(x, y);
-      x += child.size.width + spacing;
-      child = childParentData.nextSibling;
-    }
+    rowChildren.add(child);
+    x += childWidth + spacing;
+    rowHeight = max(rowHeight, childHeight);
 
-    size = Size(width, height);
+    child = childParentData.nextSibling;
   }
+
+  // Handle last row
+  if (rowChildren.isNotEmpty) {
+    _expandRowChildren(rowChildren, width);
+    height += rowHeight; // Add height of the last row
+  }
+
+  // Set final positions
+  x = 0;
+  double y = 0;
+  rowHeight = 0;
+  rowChildren.clear();
+  
+  child = firstChild;
+  while (child != null) {
+    final SmartJustifyParentData childParentData =
+        child.parentData! as SmartJustifyParentData;
+    
+    // Check if this child would start a new row
+    if (x + child.size.width > width && x > 0) {
+      x = 0;
+      y += rowHeight + runSpacing;
+      rowHeight = 0;
+    }
+    
+    childParentData.offset = Offset(x, y);
+    x += child.size.width + spacing;
+    rowHeight = max(rowHeight, child.size.height);
+    
+    child = childParentData.nextSibling;
+  }
+
+  size = Size(width, height);
+}
+  // @override
+  // void performLayout() {
+  //   final BoxConstraints constraints = this.constraints;
+  //   double width = constraints.maxWidth;
+  //   double height = 0;
+  //   double x = 0;
+  //   List<RenderBox> rowChildren = [];
+  //   RenderBox? child = firstChild;
+
+  //   while (child != null) {
+  //     final SmartJustifyParentData childParentData =
+  //         child.parentData! as SmartJustifyParentData;
+  //     child.layout(BoxConstraints(maxWidth: width), parentUsesSize: true);
+  //     final double childWidth = child.size.width;
+  //     final double childHeight = child.size.height;
+
+  //     if (x + childWidth > width && rowChildren.isNotEmpty) {
+  //       // Expand children in the current row
+  //       _expandRowChildren(rowChildren, width);
+  //       // Move to next row
+  //       x = 0;
+  //       height +=
+  //           rowChildren.map((c) => c.size.height).reduce(max) + runSpacing;
+  //       rowChildren.clear();
+  //     }
+
+  //     rowChildren.add(child);
+  //     x += childWidth + spacing;
+  //     height = max(height, childHeight);
+
+  //     child = childParentData.nextSibling;
+  //   }
+
+  //   // Handle last row
+  //   if (rowChildren.isNotEmpty) {
+  //     _expandRowChildren(rowChildren, width);
+  //     height += rowChildren.map((c) => c.size.height).reduce(max);
+  //   }
+
+  //   // Set final positions
+  //   x = 0;
+  //   double y = 0;
+  //   child = firstChild;
+  //   while (child != null) {
+  //     final SmartJustifyParentData childParentData =
+  //         child.parentData! as SmartJustifyParentData;
+  //     if (x + child.size.width > width) {
+  //       x = 0;
+  //       y += child.size.height + runSpacing;
+  //     }
+  //     childParentData.offset = Offset(x, y);
+  //     x += child.size.width + spacing;
+  //     child = childParentData.nextSibling;
+  //   }
+
+  //   size = Size(width, height);
+  // }
 
   void _expandRowChildren(List<RenderBox> children, double availableWidth) {
     double totalWidth =

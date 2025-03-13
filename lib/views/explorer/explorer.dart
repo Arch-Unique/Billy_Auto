@@ -67,9 +67,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
           HeaderItem("Inventory", vb: () {
             controller.setCurrentTypeTable<Inventory>();
           }),
-           HeaderItem("Expenses", vb: () {
-            controller.setCurrentTypeTable<Expenses>();
-          }),
+          
            HeaderItem("Bulk Expenses", vb: () {
             controller.setCurrentTypeTable<BulkExpenses>();
           }),
@@ -108,21 +106,21 @@ class _ExplorerPageState extends State<ExplorerPage> {
         
       ]),
 
+        if(controller.appRepo.appService.currentUser.value.isAdmin)
       CustomTablePage([
         HeaderItem("Markups & Targets", vb: () {
-          controller.setCurrentTypeTable<CarMake>();
-        }),
-        HeaderItem("Purchases", vb: () {
-          controller.setCurrentTypeTable<CarModels>();
-        }),
-        HeaderItem("Reports", vb: () {
-          controller.setCurrentTypeTable<BillyConditions>();
-        }),
-        if(controller.appRepo.appService.currentUser.value.isAdmin)
+          controller.setCurrentTypeTable<AppConstants>();
+        },),
+         HeaderItem("Expenses", vb: () {
+            controller.setCurrentTypeTable<Expenses>();
+          }),
+        // HeaderItem("Reports", vb: () {
+        //   controller.setCurrentTypeTable<BillyConditions>();
+        // }),
         HeaderItem("Users", vb: () {
           controller.setCurrentTypeTable<User>();
         }),
-        if(controller.appRepo.appService.currentUser.value.isAdmin)
+        
         HeaderItem("Login History", vb: () {
           controller.setCurrentTypeTable<LoginHistory>();
         })
@@ -167,7 +165,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
   }
 
   header() {
-    final cl = List.generate(DashboardModes.values.length, (i) {
+    final cl = List.generate(screens.length, (i) {
             return Obx(() {
               return CurvedContainer(
                 radius: 64,

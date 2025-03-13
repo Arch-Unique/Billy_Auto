@@ -6,7 +6,7 @@ class Supplier extends BaseModel{
   String email;
   String phone;
   String address;
-  String code;
+  String products;
   
   
 
@@ -16,7 +16,7 @@ class Supplier extends BaseModel{
     required this.email,
     required this.phone,
     required this.address,
-    required this.code,
+    required this.products,
     super.createdAt,
     super.updatedAt,
   });
@@ -29,13 +29,13 @@ Map<String, dynamic> toJson() {
       'email': email,
       'phone': phone,
       'address': address,
-      'code': code
+      'products': products
     };
   }
 
       @override
 List<dynamic> toTableRows(){
-    return [id,fullName,email,phone,code,createdAtRaw];
+    return [id,fullName,email,phone,products,createdAtRaw];
   }
 
   @override
@@ -51,7 +51,7 @@ List<dynamic> toTableRows(){
       email: json['email'] ?? "",
       phone: json['phone'] ?? "",
       address: json['address'] ?? "",
-      code: json['code'] ?? "",
+      products: json['products'] ?? "",
       createdAt: DateTime.tryParse(json['createdAt']),
       updatedAt: DateTime.tryParse(json['updatedAt']),
     );

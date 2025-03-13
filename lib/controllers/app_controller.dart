@@ -77,6 +77,7 @@ class AppController extends GetxController {
   RxList<String> currentHeaders = <String>[].obs;
 
   //MODELS
+  Rx<AppConstants> appConstants = AppConstants(id: 1).obs;
   RxList<BillyServices> allBillyServices = <BillyServices>[].obs;
   RxList<BillyConditionCategory> allBillyConditionCategories =
       <BillyConditionCategory>[].obs;
@@ -105,6 +106,7 @@ class AppController extends GetxController {
   RxList<String> inventoryStatus = <String>[].obs;
   RxList<String> inventoryTransactionTypes = <String>[].obs;
   RxList<String> allDevices = <String>[].obs;
+  RxList<String> expensesCategory= <String>[].obs;
 
   //CHART
   RxList<InventoryMetricStockBalances> allStockBalances =
@@ -125,9 +127,15 @@ class AppController extends GetxController {
   Rx<PaginatorController> paginatorController = PaginatorController().obs;
   Rx<BaseModel> currentBaseModel = User().obs;
   Rx<Order> currentOrder = Order(customerId: 0).obs;
+  Map<DateTime, int> groupedOrdersByMonth = {};
+  Map<DateTime, int> groupedOrdersByDay = {};
+  Map<DateTime, int> groupedOrdersByYear = {};
+
+  List<int> allMarkups = [0,20,25,30,35,40,45,50];
 
   Map<String, FilterOptionsModel> filterOptions = {};
   RxBool isLoading = false.obs;
+  RxInt changedMode = 0.obs;
   Timer? timer;
 
   //ORDERS
@@ -151,6 +159,43 @@ class AppController extends GetxController {
   stopLoading() {
     isLoading.value = false;
   }
+
+    void groupOrderData() {
+    // Group orders by month-year
+    groupedOrdersByMonth = {};
+    for (var order in allOrders) {
+      DateTime month = DateTime(order.createdAt!.year, order.createdAt!.month);
+      if (groupedOrdersByMonth.containsKey(month)) {
+        groupedOrdersByMonth[month] = groupedOrdersByMonth[month]! + 1;
+      } else {
+        groupedOrdersByMonth[month] = 1;
+      }
+    }
+
+    // Group orders by day
+    groupedOrdersByDay = {};
+    for (var order in allOrders) {
+      DateTime day = DateTime(
+          order.createdAt!.year, order.createdAt!.month, order.createdAt!.day);
+      if (groupedOrdersByDay.containsKey(day)) {
+        groupedOrdersByDay[day] = groupedOrdersByDay[day]! + 1;
+      } else {
+        groupedOrdersByDay[day] = 1;
+      }
+    }
+
+    // Group orders by year
+    groupedOrdersByYear = {};
+    for (var order in allOrders) {
+      DateTime year = DateTime(order.createdAt!.year);
+      if (groupedOrdersByYear.containsKey(year)) {
+        groupedOrdersByYear[year] = groupedOrdersByYear[year]! + 1;
+      } else {
+        groupedOrdersByYear[year] = 1;
+      }
+    }
+  }
+
 
   initFilterOptions() {
     filterOptions["productCategoryId"] = FilterOptionsModel(
@@ -208,12 +253,16 @@ class AppController extends GetxController {
         allUsers.map((element) => element.username).toList(),
         allUsers.map((element) => element.id).toList());
     filterOptions["device"] = FilterOptionsModel(allDevices, allDevices);
+    filterOptions["markup"] = FilterOptionsModel(allMarkups.map((e) => "$e%").toList(), allMarkups);
     filterOptions["orderId"] = FilterOptionsModel(
         allOrders.map((element) => element.title).toList(),
         allOrders.map((element) => element.id).toList());
     filterOptions["expensesTypeId"] = FilterOptionsModel(
         allExpensesTypes.map((element) => element.name).toList(),
         allExpensesTypes.map((element) => element.id).toList());
+    filterOptions["expensesCategoryId"] = FilterOptionsModel(
+        expensesCategory.map((element) => element).toList(),
+        expensesCategory.map((element) => element).toList());
   }
 
   initApp() async {
@@ -262,7 +311,9 @@ class AppController extends GetxController {
     inventoryStatus.value = ["Inbound", "Outbound", "Transfer"];
     inventoryTransactionTypes.value = ["a", "b"];
     allDevices.value = ["mobile", "pc"];
+    expensesCategory.value = ["OPEX","FIXED"];
     await initMetrics();
+    appConstants.value = (await appRepo.getOne<AppConstants>("1"))!;
     allBillyServices.value = await _getAll<BillyServices>();
     allBillyConditionCategories.value = await _getAll<BillyConditionCategory>();
     allBillyConditions.value = await _getAll<BillyConditions>();
@@ -293,6 +344,7 @@ class AppController extends GetxController {
         totalConditionsHeaders.map((e) => true).toList();
 
     initFilterOptions();
+    groupOrderData();
   }
 
   initMetrics() async {
@@ -552,6 +604,7 @@ class AppController extends GetxController {
     }
     currentFilters.value = AllTables.tablesData[T]!.fm;
     currentBaseModel = AllTables.tablesData[T]!.bm.obs;
+    currentBaseModel.refresh();
     resetCurrentFilters();
 
     tmds.value = TableModelDataSource<T>(currentHeaders);
@@ -622,6 +675,21 @@ class AppController extends GetxController {
     }
   }
 
+  editProductPrice(Product product) async {
+    try {
+      if (product.validate()) {
+        await appRepo.patch(product);
+        Get.back();
+        Ui.showInfo("Successfully Updated Existing Record");
+        await refreshModels();
+        tmds.value.refreshDatasource();
+      }
+    } catch (e) {
+      print(e);
+      Ui.showError(e.toString());
+    }
+  }
+
   syncExpenses(Map<String, dynamic> json, String dt) async {
     try {
       await appRepo.syncExpenses(json, dt);
@@ -646,5 +714,11 @@ class AppController extends GetxController {
       print(e);
       Ui.showError(e.toString());
     }
+  }
+
+  double calcNewSellingPrice(double c,int d){
+    final vat = (c*appConstants.value.vat)/100;
+    final markup1 = (c*d)/100;
+    return double.parse((c+vat+markup1).toStringAsFixed(2));
   }
 }

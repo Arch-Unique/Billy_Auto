@@ -1,4 +1,6 @@
 import 'package:inventory/models/inner_models/base_model.dart';
+import 'package:inventory/models/inner_models/expenses.dart';
+import 'package:inventory/tools/extensions.dart';
 
 class Product extends BaseModel{
   
@@ -6,7 +8,8 @@ class Product extends BaseModel{
   int productCategoryId;
   String code;
   String image;
-  
+  double cost,sellingPrice;
+  int markup;
   
   int productTypeId;
   String productCategory, productType;
@@ -18,6 +21,9 @@ class Product extends BaseModel{
     this.productCategory="",
     this.code="",
     this.image="",
+    this.cost=0,
+    this.markup=0,
+    this.sellingPrice=0,
     super.createdAt,
     super.updatedAt,
     required this.productTypeId,
@@ -30,15 +36,19 @@ Map<String, dynamic> toJson() {
     return {
       'name': name,
       'productCategoryId': productCategoryId,
-      'code': code,
       'image': image,
       'productTypeId': productTypeId,
+      'cost': cost,
+      'markup': markup,
+      'sellingPrice': sellingPrice,
     };
   }
 
+  //8 23980
+
       @override
 List<dynamic> toTableRows(){
-    return [id,name,code,productType,productCategory,createdAtRaw];
+    return [id,name,productType,sellingPrice.toCurrency(),createdAtRaw];
   }
 
   @override
@@ -51,7 +61,9 @@ List<dynamic> toTableRows(){
     return Product(
       id: json['id'] ?? 0,
       name: json['name'],
-      
+      cost: double.tryParse(json['cost'].toString()) ?? 0,
+      sellingPrice: double.tryParse(json['sellingPrice'].toString()) ?? 0,
+      markup: int.tryParse(json['markup'].toString()) ?? 0,
       productCategoryId: int.tryParse(json['productCategoryId'].toString()) ?? 0,
       productCategory: json['productCategory'] ?? "",
       code: json['code'] ?? "",
@@ -65,12 +77,9 @@ List<dynamic> toTableRows(){
 }
 
 class ProductType extends BaseModel{
-  
   String name;
   String code;
   String image, productCategory;
-  
-  
   int productCategoryId;
 
   ProductType({
@@ -89,7 +98,6 @@ class ProductType extends BaseModel{
 Map<String, dynamic> toJson() {
     return {
       'name': name,
-      'code': code,
       'image': image,
       'productCategoryId': productCategoryId,
     };
@@ -102,7 +110,7 @@ Map<String, dynamic> toJson() {
 
       @override
 List<dynamic> toTableRows(){
-    return [id,name,code,productCategory,createdAtRaw];
+    return [id,name,productCategory,createdAtRaw];
   }
 
   // Create ProductType object from JSON
@@ -140,12 +148,12 @@ class ProductCategory extends BaseModel{
   // Convert ProductCategory object to JSON
   @override
 Map<String, dynamic> toJson() {
-    return {'name': name, 'code': code, 'image': image};
+    return {'name': name, 'image': image};
   }
 
       @override
 List<dynamic> toTableRows(){
-    return [id,name,code,createdAtRaw];
+    return [id,name,createdAtRaw];
   }
 
   @override

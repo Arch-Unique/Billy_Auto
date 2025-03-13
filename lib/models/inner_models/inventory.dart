@@ -13,6 +13,7 @@ class Inventory extends BaseModel {
   int productCategoryId;
   String location;
   double cost, sellingPrice;
+  int markup;
   // DateTime shelfLife;
 
   int productTypeId;
@@ -31,6 +32,7 @@ class Inventory extends BaseModel {
     this.productCategory = "",
     required this.location,
     this.cost = 0,
+    this.markup=0,
     this.sellingPrice = 0,
     // required this.shelfLife,
     super.createdAt,
@@ -51,6 +53,7 @@ class Inventory extends BaseModel {
       'productCategoryId': productCategoryId,
       'location': location.isEmpty ? "store 1" : location,
       'cost': cost,
+      "markup": markup,
       'sellingPrice': sellingPrice,
       // 'shelfLife': shelfLife.toString(),
       'productTypeId': productTypeId,
@@ -93,6 +96,7 @@ class Inventory extends BaseModel {
           int.tryParse(json['productCategoryId'].toString()) ?? 0,
       productCategory: json['productCategory'] ?? "",
       location: json['location'],
+      markup: int.tryParse(json['markup'].toString()) ?? 0,
       cost: double.tryParse(json['cost'].toString()) ?? 0,
       sellingPrice: double.tryParse(json['sellingPrice'].toString()) ?? 0,
       // shelfLife: DateTime.parse(json['shelfLife']),

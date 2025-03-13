@@ -27,6 +27,7 @@ abstract class AppUrls {
   static const String expensesTypes = "/expenses/type";
   static const String expensesMetric = "/expenses/metric";
   static const String condition = "/condition$profile";
+  static const String appConstants = "/appconstants$profile";
   static const String conditionCategory = "/condition/category";
   static const String carMake = "/car/makes";
   static const String carModel = "/car/models";
