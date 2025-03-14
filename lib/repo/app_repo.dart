@@ -66,6 +66,7 @@ class AppRepo extends GetxController {
     BillyConditionCategory: BillyConditionCategory.fromJson,
     BillyServices: BillyServices.fromJson,
     LoginHistory: LoginHistory.fromJson,
+    UserAttendance: UserAttendance.fromJson,
     Expenses: Expenses.fromJson,
     ExpensesType: ExpensesType.fromJson,
     BulkExpenses: BulkExpenses.fromJson,
@@ -95,6 +96,7 @@ class AppRepo extends GetxController {
     BillyConditionCategory: AppUrls.conditionCategory,
     BillyServices: AppUrls.service,
     LoginHistory: AppUrls.loginHistory,
+    UserAttendance: AppUrls.userAttendance,
     Expenses: AppUrls.expenses,
     ExpensesType: AppUrls.expensesTypes,
     BulkExpenses: AppUrls.expensesMetric,
@@ -199,6 +201,32 @@ class AppRepo extends GetxController {
     }
   }
 
+  Future<bool> clockin(String code, String image) async {
+    final img = await uploadPhoto(image);
+    final res = await apiService.post(AppUrls.clockin, data: {
+      "id": code,
+      "imageIn": img,
+    });
+    if (res.statusCode!.isSuccess()) {
+      return true;
+    } else {
+      throw res.data["error"];
+    }
+  }
+
+    Future<bool> clockout(String code, String image) async {
+    final img = await uploadPhoto(image);
+    final res = await apiService.post(AppUrls.clockout, data: {
+      "id": code,
+      "imageOut": img,
+    });
+    if (res.statusCode!.isSuccess()) {
+      return true;
+    } else {
+      throw res.data["error"];
+    }
+  }
+
   syncExpenses(Map<String, dynamic> json, String dt) async {
     final res = await apiService.post("${AppUrls.expensesMetric}/add/$dt",
         data: json["data"]);
@@ -217,6 +245,15 @@ class AppRepo extends GetxController {
       // await appService.loginUser(res.data["data"]["jwt"]);
     } else {
       throw res.data["error"];
+    }
+  }
+
+  Future<TotalResponse> getReport(int a,String dateA, String dateb) async {
+final res = await apiService.get("${AppUrls.reports}/$a/$dateA/$dateb");
+if (res.statusCode!.isSuccess()) {
+      return TotalResponse(res.data["data"]["total"], res.data["data"]["data"]);
+    } else {
+      return TotalResponse(0, []);
     }
   }
 

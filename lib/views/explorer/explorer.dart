@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:inventory/controllers/app_controller.dart';
 import 'package:inventory/models/inner_models/barrel.dart';
+import 'package:inventory/models/inner_models/reports.dart';
 import 'package:inventory/models/table_repo.dart';
 import 'package:inventory/tools/colors.dart';
 import 'package:inventory/tools/enums.dart';
@@ -114,15 +115,18 @@ class _ExplorerPageState extends State<ExplorerPage> {
          HeaderItem("Expenses", vb: () {
             controller.setCurrentTypeTable<Expenses>();
           }),
-        // HeaderItem("Reports", vb: () {
-        //   controller.setCurrentTypeTable<BillyConditions>();
-        // }),
+        HeaderItem("Reports", vb: () {
+          controller.setCurrentTypeTable<Reports>();
+        }),
         HeaderItem("Users", vb: () {
           controller.setCurrentTypeTable<User>();
         }),
         
         HeaderItem("Login History", vb: () {
           controller.setCurrentTypeTable<LoginHistory>();
+        }),
+        HeaderItem("Attendance History", vb: () {
+          controller.setCurrentTypeTable<UserAttendance>();
         })
        
       ]),

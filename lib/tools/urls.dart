@@ -15,12 +15,14 @@ abstract class AppUrls {
   static const String supplier = "/supplier$profile";
   static const String service = "/service$profile";
   static const String loginHistory = "/loginhistory$profile";
+  static const String userAttendance = "/loginhistory/attendance";
   static const String invoice = "/invoice$profile";
   static const String product = "/product$profile";
   static const String productType = "/product/type";
   static const String productCategory = "/product/category";
   static const String order = "/order$profile";
   static const String inventory = "/inventory$profile";
+  static const String reports = "/inventory/reports";
   static const String customer = "/customer$profile";
   static const String customerCar = "/customer/car";
   static const String expenses = "/expenses$profile";
@@ -39,6 +41,8 @@ abstract class AppUrls {
   static const String changePassword = "$user/auth/change-password";
   static const String getUser = "$user$profile";
   static const String logout = "$user/auth/logout";
+  static const String clockin = "$user/auth/clockin";
+  static const String clockout = "$user/auth/clockout";
 
   //inventory metric
   static const String metrics = "/inventory/metrics";
@@ -65,17 +69,16 @@ class AuthMiddleWare extends GetMiddleware {
   @override
   RouteSettings? redirect(String? route) {
     if(GetPlatform.isMobile){
-      FlutterNativeSplash.remove();
+    FlutterNativeSplash.remove();
     final controller = Get.find<AppService>();
-    if (controller.hasOpenedOnboarding.value) {
-      if (controller.isLoggedIn.value) {
-        return RouteSettings(name: AppRoutes.dashboard);
-      } else {
-        return const RouteSettings(name: AppRoutes.auth);
+      if (controller.hasOpenedOnboarding.value) {
+        if (controller.isLoggedIn.value) {
+          return RouteSettings(name: AppRoutes.dashboard);
+        } else {
+          return const RouteSettings(name: AppRoutes.auth);
+        }
       }
     }
-    }
-    
     return super.redirect(route);
   }
 }

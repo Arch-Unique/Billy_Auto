@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:inventory/controllers/app_controller.dart';
 import 'package:inventory/tools/assets.dart';
 import 'package:inventory/tools/colors.dart';
+import 'package:inventory/views/auth/auth_page.dart';
 import 'package:inventory/views/checklist/profile.dart';
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
 
@@ -87,9 +88,7 @@ class CustomTextField2 extends StatelessWidget {
                       child: AppText.thin(label,
                           color: AppColors.textColor,
                           fontFamily: Assets.appFontFamily1)),
-                          if(prefixController != null)
-
-                          prefix,
+                if (prefixController != null) prefix,
                 Expanded(
                   child: TextFormField(
                     controller: controller,
@@ -159,19 +158,21 @@ class CustomTextField2 extends StatelessWidget {
                                       color: Color(0xFF667085)),
                                 )
                               : null
-                          : prefix.runtimeType == IconData ? SizedBox(
-                              width: 48,
-                              child: Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 0.0, right: 0),
-                                  child: AppIcon(
-                                    prefix,
-                                    color: AppColors.lightTextColor,
+                          : prefix.runtimeType == IconData
+                              ? SizedBox(
+                                  width: 48,
+                                  child: Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 0.0, right: 0),
+                                      child: AppIcon(
+                                        prefix,
+                                        color: AppColors.lightTextColor,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                            ) : null,
+                                )
+                              : null,
                       suffixIcon: suffix != null || varl == FPL.password
                           ? Padding(
                               padding: EdgeInsets.only(right: 16.0),
@@ -328,11 +329,12 @@ class BackgroundScaffold extends StatelessWidget {
       this.hasBack = false,
       this.action,
       this.hasEdit = false,
+      this.hasClockIn = false,
       this.hasUser = false,
       super.key});
   final Widget child;
   final Widget? action;
-  final bool hasBack, hasEdit;
+  final bool hasBack, hasEdit, hasClockIn;
   final bool hasUser;
 
   @override
@@ -364,6 +366,24 @@ class BackgroundScaffold extends StatelessWidget {
                     Get.back();
                   },
                 ),
+              )),
+        if (hasClockIn)
+          Positioned(
+              top: 24,
+              left: 24,
+              child: SafeArea(
+                child: InkWell(
+                    onTap: () {
+                      Get.to(ClockInOutPage());
+                    },
+                    child: CircleAvatar(
+                        backgroundColor: AppColors.primaryColor,
+                        radius: 24,
+                        child: Center(
+                            child: AppIcon(
+                          Icons.timer,
+                          color: AppColors.white,
+                        )))),
               )),
         if (action != null)
           Positioned(top: 24, right: 24, child: SafeArea(child: action!)),

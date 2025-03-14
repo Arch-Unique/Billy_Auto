@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:inventory/controllers/app_controller.dart';
 import 'package:inventory/repo/app_repo.dart';
 import 'package:inventory/tools/assets.dart';
@@ -36,49 +39,52 @@ class _AuthPageState extends State<AuthPage> {
             : Ui.width(context) / 3.5;
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Center(
-            child: SizedBox(
-              width: w,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Ui.boxWidth(24),
-                  LogoWidget(w / 3),
-                  Ui.boxWidth(24),
-                  Image.asset(
+        child: Center(
+          child: SizedBox(
+            width: w,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                LogoWidget(w / 3),
+                Expanded(
+                  child: Image.asset(
                     Assets.s5,
-                    width: w/1.2,
+                    width: w / 1.2,
                   ),
-                  Ui.boxWidth(24),
-                  CustomTextField("Username", username),
-                  CustomTextField(
-                    "Password",
-                    password,
-                    varl: FPL.password,
-                  ),
-                  Ui.boxWidth(24),
-                  AppButton(
-                    onPressed: () async {
-                      final msgU = Validators.validate(FPL.text, username.text);
-                      final msgP =
-                          Validators.validate(FPL.password, password.text);
-                      if (msgU == null && msgP == null) {
-                        final f = await Get.find<AppController>()
-                            .loginUser(username.text, password.text);
-                        if (f) {
-                          Ui.showInfo("Login Successful. Getting you ready...");
-                          await Get.find<AppController>().initApp();
-                          Get.offAll(ChoosePage());
-                        }
-                      } else {
-                        Ui.showError(msgU ?? msgP ?? "An error occured");
+                ),
+                CustomTextField("Username", username),
+                CustomTextField(
+                  "Password",
+                  password,
+                  varl: FPL.password,
+                ),
+                AppButton(
+                  onPressed: () async {
+                    final msgU = Validators.validate(FPL.text, username.text);
+                    final msgP =
+                        Validators.validate(FPL.password, password.text);
+                    if (msgU == null && msgP == null) {
+                      final f = await Get.find<AppController>()
+                          .loginUser(username.text, password.text);
+                      if (f) {
+                        Ui.showInfo("Login Successful. Getting you ready...");
+                        await Get.find<AppController>().initApp();
+                        Get.offAll(ChoosePage());
                       }
-                    },
-                    text: "Log In",
-                  ),
-                ],
-              ),
+                    } else {
+                      Ui.showError(msgU ?? msgP ?? "An error occured");
+                    }
+                  },
+                  text: "Log In",
+                ),
+                Ui.boxHeight(24),
+                AppText.thin("Or"),
+                Ui.boxHeight(24),
+                AppButton.outline((){
+                  Get.to(ClockInOutPage());
+                }, "Clock In/Out"),
+                Ui.boxHeight(24),
+              ],
             ),
           ),
         ),
@@ -100,6 +106,7 @@ class ChoosePage extends StatelessWidget {
       body: ConnectivityWidget(
         child: BackgroundScaffold(
           hasUser: true,
+          hasClockIn: true,
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: 850),
             child: Column(
@@ -118,27 +125,30 @@ class ChoosePage extends StatelessWidget {
                     color: AppColors.lightTextColor),
                 Ui.boxHeight(12),
                 InkWell(
-                      onTap: () async{
-                        isPressed.value = true;
-                        await Get.find<AppController>().refreshModels();
-                        isPressed.value = false;
-                        Ui.showInfo("Data Refreshed");
-                      },
-                      child: CircleAvatar(
-                          backgroundColor: AppColors.primaryColor,
-                          radius: 24,
-                          child: Center(
-                              child: Obx(
-                                 () {
-                                  return isPressed.value ? CircularProgressIndicator(color: AppColors.white,): AppIcon(
-                                                              Icons.refresh,
-                                                              color: AppColors.white,
-                                                            );
-                                }
-                              )))),
+                    onTap: () async {
+                      isPressed.value = true;
+                      await Get.find<AppController>().refreshModels();
+                      isPressed.value = false;
+                      Ui.showInfo("Data Refreshed");
+                    },
+                    child: CircleAvatar(
+                        backgroundColor: AppColors.primaryColor,
+                        radius: 24,
+                        child: Center(child: Obx(() {
+                          return isPressed.value
+                              ? CircularProgressIndicator(
+                                  color: AppColors.white,
+                                )
+                              : AppIcon(
+                                  Icons.refresh,
+                                  color: AppColors.white,
+                                );
+                        })))),
                 Ui.boxHeight(12),
                 ...List.generate(
-                    Get.find<AppService>().currentUser.value.isServiceAdvisor ? 3  : 2,
+                    Get.find<AppService>().currentUser.value.isServiceAdvisor
+                        ? 3
+                        : 2,
                     (index) => CurvedContainer(
                           height: 100,
                           width: wideUi(context),
@@ -262,5 +272,119 @@ class ChoosePage extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class ClockInOutPage extends StatelessWidget {
+  const ClockInOutPage({super.key});
+  static const List<dynamic> numKeys = [1,2,3,4,5,6,7,8,9,"",0,"x"];
+  static const double maxWidth = 500;
+
+  @override
+  Widget build(BuildContext context) {
+    final tec = TextEditingController();
+    RxString img = "".obs;
+    return Scaffold(
+        body: BackgroundScaffold(
+          hasBack: true,
+            child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 850),
+                child: Column(children: [
+                  Ui.boxWidth(24),
+                  LogoWidget(120),
+                  AppText.medium("Attendance",
+                      fontSize: 32,
+                      fontFamily: Assets.appFontFamily2,
+                      alignment: TextAlign.center,
+                      color: AppColors.textColor),
+                  Ui.boxHeight(8),
+                  AppText.thin("Take your picture and enter your clockin code",
+                      fontSize: 15,
+                      fontFamily: Assets.appFontFamily1,
+                      color: AppColors.lightTextColor),
+                  Ui.boxHeight(12),
+                  Expanded(child: Obx(
+                     () {
+                      return CurvedContainer(
+                        width: maxWidth,
+                        onPressed: () async {
+                          final ImagePicker picker = ImagePicker();
+                                      img.value = (await picker.pickImage(source: ImageSource.gallery))?.path ?? "";
+                        },
+                        border: Border.all(color: AppColors.orange),
+                        child: img.value.isEmpty ? Center(
+                                  child: AppIcon(
+                                  Icons.add_a_photo,
+                                  color: AppColors.orange,
+                                  size: 56,
+                                )) : Image.file(
+                                  File(img.value),
+                                  fit: BoxFit.cover,
+                                ),
+                      );
+                    }
+                  )),
+                  Ui.boxHeight(12),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: maxWidth),
+                    child: CustomTextField("", tec,readOnly: true,fs: 24,textAlign: TextAlign.center,)),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: maxWidth),
+                    child: Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      alignment: WrapAlignment.center,
+                      children: List.generate(numKeys.length, (i){
+                        return CurvedContainer(
+                          onPressed: (){
+                            if( i == 11 ){
+                              if(tec.text.isEmpty) return;
+                              tec.text = tec.text.substring(0,tec.text.length-1);
+                              return;
+                            }
+                            if( i == 9 ){
+                              return;
+                            }
+                            if(tec.text.length < 6){
+                              tec.text = tec.text + numKeys[i].toString();
+                            }
+                            
+                          },
+                          width: (maxWidth-30)/3,
+                          border: Border.all(color: AppColors.lightTextColor),
+                          padding: EdgeInsets.all(12),
+                          child:  Center(child: AppText.bold(numKeys[i].toString())),
+                        );
+                      }),
+                    ),
+                  ),
+                  Ui.boxHeight(12),
+                  SizedBox(
+                    width: maxWidth,
+                    child: AppButton.row("Clock In", () async{
+                      if(tec.text.length != 6){
+                        return Ui.showError("Invalid User Code");
+                      }
+                      if(img.isEmpty){
+                        return Ui.showError("Image cannot be empty");
+                      }
+                     final f = await Get.find<AppController>().clockIn(tec.text, img.value);
+                     if(f){
+                      Get.back();
+                     }
+                    }, "Clock Out", () async{
+                      if(tec.text.length != 6){
+                        return Ui.showError("Invalid User Code");
+                      }
+                      final f = await Get.find<AppController>().clockOut(tec.text, img.value);
+                       if(f){
+                      Get.back();
+                     }
+                    }),
+                  ),
+                  Ui.boxHeight(12),
+                  
+
+                ]))));
   }
 }

@@ -163,6 +163,15 @@ class AppController extends GetxController {
     isLoading.value = false;
   }
 
+  bool noActionModel<T>() {
+    return [
+      InventoryMetricDailyProfit,
+      InventoryMetricStockBalances,
+      UserAttendance
+    ].contains(T == dynamic ? currentBaseModel.value.runtimeType : T);
+                              
+  }
+
   void groupOrderData() {
     // Group orders by month-year
     groupedOrdersByMonth = {};
@@ -316,7 +325,7 @@ class AppController extends GetxController {
     allDevices.value = ["mobile", "pc"];
     expensesCategory.value = ["OPEX", "FIXED"];
     await initMetrics();
-    appConstants.value = (await appRepo.getOne<AppConstants>("1"))!;
+    appConstants.value = (await appRepo.getOne<AppConstants>("1")) ?? AppConstants();
     allBillyServices.value = await _getAll<BillyServices>();
     allBillyConditionCategories.value = await _getAll<BillyConditionCategory>();
     allBillyConditions.value = await _getAll<BillyConditions>();
@@ -575,6 +584,26 @@ class AppController extends GetxController {
   Future<bool> changePassword(String password, String npassword) async {
     try {
       await appRepo.changePassword(password, npassword);
+      return true;
+    } catch (e) {
+      Ui.showError(e.toString());
+      return false;
+    }
+  }
+
+    Future<bool> clockIn(String code, String img) async {
+    try {
+      await appRepo.clockin(code,img);
+      return true;
+    } catch (e) {
+      Ui.showError(e.toString());
+      return false;
+    }
+  }
+
+      Future<bool> clockOut(String code, String img) async {
+    try {
+      await appRepo.clockout(code,img);
       return true;
     } catch (e) {
       Ui.showError(e.toString());

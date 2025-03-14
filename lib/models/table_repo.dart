@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inventory/models/inner_models/base_model.dart';
+import 'package:inventory/models/inner_models/reports.dart';
 
 import 'inner_models/barrel.dart';
 
@@ -58,6 +59,7 @@ class FilterOptionsModel {
 
 class AllTables {
   static Map<Type, TableModel> tablesData = {
+    Reports: TableModel([], [], Reports()),
     User: TableModel([
       "id",
       "fullName",
@@ -220,6 +222,15 @@ class AllTables {
       FilterModel("Device", "device", 0),
       
     ], LoginHistory(),),
+    UserAttendance: TableModel([
+      "id",
+      "username",
+      "clockedIn",
+      "clockedOut"
+    ], [
+      FilterModel("User", "userId", 0),
+      
+    ], UserAttendance(),),
      Invoice: TableModel([
       "id",
       "order",

@@ -23,7 +23,7 @@ class LoginHistory extends BaseModel{
 Map<String, dynamic> toJson() {
     return {
       "userId":userId,
-      "device":device
+      "device":device,
     };
   }
 
@@ -44,6 +44,59 @@ List<dynamic> toTableRows(){
       username: json['username'] ?? "",
       userId: json['userId'] ?? 0,
       device: json['device'] ?? "mobile",
+      loggedOutDate: DateTime.tryParse(json['loggedOutAt'] ?? ""),
+      createdAt: DateTime.tryParse(json['createdAt']),
+      updatedAt: DateTime.tryParse(json['updatedAt']),
+    );
+  }
+}
+
+class UserAttendance extends BaseModel{
+  int userId;
+  String username,imageIn,imageOut;
+  DateTime? loggedOutDate;
+
+  UserAttendance({
+    super.id = 0,
+  this.userId=0,
+    this.username="",
+    this.imageIn="",
+    this.imageOut="",
+    this.loggedOutDate,
+    super.createdAt,
+    super.updatedAt,
+  });
+
+  String get loggedOutAtRaw => loggedOutDate == null ? "" : DateFormat("dd/MM/yyyy hh:mm:ssa").format(loggedOutDate!);
+
+  // Convert UserAttendance object to JSON
+  @override
+Map<String, dynamic> toJson() {
+    return {
+      "userId":userId,
+      "imageIn":imageIn,
+      "imageOut":imageOut,
+    };
+  }
+
+      @override
+List<dynamic> toTableRows(){
+    return [id,username,createdAtRaw,loggedOutAtRaw];
+  }
+
+  @override
+  bool validate() {
+    return userId != 0;
+  }
+
+  // Create UserAttendance object from JSON
+  factory UserAttendance.fromJson(Map<String, dynamic> json) {
+    return UserAttendance(
+      id: json['id'] ?? 0,
+      username: json['username'] ?? "",
+      userId: int.tryParse((json['userId'] ?? 0).toString()) ?? 0,
+      imageIn: json['imageIn'] ?? "",
+      imageOut: json['imageOut'] ?? "",
       loggedOutDate: DateTime.tryParse(json['loggedOutAt'] ?? ""),
       createdAt: DateTime.tryParse(json['createdAt']),
       updatedAt: DateTime.tryParse(json['updatedAt']),

@@ -1153,7 +1153,7 @@ class CustomTextField extends StatelessWidget {
             if (label.isNotEmpty) AppText.thin(label),
             if (label.isNotEmpty)
               const SizedBox(
-                height: 8,
+                height: 4,
               ),
             CurvedContainer(
               color: AppColors.white,
@@ -1199,7 +1199,7 @@ class CustomTextField extends StatelessWidget {
             ),
             if (label.isNotEmpty)
               const SizedBox(
-                height: 32,
+                height: 24,
               )
           ],
         ),

@@ -19,6 +19,7 @@ import 'package:inventory/views/checklist/shared2.dart';
 
 import '../../models/inner_models/barrel.dart';
 import '../../tools/functions.dart';
+import '../../tools/reports.dart';
 import '../../tools/service.dart';
 import '../../tools/urls.dart';
 import '../shared.dart';
@@ -38,6 +39,9 @@ class _CustomTableState extends State<CustomTable> {
       print(controller.changedMode.value);
       if (controller.currentType == AppConstants) {
         return MarkupTargetsPage();
+      }
+      if (controller.currentType == Reports) {
+        return ReportsPage();
       }
       return LoadingWidget(
         child: CurvedContainer(
@@ -84,10 +88,7 @@ class _CustomTableState extends State<CustomTable> {
                     Icons.add,
                     color: AppColors.white,
                     onTap: () async {
-                      if (controller.currentBaseModel.value.runtimeType ==
-                              InventoryMetricStockBalances ||
-                          controller.currentBaseModel.value.runtimeType ==
-                              InventoryMetricDailyProfit) return;
+                      if (controller.noActionModel()) return;
                       if (!Get.find<AppService>()
                           .currentUser
                           .value
@@ -180,7 +181,8 @@ class CustomTableFilter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       print(controller.changedMode.value);
-      if (controller.currentType == AppConstants) {
+      if (controller.currentType == AppConstants ||
+          controller.currentType == Reports) {
         return SizedBox();
       }
       return CurvedContainer(
@@ -274,7 +276,7 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
   TableModelDataSource(this.tm);
 
   editRecord(BaseModel bm) async {
-    if (T == InventoryMetricStockBalances || T == InventoryMetricDailyProfit)
+    if (Get.find<AppController>().noActionModel<T>() && T != UserAttendance)
       return;
     if (!Get.find<AppService>().currentUser.value.isServiceAdvisor) {
       Ui.showError("Not enough permissions");
@@ -303,8 +305,7 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
   }
 
   deleteRecord(BaseModel bm) {
-    if (T == InventoryMetricStockBalances || T == InventoryMetricDailyProfit)
-      return;
+    if (Get.find<AppController>().noActionModel<T>()) return;
     if (!Get.find<AppService>().currentUser.value.isServiceAdvisor) {
       Ui.showError("Not enough permissions");
       return;
@@ -795,7 +796,9 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
       );
     }
 
-    if (fieldName.toLowerCase().endsWith("image")) {
+    if (fieldName.toLowerCase().endsWith("image") ||
+        fieldName == "imageIn" ||
+        fieldName == "imageOut") {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1336,7 +1339,7 @@ class MarkupTargetsPage extends StatelessWidget {
                                   pmdTec,
                                   "Markup",
                                   initOption: curProduct.value.markup,
-                                   onChanged: (v) {
+                                  onChanged: (v) {
                                 curProduct.value.markup = v;
                                 final cd = controller.calcNewSellingPrice(
                                     curProduct.value.cost,
@@ -1426,5 +1429,210 @@ class MarkupTargetsPage extends StatelessWidget {
       ),
     );
     return cc;
+  }
+}
+
+class ReportsPage extends StatelessWidget {
+  ReportsPage({super.key});
+  final tec = TextEditingController();
+  final reptec = TextEditingController();
+  RxInt rep = 0.obs;
+  Rx<ReportDS> reportDs =
+      ReportDS(0, DateTimeRange(start: DateTime(2024), end: DateTime.now()))
+          .obs;
+  RxList<String> headers = <String>["All"].obs;
+  Rx<DateTimeRange> dtr =
+      DateTimeRange(start: DateTime(2024), end: DateTime.now()).obs;
+  static const List<String> allReports = [
+    "Revenue by Service Type",
+    "Product Sales Analysis",
+    "Customer Service History",
+    "Vehicle Service Frequency",
+    "Technician Performance",
+    "Inventory Status",
+    "Profit and Loss Statement",
+    "Service Revenue vs Parts Revenue",
+    "Finance Report",
+  ];
+  static const List<List<String>> allReportsTotal = [
+    ["service_count", "total_revenue"],
+    ["quantity_sold", "revenue"],
+    ["total_visits"],
+    ["service_count"],
+    ["orders_completed", "total_revenue_generated"],
+    ["total_sales", "total_purchases"],
+    [
+      "total_revenue",
+      "product_costs",
+      "labor_costs",
+      "operational_expenses",
+      "fixed_expenses",
+      "net_profit"
+    ],
+    ["orders_completed", "total_revenue_generated", "total_labor_cost"],
+    [
+      "productprofit",
+      "serviceprofit",
+      "labor_profit",
+      "productcost",
+      "expenses",
+      "totalprofit"
+    ],
+  ];
+  RxInt mvallength = 1.obs;
+  List mval = [];
+
+  @override
+  Widget build(BuildContext context) {
+    tec.text =
+        "${DateFormat("dd/MM/yyyy").format(dtr.value.start)} - ${DateFormat("dd/MM/yyyy").format(dtr.value.end)}";
+    return CurvedContainer(
+      width:
+          Ui.width(context) < 975 ? wideUi(context) : (Ui.width(context) - 24),
+      height: Ui.width(context) < 975 ? null : double.maxFinite,
+      color: AppColors.white.withOpacity(0.6),
+      border: Border.all(color: AppColors.primaryColorLight),
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        children: [
+          Center(
+            child: Container(
+              padding: EdgeInsets.all(24),
+              constraints: BoxConstraints(maxWidth: 850),
+              width: wideUi(context),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomTextField(
+                          "Select Date Range",
+                          tec,
+                          readOnly: true,
+                          onTap: () async {
+                            final dtrr = await showDateRangePicker(
+                                context: context,
+                                firstDate: DateTime(1980),
+                                lastDate: DateTime.now());
+                            if (dtrr != null) {
+                              tec.text =
+                                  "${DateFormat("dd/MM/yyyy").format(dtrr.start)} - ${DateFormat("dd/MM/yyyy").format(dtrr.end)}";
+                              dtr.value = dtrr;
+                            }
+                          },
+                        ),
+                      ),
+                      Ui.boxWidth(24),
+                      Expanded(
+                        child: CustomTextField.dropdown(
+                            allReports,
+                            List.generate(allReports.length, (i) => i + 1),
+                            reptec,
+                            "Select Report",
+                            initOption: rep.value, onChanged: (v) async {
+                          rep.value = v;
+                          final bms = await Get.find<AppRepo>().getReport(
+                              rep.value,
+                              dtr.value.start.toSQLDate(),
+                              dtr.value.end.toSQLDate());
+                          mval = bms.data as List<dynamic>;
+                          if (mval.isNotEmpty) {
+                            mvallength.value = mval.length;
+                            headers.value = mval[0].keys.toList();
+                            headers.refresh();
+                            reportDs.value = ReportDS(rep.value, dtr.value);
+                            reportDs.value.refreshDatasource();
+                          }
+                        }),
+                      )
+                    ],
+                  ),
+                  AppButton(
+                    onPressed: () async {
+                      if (mval.isEmpty) {
+                        return Ui.showError("Data cannot be empty");
+                      }
+                      Map<String,String> hds = {};
+                      for (var element in mval[0].keys) {
+                        hds[element] = element.replaceAll("_", " ").toString().capitalize!;
+                      }
+
+                      final filePath = await generateExcelReport(
+                        reportTitle: allReports[rep.value-1],
+                        data: mval,
+                        startDate: dtr.value.start,
+                        endDate: dtr.value.end,
+                        columnsToTotal: allReportsTotal[rep.value - 1],
+                        columnHeaders:hds,
+                      );
+                      if (filePath == null) {
+                        return Ui.showError("Failed to generate report");
+                      }
+                      return Ui.showInfo("eport saved to:\n$filePath");
+                    },
+                    text: "Export Report as Excel",
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Ui.align(child: AppText.thin("Showing the last 100 records")),
+          Expanded(
+            child: Obx(() {
+              return AsyncPaginatedDataTable2(
+                minWidth: 800,
+
+                hidePaginator: true,
+                columnSpacing: 0,
+                showCheckboxColumn: false,
+                // autoRowsToHeight: true,
+                rowsPerPage: 100,
+                headingRowHeight: 32,
+                headingRowColor: MaterialStatePropertyAll<Color>(
+                    Colors.lightGreen[100]!.withOpacity(0.7)),
+                columns: headers.map((e) {
+                  final hd = e.replaceAll("_", " ").capitalize!;
+                  return DataColumn2(
+                      label: Center(
+                        child: AppText.bold(hd,
+                            fontSize: 12, fontFamily: Assets.appFontFamily2),
+                      ),
+                      size: ColumnSize.S);
+                }).toList(),
+                source: reportDs.value,
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ReportDS extends AsyncDataTableSource {
+  ReportDS(this.rep, this.dtr);
+  final DateTimeRange dtr;
+  final int rep;
+
+  @override
+  Future<AsyncRowsResponse> getRows(int startIndex, int count) async {
+    final bms = await Get.find<AppRepo>()
+        .getReport(rep, dtr.start.toSQLDate(), dtr.end.toSQLDate());
+    final mval = bms.data as List<dynamic>;
+
+    return AsyncRowsResponse(
+        mval.length,
+        List.generate(mval.length, (index) {
+          final tval = mval[index];
+          return DataRow2(
+              onSelectChanged: (b) {},
+              cells: List.generate(tval.keys.length, (jindex) {
+                final me = tval.keys.toList()[jindex];
+                return DataCell(Center(
+                    child: AppText.thin(tval[me].toString(),
+                        fontSize: 12, att: true, alignment: TextAlign.center)));
+              }));
+        }));
   }
 }
