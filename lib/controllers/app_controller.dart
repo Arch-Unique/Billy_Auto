@@ -56,7 +56,7 @@ class AppController extends GetxController {
   /// 22 - 72 - checks
   List<TextEditingController> tecs =
       List.generate(72, (index) => TextEditingController());
-      TextEditingController prefCont = TextEditingController(text: "Mr. ");
+  TextEditingController prefCont = TextEditingController(text: "Mr. ");
 
   Rx<Uint8List> userSig = Uint8List(0).obs;
   Rx<Uint8List> advSig = Uint8List(0).obs;
@@ -106,7 +106,7 @@ class AppController extends GetxController {
   RxList<String> inventoryStatus = <String>[].obs;
   RxList<String> inventoryTransactionTypes = <String>[].obs;
   RxList<String> allDevices = <String>[].obs;
-  RxList<String> expensesCategory= <String>[].obs;
+  RxList<String> expensesCategory = <String>[].obs;
 
   //CHART
   RxList<InventoryMetricStockBalances> allStockBalances =
@@ -131,7 +131,7 @@ class AppController extends GetxController {
   Map<DateTime, int> groupedOrdersByDay = {};
   Map<DateTime, int> groupedOrdersByYear = {};
 
-  List<int> allMarkups = [0,20,25,30,35,40,45,50];
+  List<int> allMarkups = [0, 20, 25, 30, 35, 40, 45, 50];
 
   Map<String, FilterOptionsModel> filterOptions = {};
   RxBool isLoading = false.obs;
@@ -141,11 +141,14 @@ class AppController extends GetxController {
   //ORDERS
   List<Order> get allPendingOrders =>
       allOrders.where((p0) => !p0.isDispatched).toList();
-  double get totalSales => allYearlyProfit.map((f) => f.sales).fold(0, (a,b)  => a+b);
-  double get totalExpenses => allYearlyProfit.map((f) => f.expenses).fold(0, (a,b)  => a+b);
-  double get totalProductCost => allYearlyProfit.map((f) => f.productCost).fold(0, (a,b)  => a+b);
+  double get totalSales =>
+      allYearlyProfit.map((f) => f.sales).fold(0, (a, b) => a + b);
+  double get totalExpenses =>
+      allYearlyProfit.map((f) => f.expenses).fold(0, (a, b) => a + b);
+  double get totalProductCost =>
+      allYearlyProfit.map((f) => f.productCost).fold(0, (a, b) => a + b);
   // double get totalProductCost => allInventory.where((test) => test.status == "Inbound").map((f) => f.cost * f.qty).fold(0, (a,b)  => a+b);
-  double get totalProfit => totalSales - (totalExpenses+totalProductCost); 
+  double get totalProfit => totalSales - (totalExpenses + totalProductCost);
   //PROFILE
   RxBool editOn = false.obs;
   Type currentType = User;
@@ -160,7 +163,7 @@ class AppController extends GetxController {
     isLoading.value = false;
   }
 
-    void groupOrderData() {
+  void groupOrderData() {
     // Group orders by month-year
     groupedOrdersByMonth = {};
     for (var order in allOrders) {
@@ -195,7 +198,6 @@ class AppController extends GetxController {
       }
     }
   }
-
 
   initFilterOptions() {
     filterOptions["productCategoryId"] = FilterOptionsModel(
@@ -253,7 +255,8 @@ class AppController extends GetxController {
         allUsers.map((element) => element.username).toList(),
         allUsers.map((element) => element.id).toList());
     filterOptions["device"] = FilterOptionsModel(allDevices, allDevices);
-    filterOptions["markup"] = FilterOptionsModel(allMarkups.map((e) => "$e%").toList(), allMarkups);
+    filterOptions["markup"] =
+        FilterOptionsModel(allMarkups.map((e) => "$e%").toList(), allMarkups);
     filterOptions["orderId"] = FilterOptionsModel(
         allOrders.map((element) => element.title).toList(),
         allOrders.map((element) => element.id).toList());
@@ -311,7 +314,7 @@ class AppController extends GetxController {
     inventoryStatus.value = ["Inbound", "Outbound", "Transfer"];
     inventoryTransactionTypes.value = ["a", "b"];
     allDevices.value = ["mobile", "pc"];
-    expensesCategory.value = ["OPEX","FIXED"];
+    expensesCategory.value = ["OPEX", "FIXED"];
     await initMetrics();
     appConstants.value = (await appRepo.getOne<AppConstants>("1"))!;
     allBillyServices.value = await _getAll<BillyServices>();
@@ -716,9 +719,9 @@ class AppController extends GetxController {
     }
   }
 
-  double calcNewSellingPrice(double c,int d){
-    final vat = (c*appConstants.value.vat)/100;
-    final markup1 = (c*d)/100;
-    return double.parse((c+vat+markup1).toStringAsFixed(2));
+  double calcNewSellingPrice(double c, int d) {
+    final vat = (c * appConstants.value.vat) / 100;
+    final markup1 = (c * d) / 100;
+    return double.parse((c + vat + markup1).toStringAsFixed(2));
   }
 }

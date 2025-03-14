@@ -5,19 +5,19 @@ import '../tools/service.dart';
 
 class AppDependency {
   static init() async {
-    Get.put(MyPrefService());
-    Get.put(DioApiService());
+    Get.put(MyPrefService(),permanent: true);
+    Get.put(DioApiService(),permanent: true);
     await Get.putAsync(() async {
       final appService = AppService();
       await appService.initUserConfig();
       return appService;
-    });
-    Get.put(AppRepo());
+    },permanent: true);
+    Get.put(AppRepo(),permanent: true);
     await Get.putAsync(() async {
       final appcontroller = AppController();
       await appcontroller.initApp();
       return appcontroller;
-    });
+    },permanent: true);
   }
 }
 

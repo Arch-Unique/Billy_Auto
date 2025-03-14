@@ -52,7 +52,7 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
         itemDataWidget("Total Revenue", controller.totalSales.toCurrency(),
             Colors.lightGreen[100]!.withOpacity(0.7)),
         itemDataWidget(
-            "Total Operating Expenses",
+            "Total Expenses",
             controller.totalExpenses.toCurrency(),
             Colors.lightGreen[100]!.withOpacity(0.7)),
         itemDataWidget(
@@ -748,6 +748,7 @@ class _ProfitChartState extends State<ProfitChart> {
         gridData: FlGridData(
           show: false,
         ),
+
         titlesData: FlTitlesData(
           show: true,
           rightTitles: AxisTitles(
@@ -866,7 +867,7 @@ class _ProfitChartState extends State<ProfitChart> {
         ),
         minX: 0,
         maxX: datePoints.length - 1.0,
-        minY: 0,
+        // minY: 0,
         backgroundColor: AppColors.primaryColorLight.withOpacity(0.2),
         lineBarsData: [
           LineChartBarData(
