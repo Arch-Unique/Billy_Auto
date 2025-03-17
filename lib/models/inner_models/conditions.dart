@@ -30,6 +30,11 @@ List<dynamic> toTableRows(){
     return [id,name,conditionsCategory,createdAtRaw];
   }
 
+      @override
+List<dynamic> toExcelRows(){
+    return [id,name,conditionsCategory,createdAtRaw];
+  }
+
     @override
   bool validate() {
     return conditionsCategoryId != 0 && name.isNotEmpty;
@@ -71,6 +76,11 @@ Map<String, dynamic> toJson() {
 
       @override
 List<dynamic> toTableRows(){
+    return [id,name,createdAtRaw];
+  }
+
+        @override
+List<dynamic> toExcelRows(){
     return [id,name,createdAtRaw];
   }
 

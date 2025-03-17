@@ -68,6 +68,17 @@ class Invoice extends BaseModel {
     ];
   }
 
+    @override
+  List toExcelRows() {
+    return [
+      id,
+      title,
+      labourCost.toCurrency(),
+      totalCost.toCurrency(),
+      createdAt
+    ];
+  }
+
   @override
   bool validate() {
     return orderId != 0 && !containsNull();

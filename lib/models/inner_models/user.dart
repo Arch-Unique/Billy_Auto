@@ -39,6 +39,11 @@ List<dynamic> toTableRows(){
     return [id,fullName,username,email,role,createdAtRaw];
   }
 
+        @override
+List<dynamic> toExcelRows(){
+    return [id,fullName,username,email,role,createdAtRaw];
+  }
+
   @override
   bool validate() {
     return fullName.isNotEmpty && role.isNotEmpty && username.isNotEmpty;

@@ -79,6 +79,65 @@ class _CustomTableState extends State<CustomTable> {
               headingRowColor: WidgetStatePropertyAll<Color>(
                   AppColors.primaryColorLight.withOpacity(0.5)),
               actions: [
+                SizedBox(
+                  width: 100,
+                  height: 46,
+                  child: AppButton(
+                      onPressed: () async {
+                        final mvals =
+                            controller.currentTotalResponse.value.data;
+                        if (mvals.isEmpty) {
+                          return Ui.showError("Data cannot be empty");
+                        }
+                        List mval = [];
+                        for (var element in mvals) {
+                          final f = (element as BaseModel).toExcelRows();
+                          Map<String, dynamic> mv = {};
+                          for (var i = 0;
+                              i < f.length;
+                              i++) {
+                            mv[controller.currentExcelHeaders[i]] = f[i];
+                          }
+                          mval.add(mv);
+                        }
+                        Map<String, String> hds = {};
+                        for (var element in mval[0].keys) {
+                          hds[element] = element
+                              .replaceAll("_", " ")
+                              .replaceAllMapped(
+                                RegExp(r'([A-Z])'),
+                                (match) => ' ${match.group(1)}',
+                              )
+                              .toString()
+                              .capitalize!;
+                        }
+
+                        final filePath = await generateExcelReport(
+                          reportTitle:
+                              controller.currentBaseModel.value.runtimeType.toString(),
+                          data: mval,
+                          startDate: controller.currentFilters
+                                  .where((test) => test.filterType == 1)
+                                  .firstOrNull
+                                  ?.dtr
+                                  ?.start ??
+                              DateTime(2025),
+                          endDate: controller.currentFilters
+                                  .where((test) => test.filterType == 1)
+                                  .firstOrNull
+                                  ?.dtr
+                                  ?.end ??
+                              DateTime.now(),
+                          columnsToTotal: [],
+                          columnHeaders: hds,
+                        );
+                        if (filePath == null) {
+                          return Ui.showError("Failed to generate report");
+                        }
+                        return Ui.showInfo("Export saved to:\n$filePath");
+                      },
+                      text: "Export"),
+                ),
                 Material(
                   color: AppColors.green,
                   shape: RoundedRectangleBorder(
@@ -226,9 +285,10 @@ class CustomTableFilter extends StatelessWidget {
                     onTap: () async {
                       final dtr = await showDateRangePicker(
                           context: context,
-                          firstDate: DateTime(1980),
+                          firstDate: DateTime(2024),
                           lastDate: DateTime.now());
                       if (dtr != null) {
+                        e.dtr = dtr;
                         e.tec!.text =
                             "${DateFormat("dd/MM/yyyy").format(dtr.start)} - ${DateFormat("dd/MM/yyyy").format(dtr.end)}";
                       }
@@ -349,6 +409,14 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
             limit: count,
             fm: Get.find<AppController>().currentFilters);
       }
+
+      appRepo
+          .getAll<T>(fm: Get.find<AppController>().currentFilters, limit: 5000)
+          .then((v) {
+        Get.find<AppController>().currentTotalResponse.value = v;
+        Get.find<AppController>().currentExcelHeaders.value =
+            AllTables.tablesData[T]!.excelHeaders.isEmpty ? AllTables.tablesData[T]!.headers : AllTables.tablesData[T]!.excelHeaders;
+      });
 
       bms = res.data;
       tvals = res.data.map((e) => (e as BaseModel).toTableRows()).toList();
@@ -1471,12 +1539,12 @@ class ReportsPage extends StatelessWidget {
     ],
     ["orders_completed", "total_revenue_generated", "total_labor_cost"],
     [
-      "productprofit",
-      "serviceprofit",
+      "Productprofit",
+      "Serviceprofit",
       "labor_profit",
-      "productcost",
+      "Productcost",
       "expenses",
-      "totalprofit"
+      "Totalprofit"
     ],
   ];
   RxInt mvallength = 1.obs;
@@ -1553,23 +1621,24 @@ class ReportsPage extends StatelessWidget {
                       if (mval.isEmpty) {
                         return Ui.showError("Data cannot be empty");
                       }
-                      Map<String,String> hds = {};
+                      Map<String, String> hds = {};
                       for (var element in mval[0].keys) {
-                        hds[element] = element.replaceAll("_", " ").toString().capitalize!;
+                        hds[element] =
+                            element.replaceAll("_", " ").toString().capitalize!;
                       }
 
                       final filePath = await generateExcelReport(
-                        reportTitle: allReports[rep.value-1],
+                        reportTitle: allReports[rep.value - 1],
                         data: mval,
                         startDate: dtr.value.start,
                         endDate: dtr.value.end,
                         columnsToTotal: allReportsTotal[rep.value - 1],
-                        columnHeaders:hds,
+                        columnHeaders: hds,
                       );
                       if (filePath == null) {
                         return Ui.showError("Failed to generate report");
                       }
-                      return Ui.showInfo("eport saved to:\n$filePath");
+                      return Ui.showInfo("Export saved to:\n$filePath");
                     },
                     text: "Export Report as Excel",
                   ),

@@ -81,6 +81,26 @@ class Inventory extends BaseModel {
     ];
   }
 
+  @override
+  List<dynamic> toExcelRows() {
+    return [
+      id,
+      product,
+      qty,
+      status,
+      // transactionType,
+      cost.toCurrency(),
+      (cost*qty).toCurrency(),
+      supplier,
+      markup,
+      sellingPrice,
+      location,
+      // productType,
+      // productCategory,
+      createdAt
+    ];
+  }
+
   // Create Inventory object from JSON
   factory Inventory.fromJson(Map<String, dynamic> json) {
     return Inventory(
@@ -134,6 +154,11 @@ class InventoryMetricStockBalances extends UneditableModel {
 
   @override
   List toTableRows() {
+    return [productName, quantity];
+  }
+
+    @override
+  List toExcelRows() {
     return [productName, quantity];
   }
 
@@ -235,6 +260,11 @@ class InventoryMetricDailyProfit extends UneditableModel {
     return [dateRaw,sales.toCurrency(),expenses.toCurrency(),productCost.toCurrency(),profit.toCurrency()];
   }
 
+    @override
+  List toExcelRows() {
+    return [dateRaw,sales.toCurrency(),expenses.toCurrency(),productCost.toCurrency(),profit.toCurrency()];
+  }
+
   @override
   bool validate() {
     return true;
@@ -286,6 +316,11 @@ class InventoryMetricMonthlyProfit extends UneditableModel{
     return [dateRaw,sales,expenses,productCost,profit];
   }
 
+    @override
+  List toExcelRows() {
+    return [dateRaw,sales,expenses,productCost,profit];
+  }
+
   @override
   bool validate() {
     return true;
@@ -334,6 +369,11 @@ class InventoryMetricYearlyProfit extends UneditableModel{
 
   @override
   List toTableRows() {
+    return [dateRaw,sales,expenses,productCost,profit];
+  }
+
+    @override
+  List toExcelRows() {
     return [dateRaw,sales,expenses,productCost,profit];
   }
 

@@ -28,6 +28,11 @@ List<dynamic> toTableRows(){
     return [id,name,createdAtRaw];
   }
 
+       @override
+List<dynamic> toExcelRows(){
+    return [id,name,createdAtRaw];
+  }
+
   @override
   bool validate() {
     return name.isNotEmpty;

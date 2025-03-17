@@ -50,6 +50,11 @@ List<dynamic> toTableRows(){
     return [id,make,model,year,licenseNo,customer,createdAtRaw];
   }
 
+        @override
+List<dynamic> toExcelRows(){
+    return [id,make,model,year,licenseNo,customer,createdAtRaw];
+  }
+
   // Create CustomerCar object from JSON
   factory CustomerCar.fromJson(Map<String, dynamic> json) {
     return CustomerCar(

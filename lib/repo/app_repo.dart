@@ -155,7 +155,12 @@ class AppRepo extends GetxController {
     for (var i = 0; i < fm.length; i++) {
       final sfm = fm[i];
       if (sfm.tec != null && sfm.tec!.text.isNotEmpty) {
-        ffm[sfm.tableTitle] = sfm.tec!.text;
+        if(sfm.tableTitle == "createdAt"){
+          ffm["from"] = (sfm.dtr?.start ?? DateTime(2025)).toSQLDate();
+          ffm["to"] = (sfm.dtr?.end ?? DateTime.now()).toSQLDate();
+        }else{
+          ffm[sfm.tableTitle] = sfm.tec!.text;
+        }
       }
     }
     // Construct query parameters as an object

@@ -32,6 +32,11 @@ List<dynamic> toTableRows(){
     return [id,username,device,createdAtRaw,loggedOutAtRaw];
   }
 
+        @override
+List<dynamic> toExcelRows(){
+    return [id,username,device,createdAtRaw,loggedOutAtRaw];
+  }
+
   @override
   bool validate() {
     return userId != 0;
@@ -81,6 +86,11 @@ Map<String, dynamic> toJson() {
 
       @override
 List<dynamic> toTableRows(){
+    return [id,username,createdAtRaw,loggedOutAtRaw];
+  }
+
+        @override
+List<dynamic> toExcelRows(){
     return [id,username,createdAtRaw,loggedOutAtRaw];
   }
 

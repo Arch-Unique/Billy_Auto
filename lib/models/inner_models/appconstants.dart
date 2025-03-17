@@ -50,6 +50,11 @@ class AppConstants extends BaseModel {
   }
 
   @override
+  List toExcelRows() {
+    return [];
+  }
+
+  @override
   bool validate() {
     return vat != 0;
   }

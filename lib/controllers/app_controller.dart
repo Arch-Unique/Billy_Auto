@@ -127,6 +127,8 @@ class AppController extends GetxController {
   Rx<PaginatorController> paginatorController = PaginatorController().obs;
   Rx<BaseModel> currentBaseModel = User().obs;
   Rx<Order> currentOrder = Order(customerId: 0).obs;
+  Rx<TotalResponse> currentTotalResponse = TotalResponse(0, []).obs;
+  RxList<String> currentExcelHeaders = <String>[].obs;
   Map<DateTime, int> groupedOrdersByMonth = {};
   Map<DateTime, int> groupedOrdersByDay = {};
   Map<DateTime, int> groupedOrdersByYear = {};
@@ -647,6 +649,9 @@ class AppController extends GetxController {
       final fm = currentFilters[i];
       if (fm.filterType == 0) {
         fm.options = filterOptions[fm.tableTitle];
+        fm.tec?.clear();
+      } else {
+        fm.dtr = DateTimeRange(start: DateTime(2025), end: DateTime.now());
         fm.tec?.clear();
       }
     }

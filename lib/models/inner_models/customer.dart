@@ -41,6 +41,11 @@ class Customer extends BaseModel {
     return [id, fullName, phone, email, createdAtRaw];
   }
 
+  @override
+List<dynamic> toExcelRows(){
+    return [id, fullName, phone, email, createdAtRaw];
+  }
+
   // Create Customer object from JSON
   factory Customer.fromJson(Map<String, dynamic> json) {
     return Customer(

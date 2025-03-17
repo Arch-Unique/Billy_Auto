@@ -88,6 +88,11 @@ List<dynamic> toTableRows(){
     return [id,customer,car,isDispatched,createdAtRaw];
   }
 
+        @override
+List<dynamic> toExcelRows(){
+    return [id,customer,car,mileageOnReception,fuelLevel,customerConcerns,observations,lostSales,technician,serviceAdvisor,isDispatched,createdAtRaw];
+  }
+
   @override
   bool validate() {
     return customerId != 0 && serviceAdvisorId != 0 && technicianId != 0;

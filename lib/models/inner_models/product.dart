@@ -51,6 +51,11 @@ List<dynamic> toTableRows(){
     return [id,name,productType,sellingPrice.toCurrency(),createdAtRaw];
   }
 
+        @override
+List<dynamic> toExcelRows(){
+    return [id,name,productType,cost.toCurrency(),markup,sellingPrice.toCurrency(),createdAtRaw];
+  }
+
   @override
   bool validate() {
     return name.isNotEmpty && productCategoryId != 0 && productTypeId != 0 ;
@@ -113,6 +118,11 @@ List<dynamic> toTableRows(){
     return [id,name,productCategory,createdAtRaw];
   }
 
+        @override
+List<dynamic> toExcelRows(){
+    return [id,name,productCategory,createdAtRaw];
+  }
+
   // Create ProductType object from JSON
   factory ProductType.fromJson(Map<String, dynamic> json) {
     return ProductType(
@@ -153,6 +163,11 @@ Map<String, dynamic> toJson() {
 
       @override
 List<dynamic> toTableRows(){
+    return [id,name,createdAtRaw];
+  }
+
+        @override
+List<dynamic> toExcelRows(){
     return [id,name,createdAtRaw];
   }
 

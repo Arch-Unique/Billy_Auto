@@ -287,42 +287,69 @@ class ClockInOutPage extends StatelessWidget {
     return Scaffold(
         body: BackgroundScaffold(
             hasBack: true,
-            child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: 850),
-                child: Column(children: [
-                  
-                  Expanded(child: Obx(() {
-                    return CurvedContainer(
-                      width: maxWidth,
-                      onPressed: () async {
-                        final ImagePicker picker = ImagePicker();
-                        img.value = (await picker.pickImage(
-                                    source: ImageSource.gallery))
-                                ?.path ??
-                            "";
-                      },
-                      border: Border.all(color: AppColors.orange),
-                      child: img.value.isEmpty
-                          ? Center(
-                              child: AppIcon(
-                              Icons.add_a_photo,
-                              color: AppColors.orange,
-                              size: 56,
-                            ))
-                          : Image.file(
-                              File(img.value),
-                              fit: BoxFit.cover,
-                            ),
-                    );
-                  })),
-                  
-                ]))));
+            child: Ui.width(context) > 975
+                ? Column(
+                    children: [
+                      header(),
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: 1200),
+                        child: Row(
+                          children: [
+                            imageContainer(400),
+                            Expanded(child: keypad()),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
+                : ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 850),
+                    child: Column(
+                        children: [header(), imageContainer(null), keypad()]))));
   }
 
-  header(){
-return Column(
-  mainAxisSize: MAinA,
-)
+  imageContainer(double? a) {
+    return Expanded(child: Obx(() {
+      return CurvedContainer(
+        width: maxWidth,
+        height: a,
+        onPressed: () async {
+          final ImagePicker picker = ImagePicker();
+          img.value =
+              (await picker.pickImage(source: ImageSource.gallery))?.path ?? "";
+        },
+        border: Border.all(color: AppColors.orange),
+        child: img.value.isEmpty
+            ? Center(
+                child: AppIcon(
+                Icons.add_a_photo,
+                color: AppColors.orange,
+                size: 56,
+              ))
+            : Image.file(
+                File(img.value),
+                fit: BoxFit.cover,
+              ),
+      );
+    }));
+  }
+
+  header() {
+    return Column(mainAxisSize: MainAxisSize.min, children: [
+      Ui.boxWidth(24),
+      LogoWidget(120),
+      AppText.medium("Attendance",
+          fontSize: 32,
+          fontFamily: Assets.appFontFamily2,
+          alignment: TextAlign.center,
+          color: AppColors.textColor),
+      Ui.boxHeight(8),
+      AppText.thin("Take your picture and enter your clockin code",
+          fontSize: 15,
+          fontFamily: Assets.appFontFamily1,
+          color: AppColors.lightTextColor),
+      Ui.boxHeight(12),
+    ]);
   }
 
   keypad() {
@@ -330,77 +357,75 @@ return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Ui.boxHeight(12),
-                  ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: maxWidth),
-                      child: CustomTextField(
-                        "",
-                        tec,
-                        readOnly: true,
-                        fs: 24,
-                        textAlign: TextAlign.center,
-                      )),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: maxWidth),
-                    child: Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      alignment: WrapAlignment.center,
-                      children: List.generate(numKeys.length, (i) {
-                        return CurvedContainer(
-                          onPressed: () {
-                            if (i == 11) {
-                              if (tec.text.isEmpty) return;
-                              tec.text =
-                                  tec.text.substring(0, tec.text.length - 1);
-                              return;
-                            }
-                            if (i == 9) {
-                              return;
-                            }
-                            if (tec.text.length < 6) {
-                              tec.text = tec.text + numKeys[i].toString();
-                            }
-                          },
-                          width: (maxWidth - 30) / 3,
-                          border: Border.all(color: AppColors.lightTextColor),
-                          padding: EdgeInsets.all(12),
-                          child: Center(
-                              child: AppText.bold(numKeys[i].toString())),
-                        );
-                      }),
-                    ),
-                  ),
-                  Ui.boxHeight(12),
-                  SizedBox(
-                    width: maxWidth,
-                    child: AppButton.row(
-                        "Clock In",
-                        () async {
-                          if (tec.text.length != 6) {
-                            return Ui.showError("Invalid User Code");
-                          }
-                          if (img.isEmpty) {
-                            return Ui.showError("Image cannot be empty");
-                          }
-                          final f = await Get.find<AppController>()
-                              .clockIn(tec.text, img.value);
-                          if (f) {
-                            Get.back();
-                          }
-                        },
-                        "Clock Out",
-                        () async {
-                          if (tec.text.length != 6) {
-                            return Ui.showError("Invalid User Code");
-                          }
-                          final f = await Get.find<AppController>()
-                              .clockOut(tec.text, img.value);
-                          if (f) {
-                            Get.back();
-                          }
-                        }),
-                  ),
-                  Ui.boxHeight(12),
+        ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: CustomTextField(
+              "",
+              tec,
+              readOnly: true,
+              fs: 24,
+              textAlign: TextAlign.center,
+            )),
+        ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            alignment: WrapAlignment.center,
+            children: List.generate(numKeys.length, (i) {
+              return CurvedContainer(
+                onPressed: () {
+                  if (i == 11) {
+                    if (tec.text.isEmpty) return;
+                    tec.text = tec.text.substring(0, tec.text.length - 1);
+                    return;
+                  }
+                  if (i == 9) {
+                    return;
+                  }
+                  if (tec.text.length < 6) {
+                    tec.text = tec.text + numKeys[i].toString();
+                  }
+                },
+                width: (maxWidth - 30) / 3,
+                border: Border.all(color: AppColors.lightTextColor),
+                padding: EdgeInsets.all(12),
+                child: Center(child: AppText.bold(numKeys[i].toString())),
+              );
+            }),
+          ),
+        ),
+        Ui.boxHeight(12),
+        SizedBox(
+          width: maxWidth,
+          child: AppButton.row(
+              "Clock In",
+              () async {
+                if (tec.text.length != 6) {
+                  return Ui.showError("Invalid User Code");
+                }
+                if (img.isEmpty) {
+                  return Ui.showError("Image cannot be empty");
+                }
+                final f = await Get.find<AppController>()
+                    .clockIn(tec.text, img.value);
+                if (f) {
+                  Get.back();
+                }
+              },
+              "Clock Out",
+              () async {
+                if (tec.text.length != 6) {
+                  return Ui.showError("Invalid User Code");
+                }
+                final f = await Get.find<AppController>()
+                    .clockOut(tec.text, img.value);
+                if (f) {
+                  Get.back();
+                }
+              }),
+        ),
+        Ui.boxHeight(12),
       ],
     );
   }

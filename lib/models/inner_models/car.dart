@@ -23,6 +23,11 @@ List<dynamic> toTableRows(){
     return [id,make,createdAtRaw];
   }
 
+    @override
+List<dynamic> toExcelRows(){
+    return [id,make,createdAtRaw];
+  }
+
   // Create CarMake object from JSON
   factory CarMake.fromJson(Map<String, dynamic> json) {
     return CarMake(
@@ -63,6 +68,11 @@ Map<String, dynamic> toJson() {
 
     @override
 List<dynamic> toTableRows(){
+    return [id,model,make,createdAtRaw];
+  }
+
+      @override
+List<dynamic> toExcelRows(){
     return [id,model,make,createdAtRaw];
   }
 

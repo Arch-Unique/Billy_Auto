@@ -101,16 +101,17 @@ Future<String?> generateExcelReport({
           cell.value = TextCellValue("");
         } else if (value is num) {
           cell.value = DoubleCellValue(value.toDouble());
-
-          // Add to totals if this column should be totaled
-          if (columnsToTotal.contains(header)) {
-            totals[header] = (totals[header] ?? 0) + value;
-          }
         } else if (value is DateTime) {
           cell.value = TextCellValue(dateFormat.format(value));
         } else {
           cell.value = TextCellValue(value.toString());
         }
+
+        // Add to totals if this column should be totaled
+        if (columnsToTotal.contains(header)) {
+          totals[header] = (totals[header] ?? 0) + (double.tryParse(value.toString()) ?? 0);
+        }
+
         cell.cellStyle = CellStyle(
           horizontalAlign: HorizontalAlign.Center,
         );

@@ -18,4 +18,10 @@ class Reports extends BaseModel{
     // TODO: implement validate
     throw UnimplementedError();
   }
+  
+  @override
+  List toExcelRows() {
+    // TODO: implement toExcelRows
+    throw UnimplementedError();
+  }
 }

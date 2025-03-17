@@ -33,6 +33,13 @@ class Expenses extends BaseModel {
   }
 
   @override
+  List<dynamic> toExcelRows() {
+    return [id, expensesType,expensesCategoryId, cost.toCurrency(), createdAtRaw];
+  }
+
+  
+
+  @override
   bool validate() {
     return cost != 0 && expensesTypeId != 0 && expensesCategoryId != "";
   }
@@ -72,6 +79,11 @@ class ExpensesType extends BaseModel {
 
   @override
   List<dynamic> toTableRows() {
+    return [id, name, category, createdAtRaw];
+  }
+
+  @override
+  List<dynamic> toExcelRows() {
     return [id, name, category, createdAtRaw];
   }
 
@@ -124,6 +136,11 @@ class BulkExpenses extends BaseModel {
 
   @override
   List toTableRows() {
+    return [id,DateFormat("dd-MMM-yyyy").format(date), rawExpenses, totalCost.toCurrency()];
+  }
+
+    @override
+  List toExcelRows() {
     return [id,DateFormat("dd-MMM-yyyy").format(date), rawExpenses, totalCost.toCurrency()];
   }
 
