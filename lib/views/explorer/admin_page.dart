@@ -93,9 +93,7 @@ class _CustomTableState extends State<CustomTable> {
                         for (var element in mvals) {
                           final f = (element as BaseModel).toExcelRows();
                           Map<String, dynamic> mv = {};
-                          for (var i = 0;
-                              i < f.length;
-                              i++) {
+                          for (var i = 0; i < f.length; i++) {
                             mv[controller.currentExcelHeaders[i]] = f[i];
                           }
                           mval.add(mv);
@@ -113,17 +111,18 @@ class _CustomTableState extends State<CustomTable> {
                         }
 
                         final filePath = await generateExcelReport(
-                          reportTitle:
-                              controller.currentBaseModel.value.runtimeType.toString(),
+                          reportTitle: controller
+                              .currentBaseModel.value.runtimeType
+                              .toString(),
                           data: mval,
                           startDate: controller.currentFilters
-                                  .where((test) => test.filterType == 1)
+                                  .where((optv) => optv.filterType == 1)
                                   .firstOrNull
                                   ?.dtr
                                   ?.start ??
                               DateTime(2025),
                           endDate: controller.currentFilters
-                                  .where((test) => test.filterType == 1)
+                                  .where((optv) => optv.filterType == 1)
                                   .firstOrNull
                                   ?.dtr
                                   ?.end ??
@@ -415,7 +414,9 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
           .then((v) {
         Get.find<AppController>().currentTotalResponse.value = v;
         Get.find<AppController>().currentExcelHeaders.value =
-            AllTables.tablesData[T]!.excelHeaders.isEmpty ? AllTables.tablesData[T]!.headers : AllTables.tablesData[T]!.excelHeaders;
+            AllTables.tablesData[T]!.excelHeaders.isEmpty
+                ? AllTables.tablesData[T]!.headers
+                : AllTables.tablesData[T]!.excelHeaders;
       });
 
       bms = res.data;
@@ -769,7 +770,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
               fieldName == "productTypeId") {
             _controllers["productCategoryId"]!.text = Get.find<AppController>()
                 .allProductType
-                .where((test) => test.id == a)
+                .where((optv) => optv.id == a)
                 .first
                 .productCategoryId
                 .toString();
@@ -777,13 +778,13 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
               fieldName == "productId") {
             _controllers["productCategoryId"]!.text = Get.find<AppController>()
                 .allProducts
-                .where((test) => test.id == a)
+                .where((optv) => optv.id == a)
                 .first
                 .productCategoryId
                 .toString();
             _controllers["productTypeId"]!.text = Get.find<AppController>()
                 .allProducts
-                .where((test) => test.id == a)
+                .where((optv) => optv.id == a)
                 .first
                 .productTypeId
                 .toString();
@@ -791,7 +792,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
               fieldName == "expensesTypeId") {
             _controllers["expensesCategoryId"]!.text = Get.find<AppController>()
                 .allExpensesTypes
-                .where((test) => test.id == a)
+                .where((optv) => optv.id == a)
                 .first
                 .category;
           } else if (widget.model.runtimeType == Inventory &&
@@ -1033,7 +1034,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
                 if (inv.value.validate()) {
                   inv.value.orderCreatedAt = Get.find<AppController>()
                           .allOrders
-                          .where((test) => test.id == inv.value.orderId)
+                          .where((optv) => optv.id == inv.value.orderId)
                           .firstOrNull
                           ?.createdAt ??
                       DateTime.now();
@@ -1306,7 +1307,7 @@ class MarkupTargetsPage extends StatelessWidget {
         children: [
           AppText.medium("Targets",
               fontFamily: Assets.appFontFamily2, fontSize: 24),
-          Ui.boxHeight(24),
+          Ui.boxHeight(12),
           SmartJustifyRow(runSpacing: 12, spacing: 12, children: [
             itemDataWidget(
                 "Daily Orders",
@@ -1322,28 +1323,28 @@ class MarkupTargetsPage extends StatelessWidget {
                 controller.appConstants.value.yearlyOrdersTarget,
                 (controller.groupedOrdersByYear[dtry] ?? 0).toDouble()),
           ]),
-          Ui.boxHeight(24),
+          Ui.boxHeight(12),
           SmartJustifyRow(runSpacing: 12, spacing: 12, children: [
             itemDataWidget(
                 "Daily Profit",
                 controller.appConstants.value.dailyProfitTarget,
                 (controller.allDailyProfit
-                        .where((test) =>
-                            test.date.year == dtt.year &&
-                            test.date.month == dtt.month &&
-                            test.date.day == dtt.day)
+                        .where((optv) =>
+                            optv.date.year == dtt.year &&
+                            optv.date.month == dtt.month &&
+                            optv.date.day == dtt.day)
                         .firstOrNull
                         ?.profit ??
                     0),
                 isCost: true),
-            // itemDataWidget("Weekly Profit", controller.appConstants.value.weeklyProfitTarget, (controller.allDailyProfit.where((test) => test.date.year ==dtt.year && test.date.month == dtt.month).firstOrNull?.profit ?? 0),isCost: true),
+            // itemDataWidget("Weekly Profit", controller.appConstants.value.weeklyProfitTarget, (controller.allDailyProfit.where((optv) => optv.date.year ==dtt.year && optv.date.month == dtt.month).firstOrNull?.profit ?? 0),isCost: true),
             itemDataWidget(
                 "Monthly Profit",
                 controller.appConstants.value.monthlyProfitTarget,
                 (controller.allMonthlyProfit
-                        .where((test) =>
-                            test.date.year == dtt.year &&
-                            test.date.month == dtt.month)
+                        .where((optv) =>
+                            optv.date.year == dtt.year &&
+                            optv.date.month == dtt.month)
                         .firstOrNull
                         ?.profit ??
                     0),
@@ -1352,94 +1353,126 @@ class MarkupTargetsPage extends StatelessWidget {
                 "Yearly Profit",
                 controller.appConstants.value.yearlyProfitTarget,
                 (controller.allYearlyProfit
-                        .where((test) => test.date.year == dtt.year)
+                        .where((optv) => optv.date.year == dtt.year)
                         .firstOrNull
                         ?.profit ??
                     0),
                 isCost: true)
           ]),
-          Ui.boxHeight(24),
+          Ui.boxHeight(12),
           SmartJustifyRow(children: [
             itemDataWidget("VAT (%)", controller.appConstants.value.vat,
                 controller.appConstants.value.vat,
                 isMarkup: true),
           ]),
-          Ui.boxHeight(24),
-          Align(
-            alignment: Alignment.centerRight,
-            child: SizedBox(
-                width: wideUi(context) / 2,
-                child: AppButton(
-                  onPressed: () {
-                    Get.dialog(AppDialog(
-                        title: AppText.medium("Edit Record"),
-                        content: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CustomTextField.dropdown(
-                                controller.filterOptions["productId"]!.titles,
-                                controller.filterOptions["productId"]!.values,
-                                pidTec,
-                                useOld: false,
-                                "Product", onChanged: (v) {
-                              curProduct.value = controller.allProducts
-                                  .where((test) => test.id == v)
-                                  .first;
-                              pmdTec.text = curProduct.value.markup.toString();
-                              pcdTec.text =
-                                  curProduct.value.cost.toStringAsFixed(2);
-                              psdTec.text = curProduct.value.sellingPrice
-                                  .toStringAsFixed(2);
-                              curProduct.refresh();
-                              print(curProduct.value.markup);
-                            }),
-                            CustomTextField(
-                              "Unit Cost",
-                              pcdTec,
-                              readOnly: true,
-                            ),
-                            Obx(() {
-                              print("markup ${curProduct.value.markup}");
-                              return CustomTextField.dropdown(
-                                  controller.filterOptions["markup"]!.titles,
-                                  controller.filterOptions["markup"]!.values,
-                                  pmdTec,
-                                  "Markup",
-                                  initOption: curProduct.value.markup,
-                                  onChanged: (v) {
-                                curProduct.value.markup = v;
-                                final cd = controller.calcNewSellingPrice(
-                                    curProduct.value.cost,
-                                    curProduct.value.markup);
-                                curProduct.value.sellingPrice = cd;
-                                psdTec.text = curProduct.value.sellingPrice
-                                    .toStringAsFixed(2);
-                              });
-                            }),
-                            CustomTextField(
-                              "Selling Price",
-                              psdTec,
-                            ),
-                            SizedBox(
-                                width: Ui.width(context) / 2,
-                                child: AppButton(
-                                    onPressed: () async {
-                                      await controller
-                                          .editProductPrice(curProduct.value);
-                                    },
-                                    text: "Save"))
-                          ],
-                        )));
-                  },
-                  text: "Setup Products Markup",
-                )),
-          ),
-          // Ui.boxHeight(24),
-          // SizedBox(
-          //     width: wideUi(context) / 2,
-          //     child: ),
-          // Ui.boxHeight(24),
+          Ui.boxHeight(12),
+          Obx(() {
+            if (controller.allPendingMarkupProducts.isNotEmpty) {
+              return Center(
+                child: SizedBox(
+                    width: (wideUi(context) / 2) - 48,
+                    child: AppButton(
+                      onPressed: () {
+                        Get.dialog(AppDialog(
+                            title: AppText.medium("Edit Record"),
+                            content: BulkMarkup()
+
+                            // Column(
+                            //   crossAxisAlignment:
+                            //       CrossAxisAlignment.center,
+                            //   mainAxisSize: MainAxisSize.min,
+                            //   children: [
+                            //     CustomTextField.dropdown(
+                            //         controller
+                            //             .filterOptions["productId3"]!
+                            //             .titles,
+                            //         controller
+                            //             .filterOptions["productId3"]!
+                            //             .values,
+                            //         pidTec,
+                            //         useOld: false,
+                            //         "Product", onChanged: (v) {
+                            //       curProduct.value = controller
+                            //           .allProducts
+                            //           .where((optv) => optv.id == v)
+                            //           .first;
+                            //       pmdTec.text =
+                            //           curProduct.value.markup.toString();
+                            //       pcdTec.text = curProduct.value.cost
+                            //           .toStringAsFixed(2);
+                            //       psdTec.text = curProduct
+                            //           .value.sellingPrice
+                            //           .toStringAsFixed(2);
+                            //       curProduct.refresh();
+                            //       print(curProduct.value.markup);
+                            //     }),
+                            //     CustomTextField(
+                            //       "Unit Cost",
+                            //       pcdTec,
+                            //       readOnly: true,
+                            //     ),
+                            //     Obx(() {
+                            //       print(
+                            //           "markup ${curProduct.value.markup}");
+                            //       return CustomTextField.dropdown(
+                            //           controller.filterOptions["markup"]!
+                            //               .titles,
+                            //           controller.filterOptions["markup"]!
+                            //               .values,
+                            //           pmdTec,
+                            //           "Markup",
+                            //           initOption: curProduct.value.markup,
+                            //           onChanged: (v) {
+                            //         curProduct.value.markup = v;
+                            //         final cd =
+                            //             controller.calcNewSellingPrice(
+                            //                 curProduct.value.cost,
+                            //                 curProduct.value.markup);
+                            //         curProduct.value.sellingPrice = cd;
+                            //         psdTec.text = curProduct
+                            //             .value.sellingPrice
+                            //             .toStringAsFixed(2);
+                            //       });
+                            //     }),
+                            //     CustomTextField(
+                            //       "Selling Price",
+                            //       psdTec,
+                            //     ),
+                            //     SizedBox(
+                            //         width: Ui.width(context) / 2,
+                            //         child: AppButton(
+                            //             onPressed: () async {
+                            //               await controller
+                            //                   .editProductPrice(
+                            //                       curProduct.value);
+                            //             },
+                            //             text: "Save"))
+                            //   ],
+                            // )
+
+                            ));
+                      },
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          AppIcon(
+                            Icons.info,
+                            color: AppColors.white,
+                          ),
+                          AppText.bold(
+                              "   ${controller.allPendingMarkupProducts.length} ",
+                              color: AppColors.white,
+                              fontSize: 20),
+                          AppText.bold("Pending Markups",
+                              color: AppColors.white, fontSize: 16),
+                        ],
+                      ),
+                    )),
+              );
+            }
+            return SizedBox();
+          }),
         ],
       )),
     );
@@ -1703,5 +1736,146 @@ class ReportDS extends AsyncDataTableSource {
                         fontSize: 12, att: true, alignment: TextAlign.center)));
               }));
         }));
+  }
+}
+
+class BulkMarkup extends StatelessWidget {
+  BulkMarkup({super.key});
+  final controller = Get.find<AppController>();
+  RxList<Product> selectedProducts = <Product>[].obs;
+  RxInt markup = 0.obs;
+  RxInt pending = 0.obs;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          CustomTextField.dropdown(["Pending", "All Products"], [0, 1],
+              TextEditingController(), "Product", initOption: pending.value,
+              onChanged: (v) {
+            selectedProducts.value = [];
+            pending.value = v;
+            selectedProducts.refresh();
+          }),
+          CustomTextField.dropdown(
+              controller.filterOptions["markup"]!.titles,
+              controller.filterOptions["markup"]!.values,
+              TextEditingController(),
+              "Markup",
+              initOption: markup.value, onChanged: (v) {
+            markup.value = v;
+            for (var element in selectedProducts) {
+              element.markup = v;
+              element.sellingPrice =
+                  controller.calcNewSellingPrice(element.cost, v);
+            }
+            selectedProducts.refresh();
+          }),
+          Ui.align(child: AppText.bold("Select Products")),
+          Obx(() {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(selectedProducts.length, (i) {
+                // Product e = selectedProducts[i];
+                final costTec = TextEditingController(
+                    text: selectedProducts[i].cost.toCurrency());
+                final priceTec = TextEditingController(
+                    text: selectedProducts[i].sellingPrice.toCurrency());
+                final ctt = controller
+                    .filterOptions[
+                        pending.value == 1 ? "productId" : "productId3"]!
+                    .titles;
+                final vtt = controller
+                    .filterOptions[
+                        pending.value == 1 ? "productId" : "productId3"]!
+                    .values;
+                    
+                return Row(
+                  children: [
+                    Expanded(
+                        flex: 3,
+                        child: CustomTextField.dropdown(
+                            ctt, vtt, TextEditingController(), "",
+                            initOption: selectedProducts[i].id,
+                            onChanged: (p0) {
+                              print(p0);
+                              print(i);
+                          // selectedProducts[i].id = p0;
+                          if (p0 != 0) {
+                            selectedProducts[i] = pending.value == 1
+                                ? controller.allProducts
+                                    .where((b) => b.id == p0)
+                                    .first
+                                : controller.allPendingMarkupProducts
+                                    .where((b) => b.id == p0)
+                                    .first;
+                            print(selectedProducts[i].toJson());
+                            selectedProducts[i].sellingPrice =
+                                controller.calcNewSellingPrice(
+                                    selectedProducts[i].cost, markup.value);
+                            selectedProducts[i].markup = markup.value;
+                            priceTec.text =
+                                selectedProducts[i].sellingPrice.toCurrency();
+                            costTec.text =
+                                selectedProducts[i].cost.toCurrency();
+                            selectedProducts.refresh();
+                          }
+                        })),
+                    Expanded(
+                        flex: 1,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 12.0),
+                          child: TextField(
+                            controller: costTec,
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.next,
+                            readOnly: true,
+                            textAlign: TextAlign.center,
+                          ),
+                        )),
+                    Expanded(
+                        flex: 1,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 12.0),
+                          child: TextField(
+                            controller: priceTec,
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.next,
+                            readOnly: true,
+                            textAlign: TextAlign.center,
+                          ),
+                        )),
+                  ],
+                );
+              }).toList(),
+            );
+          }),
+          InvoiceItemCounter(() {
+            selectedProducts
+                .add(Product(name: "", productCategoryId: 0, productTypeId: 0));
+            selectedProducts.refresh();
+          }, () {
+            if (selectedProducts.isNotEmpty) {
+              selectedProducts.removeLast();
+            }
+            selectedProducts.refresh();
+          }),
+          Ui.boxHeight(24),
+          SizedBox(
+              width: Ui.width(context) / 2,
+              child: AppButton(
+                  onPressed: () async {
+                    if (selectedProducts.isEmpty)
+                      return Ui.showError("Products cannot be empty");
+                    if (selectedProducts.any((optv) => optv.id == 0)) {
+                      return Ui.showError("Kindly remove the 'None' values");
+                    }
+                    await controller.editBulkProductPrice(selectedProducts);
+                  },
+                  text: "Save"))
+        ],
+      ),
+    );
   }
 }

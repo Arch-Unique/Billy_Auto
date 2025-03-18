@@ -288,7 +288,7 @@ class CustomTextField2 extends StatelessWidget {
                         dropdownColor: AppColors.white,
                         items: options
                             .map((e) => DropdownMenuItem<String>(
-                                value: e, child: AppText.thin(e)))
+                                value: e, child: AppText.thin(e,att: true)))
                             .toList(),
                         onChanged: (value) {
                           setState(() {

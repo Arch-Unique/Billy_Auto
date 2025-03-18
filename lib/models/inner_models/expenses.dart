@@ -147,7 +147,7 @@ class BulkExpenses extends BaseModel {
   @override
   bool validate() {
     return expenses.isNotEmpty &&
-        !expenses.any((test) => test.rawCost.value <= 0 || test.expensesTypeId <= 0);
+        !expenses.any((optv) => optv.rawCost.value <= 0 || optv.expensesTypeId <= 0);
   }
 
   factory BulkExpenses.fromJson(Map<String, dynamic> json) {

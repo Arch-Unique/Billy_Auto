@@ -1183,7 +1183,7 @@ class CustomTextField extends StatelessWidget {
                   items: values
                       .map((e) => DropdownMenuItem<dynamic>(
                           value: e,
-                          child: AppText.thin(options[values.indexOf(e)])))
+                          child: AppText.thin(options[values.indexOf(e)],att: true)))
                       .toList(),
                   onChanged: !isEnabled
                       ? null

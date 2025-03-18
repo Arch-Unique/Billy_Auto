@@ -85,25 +85,25 @@ class Invoice extends BaseModel {
   }
 
   removeNullItems() {
-    servicesUsed.removeWhere((test) =>
-        test.rawId.value == 0 ||
-        test.rawQty.value <= 0 ||
-        test.rawUnitPrice.value <= 0);
-    productsUsed.removeWhere((test) =>
-        test.rawId.value == 0 ||
-        test.rawQty.value <= 0 ||
-        test.rawUnitPrice.value <= 0);
+    servicesUsed.removeWhere((optv) =>
+        optv.rawId.value == 0 ||
+        optv.rawQty.value <= 0 ||
+        optv.rawUnitPrice.value <= 0);
+    productsUsed.removeWhere((optv) =>
+        optv.rawId.value == 0 ||
+        optv.rawQty.value <= 0 ||
+        optv.rawUnitPrice.value <= 0);
   }
 
   bool containsNull() {
-    final a = servicesUsed.any((test) =>
-        test.rawId.value == 0 ||
-        test.rawQty.value <= 0 ||
-        test.rawUnitPrice.value <= 0);
-    final b = productsUsed.any((test) =>
-        test.rawId.value == 0 ||
-        test.rawQty.value <= 0 ||
-        test.rawUnitPrice.value <= 0);
+    final a = servicesUsed.any((optv) =>
+        optv.rawId.value == 0 ||
+        optv.rawQty.value <= 0 ||
+        optv.rawUnitPrice.value <= 0);
+    final b = productsUsed.any((optv) =>
+        optv.rawId.value == 0 ||
+        optv.rawQty.value <= 0 ||
+        optv.rawUnitPrice.value <= 0);
     return a || b;
   }
 

@@ -11,7 +11,7 @@ class TableModel {
   List<FilterModel> fm;
   BaseModel bm;
 
-  TableModel(this.headers, this.fm, this.bm,{this.excelHeaders=const[]});
+  TableModel(this.headers, this.fm, this.bm, {this.excelHeaders = const []});
 }
 
 class HeaderItem {
@@ -51,7 +51,6 @@ class FilterOptionsModel {
   List<dynamic> values;
 
   FilterOptionsModel(this.titles, this.values) {
-  
     // if (!titles.contains("None")) {
     //   titles.insert(0, "None");
     //   values.insert(0, values.isEmpty ? 0: (values[0].runtimeType == int ? 0 : ""));
@@ -66,23 +65,37 @@ class AllTables {
       "id",
       "fullName",
       "username",
-      "email",
+      "clockinCode",
       "role",
       "createdAt"
     ], [
       FilterModel("Role", "role", 0),
       FilterModel("Date", "createdAt", 1),
     ], User()),
-    Supplier: TableModel(
-        ["id", "fullName", "email", "phone", "products", "createdAt"],
-        [FilterModel("Date", "createdAt", 1),],
-        Supplier(fullName: "", email: "", phone: "", address: "", products: "")),
-    BillyServices: TableModel(
-        ["id", "name", "createdAt"],
-        [FilterModel("Date", "createdAt", 1),],
-        BillyServices(name: "", image: "")),
-    CarMake: TableModel(["id", "make", "createdAt"],
-        [FilterModel("Date", "createdAt", 1),], CarMake(make: "")),
+    Supplier: TableModel([
+      "id",
+      "fullName",
+      "email",
+      "phone",
+      "products",
+      "createdAt"
+    ], [
+      FilterModel("Date", "createdAt", 1),
+    ], Supplier(fullName: "", email: "", phone: "", address: "", products: "")),
+    BillyServices: TableModel([
+      "id",
+      "name",
+      "createdAt"
+    ], [
+      FilterModel("Date", "createdAt", 1),
+    ], BillyServices(name: "", image: "")),
+    CarMake: TableModel([
+      "id",
+      "make",
+      "createdAt"
+    ], [
+      FilterModel("Date", "createdAt", 1),
+    ], CarMake(make: "")),
     CarModels: TableModel([
       "id",
       "model",
@@ -92,10 +105,13 @@ class AllTables {
       FilterModel("Car Brand", "makeId", 0),
       FilterModel("Date", "createdAt", 1),
     ], CarModels(makeId: 0, model: "")),
-    BillyConditionCategory: TableModel(
-        ["id", "name", "createdAt"],
-        [FilterModel("Date", "createdAt", 1),],
-        BillyConditionCategory(name: "")),
+    BillyConditionCategory: TableModel([
+      "id",
+      "name",
+      "createdAt"
+    ], [
+      FilterModel("Date", "createdAt", 1),
+    ], BillyConditionCategory(name: "")),
     BillyConditions: TableModel([
       "id",
       "name",
@@ -111,7 +127,6 @@ class AllTables {
           "fullName",
           "phone",
           "email",
-        
           "createdAt"
         ],
         [
@@ -142,10 +157,13 @@ class AllTables {
         ],
         CustomerCar(
             makeId: 0, modelId: 0, year: "", licenseNo: "", customerId: 0)),
-    ProductCategory: TableModel(
-        ["id", "name", "createdAt"],
-        [FilterModel("Date", "createdAt", 1),],
-        ProductCategory(name: "", code: "", image: "")),
+    ProductCategory: TableModel([
+      "id",
+      "name",
+      "createdAt"
+    ], [
+      FilterModel("Date", "createdAt", 1),
+    ], ProductCategory(name: "", code: "", image: "")),
     ProductType: TableModel([
       "id",
       "name",
@@ -156,31 +174,26 @@ class AllTables {
       FilterModel("Date", "createdAt", 1),
     ], ProductType(name: "", code: "", image: "", productCategoryId: 0)),
     Product: TableModel(
-        [
-          "id",
-          "name",
-          "type",
-          "sellingPrice",
-          "createdAt"
-        ],
+        ["id", "name", "type", "sellingPrice", "createdAt"],
         [
           FilterModel("Product Type", "productTypeId", 0),
           FilterModel("Product Category", "productCategoryId", 0),
           FilterModel("Date", "createdAt", 1),
         ],
         Product(
-            name: "",
-            productCategoryId: 0,
-            productTypeId: 0,),excelHeaders: [
-              "id",
+          name: "",
+          productCategoryId: 0,
+          productTypeId: 0,
+        ),
+        excelHeaders: [
+          "id",
           "name",
           "type",
           "cost",
           "markup",
           "sellingPrice",
           "createdAt"
-              
-            ]),
+        ]),
     Inventory: TableModel(
         [
           "id",
@@ -210,8 +223,9 @@ class AllTables {
             productCategoryId: 0,
             location: "store 1",
             // shelfLife: DateTime.now(),
-            productTypeId: 0),excelHeaders: [
-              "id",
+            productTypeId: 0),
+        excelHeaders: [
+          "id",
           "product",
           "qty",
           "status",
@@ -222,85 +236,88 @@ class AllTables {
           "unit selling price",
           "location",
           "createdAt"
-            ]),
-    Order: TableModel([
-      "id",
-      "customer",
-      "car",
-      "status",
-      "createdAt"
-    ], [
-      FilterModel("Customer", "customerId", 0),
-      FilterModel("Customer Car", "carId", 0),
-      FilterModel("Date", "createdAt", 1),
-    ], Order(customerId: 0),excelHeaders: [
-      "id",
-      "customer",
-      "car",
-      
-      "mileageOnReception","fuelLevel","customerConcerns","observations","lostSales","technician","serviceAdvisor","status",
-      "createdAt"
-    ]),
-     LoginHistory: TableModel([
-      "id",
-      "username",
-      "device",
-      "loggedIn",
-      "loggedOut"
-    ], [
-      FilterModel("User", "userId", 0),
-      FilterModel("Device", "device", 0),
-      FilterModel("Date", "createdAt", 1),
-    ], LoginHistory(),),
-    UserAttendance: TableModel([
-      "id",
-      "username",
-      "clockedIn",
-      "clockedOut"
-    ], [
-      FilterModel("User", "userId", 0),
-      FilterModel("Date", "createdAt", 1),
-    ], UserAttendance(),),
-     Invoice: TableModel([
-      "id",
-      "order",
-      "labourCost",
-      "totalCost",
-      "createdAt"
-    ], [
-      FilterModel("Date", "createdAt", 1),
-    ], Invoice(productsUsed: [], servicesUsed: []),),
-
-    ExpensesType: TableModel([
-      "id",
-      "name",
-      "category",
-      "createdAt"
-    ], [
-      FilterModel("Date", "createdAt", 1),
-    ], ExpensesType(name: "",code: ""),),
-    Expenses: TableModel([
-      "id",
-      "expensesType",
-      "expensesCategory",
-      "cost",
-      "createdAt"
-    ], [
-      FilterModel("Date", "createdAt", 1),
-      FilterModel("Expenses Type", "expensesTypeId", 0),
-      FilterModel("Expenses Category", "expensesCategoryId", 0),
-    ], Expenses(),),
-    BulkExpenses: TableModel([
-      "id",
-      "date",
-      "expenses",
-      "totalCost",
-    ], [
-      FilterModel("Date", "createdAt", 1),
-      FilterModel("Expenses", "expensesTypeId", 0),
-    ], BulkExpenses(date: DateTime.now()),),
-    InventoryMetricStockBalances: TableModel(["product","quantity"], [], InventoryMetricStockBalances()),
-    InventoryMetricDailyProfit: TableModel(["date","revenue","expenses","productCost","profit"], [], InventoryMetricDailyProfit(date: DateTime.now())),
+        ]),
+    Order: TableModel(
+        ["id", "customer", "car", "status", "createdAt"],
+        [
+          FilterModel("Customer", "customerId", 0),
+          FilterModel("Customer Car", "carId", 0),
+          FilterModel("Date", "createdAt", 1),
+        ],
+        Order(customerId: 0),
+        excelHeaders: [
+          "id",
+          "customer",
+          "car",
+          "mileageOnReception",
+          "fuelLevel",
+          "customerConcerns",
+          "observations",
+          "lostSales",
+          "technician",
+          "serviceAdvisor",
+          "status",
+          "createdAt"
+        ]),
+    LoginHistory: TableModel(
+      ["id", "username", "device", "loggedIn", "loggedOut"],
+      [
+        FilterModel("User", "userId", 0),
+        FilterModel("Device", "device", 0),
+        FilterModel("Date", "createdAt", 1),
+      ],
+      LoginHistory(),
+    ),
+    UserAttendance: TableModel(
+      ["id", "username", "clockedIn", "clockedOut","workHours (hh:mm)"],
+      [
+        FilterModel("User", "userId", 0),
+        FilterModel("Date", "createdAt", 1),
+      ],
+      UserAttendance(),
+    ),
+    Invoice: TableModel(
+      ["id", "order", "labourCost", "totalCost", "createdAt"],
+      [
+        FilterModel("Date", "createdAt", 1),
+      ],
+      Invoice(productsUsed: [], servicesUsed: []),
+    ),
+    ExpensesType: TableModel(
+      ["id", "name", "category", "createdAt"],
+      [
+        FilterModel("Date", "createdAt", 1),
+      ],
+      ExpensesType(name: "", code: ""),
+    ),
+    Expenses: TableModel(
+      ["id", "expensesType", "expensesCategory", "cost", "createdAt"],
+      [
+        FilterModel("Date", "createdAt", 1),
+        FilterModel("Expenses Type", "expensesTypeId", 0),
+        FilterModel("Expenses Category", "expensesCategoryId", 0),
+      ],
+      Expenses(),
+    ),
+    BulkExpenses: TableModel(
+      [
+        "id",
+        "date",
+        "expenses",
+        "totalCost",
+      ],
+      [
+        FilterModel("Date", "createdAt", 1),
+        FilterModel("Expenses", "expensesTypeId", 0),
+      ],
+      BulkExpenses(date: DateTime.now()),
+    ),
+    InventoryMetricStockBalances:
+        TableModel(["product", "quantity"], [], InventoryMetricStockBalances()),
+    InventoryMetricDailyProfit: TableModel(
+        ["date", "revenue", "expenses", "productCost", "profit"],
+        [],
+        InventoryMetricDailyProfit(date: DateTime.now())),
     AppConstants: TableModel(["product"], [], AppConstants()),
   };
 }

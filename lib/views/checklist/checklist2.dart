@@ -57,19 +57,19 @@ class _CheckList2PageState extends State<CheckList2Page> {
   setPreviousStates() {
     if ((int.tryParse(controller.tecs[5].text) ?? 0) != 0) {
       currentCustomer.value = controller.allCustomer
-          .firstWhere((test) => test.id == int.parse(controller.tecs[5].text));
+          .firstWhere((optv) => optv.id == int.parse(controller.tecs[5].text));
     }
     if ((int.tryParse(controller.tecs[10].text) ?? 0) != 0) {
       currentCar.value = controller.allCustomerCar
-          .firstWhere((test) => test.id == int.parse(controller.tecs[10].text));
+          .firstWhere((optv) => optv.id == int.parse(controller.tecs[10].text));
     }
     if ((int.tryParse(controller.tecs[16].text) ?? 0) != 0) {
       serviceAdvisor.value = controller.allServiceAdvisor
-          .firstWhere((test) => test.id == int.parse(controller.tecs[16].text));
+          .firstWhere((optv) => optv.id == int.parse(controller.tecs[16].text));
     }
     if ((int.tryParse(controller.tecs[17].text) ?? 0) != 0) {
       technician.value = controller.allTechnicians
-          .firstWhere((test) => test.id == int.parse(controller.tecs[17].text));
+          .firstWhere((optv) => optv.id == int.parse(controller.tecs[17].text));
     }
   }
 
@@ -261,7 +261,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
               customerType: "");
         } else {
           currentCustomer.value = controller.allCustomer.firstWhere(
-              (test) => test.id == int.parse(controller.tecs[5].text));
+              (optv) => optv.id == int.parse(controller.tecs[5].text));
         }
       }),
       Obx(() {
@@ -372,11 +372,11 @@ class _CheckList2PageState extends State<CheckList2Page> {
       Obx(() {
         return CustomTextField2.dropdown<int>(
             controller.allCustomerCar
-                .where((test) => test.customerId == (currentCustomer.value.id))
+                .where((optv) => optv.customerId == (currentCustomer.value.id))
                 .map((element) => element.desc)
                 .toList(),
             controller.allCustomerCar
-                .where((test) => test.customerId == (currentCustomer.value.id))
+                .where((optv) => optv.customerId == (currentCustomer.value.id))
                 .map((element) => element.id)
                 .toList(),
             controller.tecs[10],
@@ -386,7 +386,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
                 makeId: 0, modelId: 0, year: "", licenseNo: "0", customerId: 0);
           } else {
             currentCar.value = controller.allCustomerCar.firstWhere(
-                (test) => test.id == int.parse(controller.tecs[10].text));
+                (optv) => optv.id == int.parse(controller.tecs[10].text));
           }
         });
       }),
@@ -571,7 +571,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
           serviceAdvisor.value = User();
         } else {
           serviceAdvisor.value = controller.allServiceAdvisor.firstWhere(
-              (test) => test.id == int.tryParse(controller.tecs[16].text));
+              (optv) => optv.id == int.tryParse(controller.tecs[16].text));
         }
       }),
       CustomTextField2.dropdown<int>(
@@ -583,7 +583,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
           technician.value = User();
         } else {
           technician.value = controller.allTechnicians.firstWhere(
-              (test) => test.id == int.tryParse(controller.tecs[17].text));
+              (optv) => optv.id == int.tryParse(controller.tecs[17].text));
         }
       }),
       Ui.align(child: Builder(builder: (context) {

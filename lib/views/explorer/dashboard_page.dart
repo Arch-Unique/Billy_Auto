@@ -330,6 +330,7 @@ class MyBarChart extends StatefulWidget {
 class _MyBarChartState extends State<MyBarChart> {
   List<DateTime> datePoints = [];
   List<int> orderCnt = [];
+  int orderMax = 10;
   Map<DateTime, int> groupedOrdersByMonth = {};
   Map<DateTime, int> groupedOrdersByDay = {};
   Map<DateTime, int> groupedOrdersByYear = {};
@@ -350,7 +351,8 @@ class _MyBarChartState extends State<MyBarChart> {
     // Group orders by month-year
     groupedOrdersByMonth = {};
     for (var order in Get.find<AppController>().allOrders) {
-      DateTime month = DateTime(order.createdAt!.year, order.createdAt!.month);
+      if(!order.isDispatched) continue;
+      DateTime month = DateTime(order.dispatchedAt!.year, order.dispatchedAt!.month);
       if (groupedOrdersByMonth.containsKey(month)) {
         groupedOrdersByMonth[month] = groupedOrdersByMonth[month]! + 1;
       } else {
@@ -361,8 +363,9 @@ class _MyBarChartState extends State<MyBarChart> {
     // Group orders by day
     groupedOrdersByDay = {};
     for (var order in Get.find<AppController>().allOrders) {
+      if(!order.isDispatched) continue;
       DateTime day = DateTime(
-          order.createdAt!.year, order.createdAt!.month, order.createdAt!.day);
+          order.dispatchedAt!.year, order.dispatchedAt!.month, order.dispatchedAt!.day);
       if (groupedOrdersByDay.containsKey(day)) {
         groupedOrdersByDay[day] = groupedOrdersByDay[day]! + 1;
       } else {
@@ -373,7 +376,8 @@ class _MyBarChartState extends State<MyBarChart> {
     // Group orders by year
     groupedOrdersByYear = {};
     for (var order in Get.find<AppController>().allOrders) {
-      DateTime year = DateTime(order.createdAt!.year);
+      if(!order.isDispatched) continue;
+      DateTime year = DateTime(order.dispatchedAt!.year);
       if (groupedOrdersByYear.containsKey(year)) {
         groupedOrdersByYear[year] = groupedOrdersByYear[year]! + 1;
       } else {
@@ -405,6 +409,7 @@ class _MyBarChartState extends State<MyBarChart> {
       last6Months.add(month);
       orderCnt.add(groupedOrdersByMonth[month] ?? 0);
     }
+    orderMax = Get.find<AppController>().appConstants.value.monthlyOrdersTarget.toInt();
     return last6Months;
   }
 
@@ -419,6 +424,7 @@ class _MyBarChartState extends State<MyBarChart> {
       last6Days.add(day);
       orderCnt.add(groupedOrdersByDay[day] ?? 0);
     }
+    orderMax = Get.find<AppController>().appConstants.value.dailyOrdersTarget.toInt();
     return last6Days;
   }
 
@@ -432,6 +438,7 @@ class _MyBarChartState extends State<MyBarChart> {
       last6Years.add(year);
       orderCnt.add(groupedOrdersByYear[year] ?? 0);
     }
+    orderMax = Get.find<AppController>().appConstants.value.yearlyOrdersTarget.toInt();
     return last6Years;
   }
 
@@ -554,29 +561,34 @@ class _MyBarChartState extends State<MyBarChart> {
         show: false,
       );
 
-  LinearGradient get _barsGradient => const LinearGradient(
-        colors: [
-          
-          AppColors.primaryColor,
-          AppColors.orange,
-        ],
-        begin: Alignment.bottomCenter,
-        end: Alignment.topCenter,
-      );
+  // LinearGradient get _barsGradient => const ;
 
   List<BarChartGroupData> get barGroups => List.generate(
       datePoints.length,
-      (index) => BarChartGroupData(
+      (index) {
+        final lp = orderCnt[index] < orderMax;
+        return BarChartGroupData(
             x: index,
             barRods: [
               BarChartRodData(
                   toY: orderCnt[index].toDouble(),
-                  gradient: _barsGradient,
+                  // color: lp ? AppColors.,
+                  gradient: 
+                  LinearGradient(
+        colors: [
+          
+          lp ? AppColors.primaryColor : AppColors.green.withOpacity(0.9), 
+          lp ? AppColors.orange : AppColors.green,
+        ],
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+      ),
                   borderRadius: BorderRadius.circular(8),
                   width: 56)
             ],
             showingTooltipIndicators: [0],
-          ));
+          );
+      });
 }
 
 class ChartHeaderChooser extends StatelessWidget {
@@ -616,10 +628,11 @@ class _ProfitChartState extends State<ProfitChart> {
   TextEditingController filterTec = TextEditingController(text: "Day");
   String profitType = "Sales"; // Options: Total, Product, Service, Labor
   TextEditingController profitTypeTec = TextEditingController(text: "Sales");
+  double profitMax = 100000;
 
   List<Color> gradientColors = [
     // const Color.fromARGB(255, 204, 242, 255),
-    AppColors.orange,
+    AppColors.primaryColorLight,
     AppColors.primaryColor,
   ];
 
@@ -720,6 +733,7 @@ class _ProfitChartState extends State<ProfitChart> {
               p.date.day == date.day,
           orElse: () => InventoryMetricDailyProfit(date: date),
         );
+        profitMax = Get.find<AppController>().appConstants.value.dailyProfitTarget;
         return getProfitValue(profit);
 
       case "Month":
@@ -727,6 +741,7 @@ class _ProfitChartState extends State<ProfitChart> {
           (p) => p.date.year == date.year && p.date.month == date.month,
           orElse: () => InventoryMetricMonthlyProfit(date: date),
         );
+        profitMax = Get.find<AppController>().appConstants.value.monthlyProfitTarget;
         return getProfitValue(profit);
 
       case "Year":
@@ -734,6 +749,7 @@ class _ProfitChartState extends State<ProfitChart> {
           (p) => p.date.year == date.year,
           orElse: () => InventoryMetricYearlyProfit(date: date),
         );
+        profitMax = Get.find<AppController>().appConstants.value.yearlyProfitTarget;
         return getProfitValue(profit);
 
       default:
@@ -884,14 +900,16 @@ class _ProfitChartState extends State<ProfitChart> {
             dotData: FlDotData(
               show: true,
               getDotPainter: (spot, percent, barData, index) {
+                final lp = getProfitForDate(datePoints[index]) < profitMax;
                 return FlDotCirclePainter(
-                  radius: 5,
-                  color: AppColors.orange,
+                  radius: 8,
+                  color: lp ? AppColors.primaryColor: (profitType == "Expenses" ? AppColors.primaryColor : AppColors.green),
                   strokeWidth: 1,
                   strokeColor: Colors.white,
                 );
               },
             ),
+
             belowBarData: BarAreaData(
               show: true,
               color: AppColors.primaryColor.withOpacity(0.2),

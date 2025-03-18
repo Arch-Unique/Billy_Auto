@@ -10,6 +10,7 @@ class User extends BaseModel{
   
   bool get isAdmin => role == "admin";
   bool get isServiceAdvisor => isAdmin || role == "service-advisor";
+  int get clockInCode => 100000 + id;
 
   User({
     super.id=0,
@@ -36,7 +37,7 @@ Map<String, dynamic> toJson() {
 
       @override
 List<dynamic> toTableRows(){
-    return [id,fullName,username,email,role,createdAtRaw];
+    return [id,fullName,username,clockInCode,role,createdAtRaw];
   }
 
         @override

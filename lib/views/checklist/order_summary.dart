@@ -49,7 +49,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     if (widget.order.id != 0) {
       final fg = Get.find<AppController>()
           .allInvoices
-          .where((test) => test.orderId == widget.order.id);
+          .where((optv) => optv.orderId == widget.order.id);
       if (fg.isNotEmpty) {
         invoice.value = fg.first;
       }
@@ -767,13 +767,13 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
           final ap = Get.find<AppController>().allProducts;
           final sp = Get.find<AppController>().allBillyServices;
           for (var element in widget.invoice!.productsUsed) {
-            final app = ap.where((test) => test.id == element.id).first;
+            final app = ap.where((optv) => optv.id == element.id).first;
             productUsed[
                     "${app.name} - ${element.qty} - ${element.unitPrice.toCurrency()}"] =
                 element.totalPrice.toCurrency();
           }
           for (var element in widget.invoice!.servicesUsed) {
-            serviceUsed[sp.where((test) => test.id == element.id).first.name] =
+            serviceUsed[sp.where((optv) => optv.id == element.id).first.name] =
                 element.totalPrice.toCurrency();
           }
           final pf = pw.Column(
@@ -1219,13 +1219,13 @@ class InvoiceItemWidget extends StatelessWidget {
                     if (isProduct) {
                       item!.rawUnitPrice.value = Get.find<AppController>()
                           .allProductsCurrentPrice
-                          .where((test) => test.productId == p0)
+                          .where((optv) => optv.productId == p0)
                           .first
                           .cost;
                     } else {
                       item!.rawUnitPrice.value = Get.find<AppController>()
                           .allBillyServices
-                          .where((test) => test.id == p0)
+                          .where((optv) => optv.id == p0)
                           .first
                           .cost;
                     }
@@ -1251,7 +1251,7 @@ class InvoiceItemWidget extends StatelessWidget {
                     textAlign: TextAlign.center,
                     decoration: InputDecoration(hintText: "Qty"),
                     onChanged: (_) {
-                      final maxQty = (Get.find<AppController>().allStockBalances.where((test) => test.productId == item!.rawId.value).firstOrNull?.quantity ?? 0);
+                      final maxQty = (Get.find<AppController>().allStockBalances.where((optv) => optv.productId == item!.rawId.value).firstOrNull?.quantity ?? 0);
                       item!.rawQty.value =
                           int.tryParse(qtyTec.text) ?? item!.qty;
                           if(item!.rawQty.value > maxQty){

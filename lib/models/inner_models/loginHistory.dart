@@ -73,6 +73,7 @@ class UserAttendance extends BaseModel{
   });
 
   String get loggedOutAtRaw => loggedOutDate == null ? "" : DateFormat("dd/MM/yyyy hh:mm:ssa").format(loggedOutDate!);
+  String get workHours => loggedOutDate == null ? "" : "${loggedOutDate!.difference(createdAt!).inHours}:${loggedOutDate!.difference(createdAt!).inMinutes}";
 
   // Convert UserAttendance object to JSON
   @override
@@ -86,12 +87,12 @@ Map<String, dynamic> toJson() {
 
       @override
 List<dynamic> toTableRows(){
-    return [id,username,createdAtRaw,loggedOutAtRaw];
+    return [id,username,createdAtRaw,loggedOutAtRaw,workHours];
   }
 
         @override
 List<dynamic> toExcelRows(){
-    return [id,username,createdAtRaw,loggedOutAtRaw];
+    return [id,username,createdAtRaw,loggedOutAtRaw,workHours];
   }
 
   @override

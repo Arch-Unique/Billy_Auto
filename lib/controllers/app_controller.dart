@@ -90,6 +90,7 @@ class AppController extends GetxController {
   RxList<CustomerCar> allCustomerCar = <CustomerCar>[].obs;
   RxList<Supplier> allSuppliers = <Supplier>[].obs;
   RxList<Product> allProducts = <Product>[].obs;
+  RxList<Product> allPendingMarkupProducts = <Product>[].obs;
   RxList<User> allServiceAdvisor = <User>[].obs;
   RxList<User> allTechnicians = <User>[].obs;
   RxList<User> allUsers = <User>[].obs;
@@ -149,7 +150,7 @@ class AppController extends GetxController {
       allYearlyProfit.map((f) => f.expenses).fold(0, (a, b) => a + b);
   double get totalProductCost =>
       allYearlyProfit.map((f) => f.productCost).fold(0, (a, b) => a + b);
-  // double get totalProductCost => allInventory.where((test) => test.status == "Inbound").map((f) => f.cost * f.qty).fold(0, (a,b)  => a+b);
+  // double get totalProductCost => allInventory.where((optv) => optv.status == "Inbound").map((f) => f.cost * f.qty).fold(0, (a,b)  => a+b);
   double get totalProfit => totalSales - (totalExpenses + totalProductCost);
   //PROFILE
   RxBool editOn = false.obs;
@@ -171,14 +172,15 @@ class AppController extends GetxController {
       InventoryMetricStockBalances,
       UserAttendance
     ].contains(T == dynamic ? currentBaseModel.value.runtimeType : T);
-                              
   }
 
   void groupOrderData() {
     // Group orders by month-year
     groupedOrdersByMonth = {};
     for (var order in allOrders) {
-      DateTime month = DateTime(order.createdAt!.year, order.createdAt!.month);
+      if (!order.isDispatched) continue;
+      DateTime month =
+          DateTime(order.dispatchedAt!.year, order.dispatchedAt!.month);
       if (groupedOrdersByMonth.containsKey(month)) {
         groupedOrdersByMonth[month] = groupedOrdersByMonth[month]! + 1;
       } else {
@@ -189,8 +191,9 @@ class AppController extends GetxController {
     // Group orders by day
     groupedOrdersByDay = {};
     for (var order in allOrders) {
-      DateTime day = DateTime(
-          order.createdAt!.year, order.createdAt!.month, order.createdAt!.day);
+      if (!order.isDispatched) continue;
+      DateTime day = DateTime(order.dispatchedAt!.year,
+          order.dispatchedAt!.month, order.dispatchedAt!.day);
       if (groupedOrdersByDay.containsKey(day)) {
         groupedOrdersByDay[day] = groupedOrdersByDay[day]! + 1;
       } else {
@@ -201,7 +204,8 @@ class AppController extends GetxController {
     // Group orders by year
     groupedOrdersByYear = {};
     for (var order in allOrders) {
-      DateTime year = DateTime(order.createdAt!.year);
+      if (!order.isDispatched) continue;
+      DateTime year = DateTime(order.dispatchedAt!.year);
       if (groupedOrdersByYear.containsKey(year)) {
         groupedOrdersByYear[year] = groupedOrdersByYear[year]! + 1;
       } else {
@@ -224,9 +228,16 @@ class AppController extends GetxController {
     filterOptions["productId"] = FilterOptionsModel(
         allProducts.map((element) => element.name).toList(),
         allProducts.map((element) => element.id).toList());
+    //todo
+    final asbid = allStockBalances.map((e) => e.productId);
+    final pd = allProducts
+        .where((optv) => optv.sellingPrice != 0 && asbid.contains(optv.id));
     filterOptions["productId2"] = FilterOptionsModel(
-        allStockBalances.map((element) => element.productName).toList(),
-        allStockBalances.map((element) => element.productId).toList());
+        pd.map((element) => element.name).toList(),
+        pd.map((element) => element.id).toList());
+    filterOptions["productId3"] = FilterOptionsModel(
+        allPendingMarkupProducts.map((element) => element.name).toList(),
+        allPendingMarkupProducts.map((element) => element.id).toList());
 
     filterOptions["supplierId"] = FilterOptionsModel(
         allSuppliers.map((element) => element.fullName).toList(),
@@ -327,7 +338,8 @@ class AppController extends GetxController {
     allDevices.value = ["mobile", "pc"];
     expensesCategory.value = ["OPEX", "FIXED"];
     await initMetrics();
-    appConstants.value = (await appRepo.getOne<AppConstants>("1")) ?? AppConstants();
+    appConstants.value =
+        (await appRepo.getOne<AppConstants>("1")) ?? AppConstants();
     allBillyServices.value = await _getAll<BillyServices>();
     allBillyConditionCategories.value = await _getAll<BillyConditionCategory>();
     allBillyConditions.value = await _getAll<BillyConditions>();
@@ -339,6 +351,8 @@ class AppController extends GetxController {
     allCustomerCar.value = await _getAll<CustomerCar>();
     allOrders.value = await _getAll<Order>();
     allProducts.value = await _getAll<Product>();
+    allPendingMarkupProducts.value =
+        allProducts.where((optv) => optv.markup == 0).toList();
     allSuppliers.value = await _getAll<Supplier>();
     allInventory.value = await _getAll<Inventory>();
     allExpensesTypes.value = await _getAll<ExpensesType>();
@@ -347,9 +361,9 @@ class AppController extends GetxController {
     allExpenses.value = await _getAll<Expenses>();
     allUsers.value = await _getAll<User>();
     allTechnicians.value =
-        allUsers.where((test) => test.role == userRoles[2]).toList();
+        allUsers.where((optv) => optv.role == userRoles[2]).toList();
     allServiceAdvisor.value =
-        allUsers.where((test) => test.role == userRoles[3]).toList();
+        allUsers.where((optv) => optv.role == userRoles[3]).toList();
     updateOrderWithInfo();
 
     totalConditionsHeaders =
@@ -593,9 +607,9 @@ class AppController extends GetxController {
     }
   }
 
-    Future<bool> clockIn(String code, String img) async {
+  Future<bool> clockIn(String code, String img) async {
     try {
-      await appRepo.clockin(code,img);
+      await appRepo.clockin(code, img);
       return true;
     } catch (e) {
       Ui.showError(e.toString());
@@ -603,9 +617,9 @@ class AppController extends GetxController {
     }
   }
 
-      Future<bool> clockOut(String code, String img) async {
+  Future<bool> clockOut(String code, String img) async {
     try {
-      await appRepo.clockout(code,img);
+      await appRepo.clockout(code, img);
       return true;
     } catch (e) {
       Ui.showError(e.toString());
@@ -721,6 +735,21 @@ class AppController extends GetxController {
         await refreshModels();
         tmds.value.refreshDatasource();
       }
+    } catch (e) {
+      print(e);
+      Ui.showError(e.toString());
+    }
+  }
+
+  editBulkProductPrice(List<Product> products) async {
+    try {
+      for (Product product in products) {
+        await appRepo.patch(product);
+      }
+      Get.back();
+        Ui.showInfo("Successfully Updated Existing Record");
+        await refreshModels();
+        tmds.value.refreshDatasource();
     } catch (e) {
       print(e);
       Ui.showError(e.toString());
