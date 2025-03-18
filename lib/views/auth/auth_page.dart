@@ -315,8 +315,9 @@ class ClockInOutPage extends StatelessWidget {
         height: a,
         onPressed: () async {
           final ImagePicker picker = ImagePicker();
+          
           img.value =
-              (await picker.pickImage(source: ImageSource.gallery))?.path ?? "";
+              (await picker.pickImage(source: GetPlatform.isDesktop ? ImageSource.gallery : ImageSource.camera))?.path ?? "";
         },
         border: Border.all(color: AppColors.orange),
         child: img.value.isEmpty
