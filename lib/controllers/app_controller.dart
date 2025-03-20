@@ -18,6 +18,7 @@ import 'package:path_provider/path_provider.dart';
 import '../models/inner_models/barrel.dart';
 import '../models/step.dart';
 import '../repo/app_repo.dart';
+import '../tools/service.dart';
 
 class AppController extends GetxController {
   Rx<DashboardModes> currentDashboardMode = DashboardModes.dashboard.obs;
@@ -98,11 +99,14 @@ class AppController extends GetxController {
   RxList<Inventory> allInventory = <Inventory>[].obs;
   RxList<Order> allOrders = <Order>[].obs;
   RxList<Invoice> allInvoices = <Invoice>[].obs;
+  RxList<UserRole> allUserRoles = <UserRole>[].obs;
+  RxList<Locations> allLocations = <Locations>[].obs;
+  RxList<Stations> allStations = <Stations>[].obs;
 
   RxList<ExpensesType> allExpensesTypes = <ExpensesType>[].obs;
   RxList<Expenses> allExpenses = <Expenses>[].obs;
 
-  RxList<String> userRoles = <String>[].obs;
+  // RxList<String> userRoles = <String>[].obs;
   RxList<String> customerTypes = <String>[].obs;
   RxList<String> inventoryStatus = <String>[].obs;
   RxList<String> inventoryTransactionTypes = <String>[].obs;
@@ -262,7 +266,16 @@ class AppController extends GetxController {
         FilterOptionsModel(inventoryStatus, inventoryStatus);
     filterOptions["customerType"] =
         FilterOptionsModel(customerTypes, customerTypes);
-    filterOptions["role"] = FilterOptionsModel(userRoles, userRoles);
+    // filterOptions["role"] = FilterOptionsModel(userRoles, userRoles);
+    filterOptions["roleId"] = FilterOptionsModel(
+        allUserRoles.map((f) => f.name).toList(),
+        allUserRoles.map((f) => f.id).toList());
+    filterOptions["locationId"] = FilterOptionsModel(
+        allLocations.map((f) => f.name).toList(),
+        allLocations.map((f) => f.id).toList());
+    filterOptions["stationId"] = FilterOptionsModel(
+        allStations.map((f) => f.name).toList(),
+        allStations.map((f) => f.id).toList());
     filterOptions["technicianId"] = FilterOptionsModel(
         allTechnicians.map((element) => element.fullName).toList(),
         allTechnicians.map((element) => element.id).toList());
@@ -331,15 +344,20 @@ class AppController extends GetxController {
   }
 
   refreshModels() async {
-    userRoles.value = ["admin", "user", "technician", "service-advisor"];
     customerTypes.value = ["Individual", "Corporate"];
     inventoryStatus.value = ["Inbound", "Outbound", "Transfer"];
     inventoryTransactionTypes.value = ["a", "b"];
     allDevices.value = ["mobile", "pc"];
     expensesCategory.value = ["OPEX", "FIXED"];
+    final stt = appRepo.appService.currentStation.value;
+    final allAC = await _getAll<AppConstants>(fm: [
+      FilterModel("stationId", "stationId", 0,
+          tec: TextEditingController(text: stt.toString()))
+    ]);
+    appConstants.value = allAC.isEmpty ? AppConstants() : allAC[0];
+    
+
     await initMetrics();
-    appConstants.value =
-        (await appRepo.getOne<AppConstants>("1")) ?? AppConstants();
     allBillyServices.value = await _getAll<BillyServices>();
     allBillyConditionCategories.value = await _getAll<BillyConditionCategory>();
     allBillyConditions.value = await _getAll<BillyConditions>();
@@ -349,21 +367,42 @@ class AppController extends GetxController {
     allCarModels.value = await _getAll<CarModels>();
     allCustomer.value = await _getAll<Customer>();
     allCustomerCar.value = await _getAll<CustomerCar>();
-    allOrders.value = await _getAll<Order>();
-    allProducts.value = await _getAll<Product>();
+    allOrders.value = await _getAll<Order>(fm: [
+      FilterModel("stationId", "stationId", 0,
+          tec: TextEditingController(text: stt.toString()))
+    ]);
+    allProducts.value = await _getAll<Product>(fm: [
+      FilterModel("stationId", "stationId", 0,
+          tec: TextEditingController(text: stt.toString()))
+    ]);
     allPendingMarkupProducts.value =
         allProducts.where((optv) => optv.markup == 0).toList();
     allSuppliers.value = await _getAll<Supplier>();
-    allInventory.value = await _getAll<Inventory>();
+    allInventory.value = await _getAll<Inventory>(fm: [
+      FilterModel("stationId", "stationId", 0,
+          tec: TextEditingController(text: stt.toString()))
+    ]);
     allExpensesTypes.value = await _getAll<ExpensesType>();
     // allLoginHistory.value = await _getAll<LoginHistory>();
     allInvoices.value = await _getAll<Invoice>();
-    allExpenses.value = await _getAll<Expenses>();
-    allUsers.value = await _getAll<User>();
+    allExpenses.value = await _getAll<Expenses>(fm: [
+      FilterModel("stationId", "stationId", 0,
+          tec: TextEditingController(text: stt.toString()))
+    ]);
+    allUsers.value = await _getAll<User>(fm: [
+      FilterModel("stationId", "stationId", 0,
+          tec: TextEditingController(text: stt.toString()))
+    ]);
+    allLocations.value = await _getAll<Locations>(fm: [
+      FilterModel("stationId", "stationId", 0,
+          tec: TextEditingController(text: stt.toString()))
+    ]);
+    allStations.value = await _getAll<Stations>();
+    allUserRoles.value = await _getAll<UserRole>();
     allTechnicians.value =
-        allUsers.where((optv) => optv.role == userRoles[2]).toList();
+        allUsers.where((optv) => optv.role == "technician").toList();
     allServiceAdvisor.value =
-        allUsers.where((optv) => optv.role == userRoles[3]).toList();
+        allUsers.where((optv) => optv.role == "service-advisor").toList();
     updateOrderWithInfo();
 
     totalConditionsHeaders =
@@ -531,6 +570,7 @@ class AppController extends GetxController {
             await appRepo.create<CustomerCar>(currentOrder.value.customerCar!);
         currentOrder.value.carId = car;
       }
+      currentOrder.value.stationId = Get.find<AppService>().currentStation.value;
       if (!currentOrder.value.validate()) {
         throw "Order Details incomplete";
       }
@@ -747,9 +787,9 @@ class AppController extends GetxController {
         await appRepo.patch(product);
       }
       Get.back();
-        Ui.showInfo("Successfully Updated Existing Record");
-        await refreshModels();
-        tmds.value.refreshDatasource();
+      Ui.showInfo("Successfully Updated Existing Record");
+      await refreshModels();
+      tmds.value.refreshDatasource();
     } catch (e) {
       print(e);
       Ui.showError(e.toString());

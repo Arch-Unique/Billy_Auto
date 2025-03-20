@@ -1,3 +1,6 @@
+import 'package:get/get.dart';
+
+import '../../tools/service.dart';
 import 'base_model.dart';
 
 class AppConstants extends BaseModel {
@@ -10,7 +13,8 @@ class AppConstants extends BaseModel {
       weeklyOrdersTarget,
       monthlyOrdersTarget,
       yearlyOrdersTarget;
-  int version;
+      String station;
+  int version,stationId;
 
   AppConstants({
     this.vat = 7.5,
@@ -23,6 +27,8 @@ class AppConstants extends BaseModel {
     this.monthlyOrdersTarget = 0,
     this.yearlyOrdersTarget = 0,
     this.version = 0,
+    this.station="",
+    this.stationId=0,
     super.id = 0,
     super.createdAt,
     super.updatedAt,
@@ -40,7 +46,8 @@ class AppConstants extends BaseModel {
       "weeklyOrdersTarget": weeklyOrdersTarget,
       "monthlyOrdersTarget": monthlyOrdersTarget,
       "yearlyOrdersTarget": yearlyOrdersTarget,
-      "version": version
+      "stationId":Get.find<AppService>().currentStation.value,
+      // "version": version
     };
   }
 
@@ -56,7 +63,7 @@ class AppConstants extends BaseModel {
 
   @override
   bool validate() {
-    return vat != 0;
+    return vat != 0 && stationId != 0;
   }
 
   factory AppConstants.fromJson(Map<String, dynamic> json) {
@@ -80,6 +87,106 @@ class AppConstants extends BaseModel {
       yearlyOrdersTarget:
           double.parse((json['yearlyOrdersTarget'] ?? 0).toString()),
       version: int.parse((json['version'] ?? 0).toString()),
+      station: json['station'] ?? "",
+      stationId: int.tryParse(json['stationId'].toString()) ?? 0,
+      createdAt: DateTime.tryParse(json['createdAt']),
+      updatedAt: DateTime.tryParse(json['updatedAt']),
+    );
+  }
+}
+
+class Stations extends BaseModel {
+  String name, address, phone, email;
+
+  Stations(
+      {super.id,
+      this.name="",
+      this.address = "",
+      this.phone = "",
+      this.email = "",
+      super.createdAt,
+      super.updatedAt});
+
+  @override
+  List toExcelRows() {
+    return [id, name, address, email, phone, createdAt];
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      "name": name,
+      "address": address,
+      "email": email,
+      "phone": phone,
+    };
+  }
+
+  @override
+  List toTableRows() {
+    return [id, name, address, email, phone, createdAt];
+  }
+
+  @override
+  bool validate() {
+    return name.isNotEmpty;
+  }
+
+  factory Stations.fromJson(Map<String, dynamic> json) {
+    return Stations(
+      id: json['id'] ?? 0,
+      name: json["name"] ?? "",
+      address: json["address"] ?? "",
+      email: json["email"] ?? "",
+      phone: json["phone"] ?? "",
+      createdAt: DateTime.tryParse(json['createdAt']),
+      updatedAt: DateTime.tryParse(json['updatedAt']),
+    );
+  }
+}
+
+
+class Locations extends BaseModel {
+  String name,station;
+  int stationId;
+
+  Locations(
+      {super.id,
+      this.name="Store 1",
+      this.station = "",
+      this.stationId = 0,
+      super.createdAt,
+      super.updatedAt});
+
+  @override
+  List toExcelRows() {
+    return [id, name, station, createdAt];
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      "name": name,
+      "stationId": stationId
+    };
+  }
+
+  @override
+  List toTableRows() {
+    return [id, name, station, createdAt];
+  }
+
+  @override
+  bool validate() {
+    return name.isNotEmpty && stationId != 0;
+  }
+
+  factory Locations.fromJson(Map<String, dynamic> json) {
+    return Locations(
+      id: json['id'] ?? 0,
+      name: json["name"] ?? "",
+      station: json["station"] ?? "",
+      stationId: int.tryParse(json["stationId"].toString()) ?? 0,
       createdAt: DateTime.tryParse(json['createdAt']),
       updatedAt: DateTime.tryParse(json['updatedAt']),
     );

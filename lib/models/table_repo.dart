@@ -59,6 +59,11 @@ class FilterOptionsModel {
 }
 
 class AllTables {
+  static List<Type> tablesType = [
+    Reports,User,Supplier,BillyServices,CarMake,CarModels,BillyConditionCategory,BillyConditions,Customer,CustomerCar,ProductCategory,ProductType,Product,
+    Inventory,Order,LoginHistory,UserAttendance,Invoice,ExpensesType,Expenses,BulkExpenses,InventoryMetricStockBalances,InventoryMetricDailyProfit,AppConstants,
+    Locations,UserRole,Stations
+  ];
   static Map<Type, TableModel> tablesData = {
     Reports: TableModel([], [], Reports()),
     User: TableModel([
@@ -69,9 +74,17 @@ class AllTables {
       "role",
       "createdAt"
     ], [
-      FilterModel("Role", "role", 0),
+      FilterModel("Role", "roleId", 0),
       FilterModel("Date", "createdAt", 1),
-    ], User()),
+    ], User(),excelHeaders: [
+      "id",
+      "fullName",
+      "username",
+      "clockinCode",
+      "email",
+      "role",
+      "createdAt"
+    ]),
     Supplier: TableModel([
       "id",
       "fullName",
@@ -319,5 +332,15 @@ class AllTables {
         [],
         InventoryMetricDailyProfit(date: DateTime.now())),
     AppConstants: TableModel(["product"], [], AppConstants()),
+    Locations: TableModel([
+      "id","name","station","createdAt"
+    ], [FilterModel("Station", "stationId", 0),FilterModel("Date", "createdAt", 1),], Locations()),
+    UserRole: TableModel([
+      "id","name","createdAt"
+    ], [FilterModel("Date", "createdAt", 1),], UserRole()),
+    Stations: TableModel([
+      "id","name","address","email","phone","createdAt"
+    ], [FilterModel("Date", "createdAt", 1),], Stations())
   };
+  
 }

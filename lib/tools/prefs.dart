@@ -8,4 +8,5 @@ class MyPrefs {
   static const String hasOpenedOnboarding = "hasOpenedOnboarding";
   static const String mpFirstName = "mpFirstName";
   static const String mpLastName = "mpLastName";
+  static const String mpStation = "mpStation";
 }

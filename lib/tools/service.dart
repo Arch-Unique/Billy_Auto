@@ -185,6 +185,7 @@ class DioApiService extends GetxService implements ApiService {
 
 class AppService extends GetxService {
   Rx<User> currentUser = User().obs;
+  RxInt currentStation = 0.obs;
   RxBool hasOpenedOnboarding = false.obs;
   RxBool isLoggedIn = false.obs;
   RxBool isConnected = true.obs;
@@ -200,6 +201,7 @@ class AppService extends GetxService {
           .listen((List<ConnectivityResult> result) {
         isConnected.value = !result.contains(ConnectivityResult.none);
       });
+      _initStation();
       await _hasOpened();
       await _setLoginStatus();
       if (isLoggedIn.value) {
@@ -233,6 +235,15 @@ class AppService extends GetxService {
     hasOpenedOnboarding.value = a;
   }
 
+  _initStation() {
+    currentStation.value = prefService.get(MyPrefs.mpStation) ?? 1;
+  }
+
+  saveStation(int id)  async {
+    await prefService.save(MyPrefs.mpStation, id);
+    currentStation.value = id;
+  }
+
   _logout() async {
     await prefService.eraseAllExcept([MyPrefs.hasOpenedOnboarding]);
   }
@@ -251,8 +262,9 @@ class AppService extends GetxService {
     final res = await apiService.post(
         "${AppUrls.getUser}/get/${prefService.get(MyPrefs.mpUserID)}",
         data: {"filter": {}});
-    print(res.data);
+    // print(res.data);
     currentUser.value = User.fromJson(res.data["data"]);
+    await saveStation(currentUser.value.stationId);
   }
 
   refreshUser() async {

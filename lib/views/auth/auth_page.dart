@@ -216,7 +216,74 @@ class ChoosePage extends StatelessWidget {
                 //   actionItem("Inventory", Assets.s3, () {
                 //     Get.to(ExplorerPage());
                 //   }),
-                Ui.boxHeight(24),
+                Ui.spacer(),
+                InkWell(
+                  onTap: () {
+                    Get.dialog(AppDialog(
+                        title: AppText.medium("Change Station"),
+                        content: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: List.generate(
+                                Get.find<AppController>().allStations.length,
+                                (i) {
+                              return Ui.padding(
+                                child: ListTile(
+                                  tileColor: AppColors.primaryColor,
+                                  selectedTileColor: AppColors.orange,
+                                  selected: Get.find<AppController>()
+                                            .allStations[i]
+                                            .id ==
+                                        Get.find<AppService>()
+                                            .currentStation
+                                            .value,
+                                  title: AppText.thin(Get.find<AppController>()
+                                      .allStations[i]
+                                      .name,color: AppColors.white),
+                                  onTap: () async {
+                                    if (Get.find<AppController>()
+                                            .allStations[i]
+                                            .id !=
+                                        Get.find<AppService>()
+                                            .currentStation
+                                            .value) {
+                                      await Get.find<AppService>().saveStation(
+                                          Get.find<AppController>()
+                                              .allStations[i]
+                                              .id);
+                                      await Get.find<AppController>()
+                                          .refreshAllData();
+                                    }
+                                    Get.back();
+                                  },
+                                ),
+                              );
+                            }),
+                          ),
+                        )));
+                  },
+                  child: Ui.padding(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        AppIcon(
+                          Icons.location_city_rounded,
+                          color: AppColors.primaryColor,
+                        ),
+                        Ui.boxWidth(12),
+                        Obx(() {
+                          return AppText.thin(Get.find<AppController>()
+                              .allStations
+                              .where((test) =>
+                                  test.id ==
+                                  Get.find<AppService>().currentStation.value)
+                              .first
+                              .name);
+                        })
+                      ],
+                    ),
+                  ),
+                )
               ],
             ),
           ),
@@ -304,8 +371,11 @@ class ClockInOutPage extends StatelessWidget {
                   )
                 : ConstrainedBox(
                     constraints: BoxConstraints(maxWidth: 850),
-                    child: Column(
-                        children: [header(), imageContainer(null), keypad()]))));
+                    child: Column(children: [
+                      header(),
+                      imageContainer(null),
+                      keypad()
+                    ]))));
   }
 
   imageContainer(double? a) {
@@ -315,9 +385,13 @@ class ClockInOutPage extends StatelessWidget {
         height: a,
         onPressed: () async {
           final ImagePicker picker = ImagePicker();
-          
-          img.value =
-              (await picker.pickImage(source: GetPlatform.isDesktop ? ImageSource.gallery : ImageSource.camera))?.path ?? "";
+
+          img.value = (await picker.pickImage(
+                      source: GetPlatform.isDesktop
+                          ? ImageSource.gallery
+                          : ImageSource.camera))
+                  ?.path ??
+              "";
         },
         border: Border.all(color: AppColors.orange),
         child: img.value.isEmpty

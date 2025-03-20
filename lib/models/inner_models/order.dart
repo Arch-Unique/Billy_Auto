@@ -1,12 +1,13 @@
 import 'dart:convert';
 
+import 'package:get/get.dart';
 import 'package:inventory/models/inner_models/barrel.dart';
-
+import '../../tools/service.dart';
 import 'base_model.dart';
 
 class Order extends BaseModel{
   int customerId;
-  int carId;
+  int carId, stationId;
   
   int mileageOnReception;
   String? customerConcerns;
@@ -21,7 +22,7 @@ class Order extends BaseModel{
   List<int> conditions; //0-false,1-true
   String lostSales;
   double cost;
-  String customer, car;
+  String customer, car, station;
 
   Customer? customerDetails;
   User? serviceAdvisorDetails;
@@ -56,12 +57,15 @@ class Order extends BaseModel{
     super.updatedAt,
     this.conditions = const [],
     this.lostSales = "",
+    this.station="",
+    this.stationId =0,
     this.cost = 0,
   });
 
   // Convert Order object to JSON
   @override
 Map<String, dynamic> toJson() {
+  
     return {
       'customerId': customerId,
       'carId': carId,
@@ -80,6 +84,7 @@ Map<String, dynamic> toJson() {
       'customerImage': customerImage,
       'technicianId': technicianId,
       'serviceAdvisorId': serviceAdvisorId,
+      "stationId": Get.find<AppService>().currentStation.value,
     };
   }
 
@@ -95,7 +100,7 @@ List<dynamic> toExcelRows(){
 
   @override
   bool validate() {
-    return customerId != 0 && serviceAdvisorId != 0 && technicianId != 0;
+    return customerId != 0 && serviceAdvisorId != 0 && technicianId != 0 && stationId != 0;
   }
 
   // Create Order object from JSON
@@ -123,6 +128,8 @@ List<dynamic> toExcelRows(){
       conditions: List<int>.from(json['conditions'] ?? []),
       lostSales: json['lostSales'] ?? "",
       cost: double.parse((json['cost'] ?? 0).toString()),
+      station: json['station'] ?? "",
+      stationId: int.tryParse(json['stationId'].toString()) ?? 0,
     );
   }
 }

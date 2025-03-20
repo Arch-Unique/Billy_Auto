@@ -1,11 +1,13 @@
+import 'package:get/get.dart';
 import 'package:inventory/models/inner_models/base_model.dart';
 import 'package:inventory/models/inner_models/expenses.dart';
 import 'package:inventory/tools/extensions.dart';
+import '../../tools/service.dart';
 
 class Product extends BaseModel{
   
-  String name;
-  int productCategoryId;
+  String name,station;
+  int productCategoryId,stationId;
   String code;
   String image;
   double cost,sellingPrice;
@@ -23,6 +25,8 @@ class Product extends BaseModel{
     this.image="",
     this.cost=0,
     this.markup=0,
+    this.station = "",
+    this.stationId=0,
     this.sellingPrice=0,
     super.createdAt,
     super.updatedAt,
@@ -41,6 +45,7 @@ Map<String, dynamic> toJson() {
       'cost': cost,
       'markup': markup,
       'sellingPrice': sellingPrice,
+      "stationId": Get.find<AppService>().currentStation.value,
     };
   }
 
@@ -58,7 +63,7 @@ List<dynamic> toExcelRows(){
 
   @override
   bool validate() {
-    return name.isNotEmpty && productCategoryId != 0 && productTypeId != 0 ;
+    return name.isNotEmpty && productCategoryId != 0 && productTypeId != 0 && stationId != 0;
   }
 
   // Create Product object from JSON
@@ -77,6 +82,8 @@ List<dynamic> toExcelRows(){
       updatedAt: DateTime.tryParse(json['updatedAt']),
       productTypeId: int.tryParse(json['productTypeId'].toString()) ?? 0,
       productType: json['productType'] ?? "",
+      station: json['station'] ?? "",
+      stationId: int.tryParse(json['stationId'].toString()) ?? 0,
     );
   }
 }

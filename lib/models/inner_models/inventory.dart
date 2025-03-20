@@ -1,6 +1,7 @@
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:inventory/tools/extensions.dart';
-
+import '../../tools/service.dart';
 import 'base_model.dart';
 
 class Inventory extends BaseModel {
@@ -16,8 +17,8 @@ class Inventory extends BaseModel {
   int markup;
   // DateTime shelfLife;
 
-  int productTypeId;
-  String productType, productCategory, product;
+  int productTypeId,stationId,locationId;
+  String productType, productCategory, product,station;
 
   Inventory({
     super.id = 0,
@@ -34,6 +35,9 @@ class Inventory extends BaseModel {
     this.cost = 0,
     this.markup=0,
     this.sellingPrice = 0,
+    this.station="",
+    this.locationId=0,
+    this.stationId=0,
     // required this.shelfLife,
     super.createdAt,
     super.updatedAt,
@@ -51,10 +55,12 @@ class Inventory extends BaseModel {
       'status': status,
       'supplierId': supplierId,
       'productCategoryId': productCategoryId,
-      'location': location.isEmpty ? "store 1" : location,
+      
+      'locationId': locationId,
       'cost': cost,
       "markup": markup,
       'sellingPrice': sellingPrice,
+      "stationId": Get.find<AppService>().currentStation.value,
       // 'shelfLife': shelfLife.toString(),
       'productTypeId': productTypeId,
     };
@@ -62,7 +68,7 @@ class Inventory extends BaseModel {
 
   @override
   bool validate() {
-    return productId != 0 && status.isNotEmpty && location.isNotEmpty;
+    return productId != 0 && status.isNotEmpty && stationId != 0 && locationId != 0;
   }
 
   @override
@@ -115,7 +121,7 @@ class Inventory extends BaseModel {
       productCategoryId:
           int.tryParse(json['productCategoryId'].toString()) ?? 0,
       productCategory: json['productCategory'] ?? "",
-      location: json['location'],
+      location: json['locationName'] ?? "",
       markup: int.tryParse(json['markup'].toString()) ?? 0,
       cost: double.tryParse(json['cost'].toString()) ?? 0,
       sellingPrice: double.tryParse(json['sellingPrice'].toString()) ?? 0,
@@ -124,6 +130,10 @@ class Inventory extends BaseModel {
       updatedAt: DateTime.tryParse(json['updatedAt']),
       productTypeId: int.tryParse(json['productTypeId'].toString()) ?? 0,
       productType: json['productType'] ?? "",
+      station: json['station'] ?? "",
+      stationId: int.tryParse(json['stationId'].toString()) ?? 0,
+      locationId: int.tryParse(json['locationId'].toString()) ?? 0,
+      
     );
   }
 }

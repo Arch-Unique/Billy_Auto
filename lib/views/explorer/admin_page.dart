@@ -33,6 +33,12 @@ class CustomTable extends StatefulWidget {
 
 class _CustomTableState extends State<CustomTable> {
   final controller = Get.find<AppController>();
+  final perm = Get.find<AppController>()
+      .allUserRoles
+      .where((e) =>
+          e.id == Get.find<AppRepo>().appService.currentUser.value.roleId)
+      .firstOrNull;
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -137,6 +143,7 @@ class _CustomTableState extends State<CustomTable> {
                       },
                       text: "Export"),
                 ),
+                if(perm?.perms[AllTables.tablesType.indexOf(controller.currentBaseModel.value.runtimeType)][0] == 1)
                 Material(
                   color: AppColors.green,
                   shape: RoundedRectangleBorder(
@@ -335,12 +342,18 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
   TableModelDataSource(this.tm);
 
   editRecord(BaseModel bm) async {
-    if (Get.find<AppController>().noActionModel<T>() && T != UserAttendance)
-      return;
-    if (!Get.find<AppService>().currentUser.value.isServiceAdvisor) {
-      Ui.showError("Not enough permissions");
+    final perm = Get.find<AppController>()
+        .allUserRoles
+        .where((e) =>
+            e.id == Get.find<AppRepo>().appService.currentUser.value.roleId)
+        .firstOrNull;
+    if (Get.find<AppController>().noActionModel<T>() && T != UserAttendance) {
       return;
     }
+    // if (perm?.perms[AllTables.tablesType.indexOf(T)][2] != 1) {
+    //   Ui.showError("Not enough permissions");
+    //   return;
+    // }
     Get.find<AppController>().startLoading();
     if (T == BulkExpenses) {
       (bm as BulkExpenses).expenses =
@@ -364,8 +377,13 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
   }
 
   deleteRecord(BaseModel bm) {
+    final perm = Get.find<AppController>()
+        .allUserRoles
+        .where((e) =>
+            e.id == Get.find<AppRepo>().appService.currentUser.value.roleId)
+        .firstOrNull;
     if (Get.find<AppController>().noActionModel<T>()) return;
-    if (!Get.find<AppService>().currentUser.value.isServiceAdvisor) {
+    if (perm?.perms[AllTables.tablesType.indexOf(T)][3] != 1) {
       Ui.showError("Not enough permissions");
       return;
     }
@@ -388,11 +406,17 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
   Future<AsyncRowsResponse> getRows(int startIndex, int count) async {
     final appRepo = Get.find<AppRepo>();
     int page = (startIndex ~/ count) + 1;
+    final perm = Get.find<AppController>()
+        .allUserRoles
+        .where((e) =>
+            e.id == Get.find<AppRepo>().appService.currentUser.value.roleId)
+        .firstOrNull;
 
     try {
       List<T> bms = [];
       List<List<dynamic>> tvals = [];
       TotalResponse<T> res;
+
       if (T == InventoryMetricStockBalances) {
         await Get.find<AppController>().initMetrics();
         res = TotalResponse<T>(
@@ -457,15 +481,21 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                                 ),
                               ),
                               Ui.boxWidth(12),
-                              AppIcon(
-                                Icons.edit,
-                                color: AppColors.green,
-                                onTap: () async {
-                                  await editRecord(bm);
-                                },
-                              ),
+                              if (perm?.perms[AllTables.tablesType.indexOf(T)]
+                                      [1] ==
+                                  1)
+                                AppIcon(
+                                  Icons.edit,
+                                  color: AppColors.green,
+                                  onTap: () async {
+                                    await editRecord(bm);
+                                  },
+                                ),
                               Ui.boxWidth(12),
-                              if (T != BulkExpenses)
+                              if (T != BulkExpenses &&
+                                  (perm?.perms[AllTables.tablesType.indexOf(T)]
+                                          [3] ==
+                                      1))
                                 AppIcon(
                                   Icons.delete,
                                   color: Colors.red,
@@ -488,15 +518,21 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                                 //   color: Colors.brown,
                                 // ),
                                 // Ui.boxWidth(12),
-                                AppIcon(
-                                  Icons.edit,
-                                  color: AppColors.green,
-                                  onTap: () async {
-                                    await editRecord(bm);
-                                  },
-                                ),
+                                if (perm?.perms[AllTables.tablesType.indexOf(T)]
+                                        [1] ==
+                                    1)
+                                  AppIcon(
+                                    Icons.edit,
+                                    color: AppColors.green,
+                                    onTap: () async {
+                                      await editRecord(bm);
+                                    },
+                                  ),
                                 Ui.boxWidth(12),
-                                if (T != BulkExpenses)
+                                if (T != BulkExpenses &&
+                                    (perm?.perms[AllTables.tablesType
+                                            .indexOf(T)][3] ==
+                                        1))
                                   AppIcon(
                                     Icons.delete,
                                     color: Colors.red,
@@ -745,8 +781,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
     if (fieldName.endsWith("Id") ||
         fieldName.endsWith("Type") ||
         fieldName.endsWith("status") ||
-        fieldName.endsWith("markup") ||
-        fieldName.endsWith("role")) {
+        fieldName.endsWith("markup")) {
       if ((widget.model.runtimeType == Expenses &&
               fieldName == "expensesCategoryId") ||
           (widget.model.runtimeType == Product &&
@@ -1005,6 +1040,54 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
   @override
   Widget build(BuildContext context) {
     Map<String, dynamic> jsonMap = widget.model.toJson();
+    if (widget.model.runtimeType == UserRole) {
+      UserRole ur = widget.model as UserRole;
+
+      return SingleChildScrollView(
+        child: Column(
+          children: [
+            if (!widget.isNew)
+              CustomTextField(_formatFieldName("id"),
+                  TextEditingController(text: _formData['id'].toString()),
+                  readOnly: true),
+            _buildField("name", jsonMap["name"]),
+            UserRolesList(ur),
+            Ui.boxHeight(24),
+            if (!widget.isNew)
+              CustomTextField(
+                _formatFieldName("createdAt"),
+                TextEditingController(
+                    text: DateFormat("dd/MM/yyyy hh:mm:ss")
+                        .format(DateTime.parse(_formData['createdAt']))),
+                readOnly: true,
+              ),
+            if (!widget.isNew)
+              CustomTextField(
+                _formatFieldName("updatedAt"),
+                TextEditingController(
+                    text: DateFormat("dd/MM/yyyy hh:mm:ss")
+                        .format(DateTime.parse(_formData['updatedAt']))),
+                readOnly: true,
+              ),
+            AppButton(
+              onPressed: () async {
+                ur.name = _controllers["name"]!.text;
+                if (ur.validate()) {
+                  print(ur.perms);
+                  final gh = ur.toJson();
+                  print(gh);
+                  await widget.onSave(gh);
+                } else {
+                  Ui.showError("User role name cannot be empty");
+                }
+              },
+              text: "Save",
+            )
+          ],
+        ),
+      );
+    }
+
     if (widget.model.runtimeType == Invoice) {
       Rx<Invoice> inv = (widget.model as Invoice).obs;
       TextEditingController ltec =
@@ -1026,6 +1109,22 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
               ltec,
               isOwn: false,
             ),
+            if (!widget.isNew)
+              CustomTextField(
+                _formatFieldName("createdAt"),
+                TextEditingController(
+                    text: DateFormat("dd/MM/yyyy hh:mm:ss")
+                        .format(DateTime.parse(_formData['createdAt']))),
+                readOnly: true,
+              ),
+            if (!widget.isNew)
+              CustomTextField(
+                _formatFieldName("updatedAt"),
+                TextEditingController(
+                    text: DateFormat("dd/MM/yyyy hh:mm:ss")
+                        .format(DateTime.parse(_formData['updatedAt']))),
+                readOnly: true,
+              ),
             AppButton(
               onPressed: () async {
                 inv.value.orderId =
@@ -1305,8 +1404,45 @@ class MarkupTargetsPage extends StatelessWidget {
       child: SingleChildScrollView(
           child: Column(
         children: [
-          AppText.medium("Targets",
-              fontFamily: Assets.appFontFamily2, fontSize: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              AppText.medium("Targets",
+                  fontFamily: Assets.appFontFamily2, fontSize: 24),
+              Obx(() {
+                if (controller.allPendingMarkupProducts.isNotEmpty) {
+                  return Center(
+                    child: SizedBox(
+                        width: 240,
+                        child: AppButton(
+                          onPressed: () {
+                            Get.dialog(AppDialog(
+                                title: AppText.medium("Edit Record"),
+                                content: BulkMarkup()));
+                          },
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              AppIcon(
+                                Icons.info,
+                                color: AppColors.white,
+                              ),
+                              AppText.bold(
+                                  "   ${controller.allPendingMarkupProducts.length} ",
+                                  color: AppColors.white,
+                                  fontSize: 20),
+                              AppText.bold("Pending Markups",
+                                  color: AppColors.white, fontSize: 16),
+                            ],
+                          ),
+                        )),
+                  );
+                }
+                return SizedBox();
+              }),
+            ],
+          ),
           Ui.boxHeight(12),
           SmartJustifyRow(runSpacing: 12, spacing: 12, children: [
             itemDataWidget(
@@ -1366,113 +1502,6 @@ class MarkupTargetsPage extends StatelessWidget {
                 isMarkup: true),
           ]),
           Ui.boxHeight(12),
-          Obx(() {
-            if (controller.allPendingMarkupProducts.isNotEmpty) {
-              return Center(
-                child: SizedBox(
-                    width: (wideUi(context) / 2) - 48,
-                    child: AppButton(
-                      onPressed: () {
-                        Get.dialog(AppDialog(
-                            title: AppText.medium("Edit Record"),
-                            content: BulkMarkup()
-
-                            // Column(
-                            //   crossAxisAlignment:
-                            //       CrossAxisAlignment.center,
-                            //   mainAxisSize: MainAxisSize.min,
-                            //   children: [
-                            //     CustomTextField.dropdown(
-                            //         controller
-                            //             .filterOptions["productId3"]!
-                            //             .titles,
-                            //         controller
-                            //             .filterOptions["productId3"]!
-                            //             .values,
-                            //         pidTec,
-                            //         useOld: false,
-                            //         "Product", onChanged: (v) {
-                            //       curProduct.value = controller
-                            //           .allProducts
-                            //           .where((optv) => optv.id == v)
-                            //           .first;
-                            //       pmdTec.text =
-                            //           curProduct.value.markup.toString();
-                            //       pcdTec.text = curProduct.value.cost
-                            //           .toStringAsFixed(2);
-                            //       psdTec.text = curProduct
-                            //           .value.sellingPrice
-                            //           .toStringAsFixed(2);
-                            //       curProduct.refresh();
-                            //       print(curProduct.value.markup);
-                            //     }),
-                            //     CustomTextField(
-                            //       "Unit Cost",
-                            //       pcdTec,
-                            //       readOnly: true,
-                            //     ),
-                            //     Obx(() {
-                            //       print(
-                            //           "markup ${curProduct.value.markup}");
-                            //       return CustomTextField.dropdown(
-                            //           controller.filterOptions["markup"]!
-                            //               .titles,
-                            //           controller.filterOptions["markup"]!
-                            //               .values,
-                            //           pmdTec,
-                            //           "Markup",
-                            //           initOption: curProduct.value.markup,
-                            //           onChanged: (v) {
-                            //         curProduct.value.markup = v;
-                            //         final cd =
-                            //             controller.calcNewSellingPrice(
-                            //                 curProduct.value.cost,
-                            //                 curProduct.value.markup);
-                            //         curProduct.value.sellingPrice = cd;
-                            //         psdTec.text = curProduct
-                            //             .value.sellingPrice
-                            //             .toStringAsFixed(2);
-                            //       });
-                            //     }),
-                            //     CustomTextField(
-                            //       "Selling Price",
-                            //       psdTec,
-                            //     ),
-                            //     SizedBox(
-                            //         width: Ui.width(context) / 2,
-                            //         child: AppButton(
-                            //             onPressed: () async {
-                            //               await controller
-                            //                   .editProductPrice(
-                            //                       curProduct.value);
-                            //             },
-                            //             text: "Save"))
-                            //   ],
-                            // )
-
-                            ));
-                      },
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          AppIcon(
-                            Icons.info,
-                            color: AppColors.white,
-                          ),
-                          AppText.bold(
-                              "   ${controller.allPendingMarkupProducts.length} ",
-                              color: AppColors.white,
-                              fontSize: 20),
-                          AppText.bold("Pending Markups",
-                              color: AppColors.white, fontSize: 16),
-                        ],
-                      ),
-                    )),
-              );
-            }
-            return SizedBox();
-          }),
         ],
       )),
     );
@@ -1790,7 +1819,7 @@ class BulkMarkup extends StatelessWidget {
                     .filterOptions[
                         pending.value == 1 ? "productId" : "productId3"]!
                     .values;
-                    
+
                 return Row(
                   children: [
                     Expanded(
@@ -1799,8 +1828,8 @@ class BulkMarkup extends StatelessWidget {
                             ctt, vtt, TextEditingController(), "",
                             initOption: selectedProducts[i].id,
                             onChanged: (p0) {
-                              print(p0);
-                              print(i);
+                          print(p0);
+                          print(i);
                           // selectedProducts[i].id = p0;
                           if (p0 != 0) {
                             selectedProducts[i] = pending.value == 1
@@ -1866,8 +1895,9 @@ class BulkMarkup extends StatelessWidget {
               width: Ui.width(context) / 2,
               child: AppButton(
                   onPressed: () async {
-                    if (selectedProducts.isEmpty)
+                    if (selectedProducts.isEmpty) {
                       return Ui.showError("Products cannot be empty");
+                    }
                     if (selectedProducts.any((optv) => optv.id == 0)) {
                       return Ui.showError("Kindly remove the 'None' values");
                     }
@@ -1876,6 +1906,83 @@ class BulkMarkup extends StatelessWidget {
                   text: "Save"))
         ],
       ),
+    );
+  }
+}
+
+class UserRolesList extends StatelessWidget {
+  const UserRolesList(this.ur, {super.key});
+  final UserRole ur;
+
+  @override
+  Widget build(BuildContext context) {
+    final modelKeys = AllTables.tablesType;
+    final modelKeysString =
+        AllTables.tablesType.map((e) => e.toString()).toList();
+    final tec = TextEditingController();
+    tec.addListener(() {
+      final v = tec.text;
+      final df = v.split(",");
+      if (df.isEmpty) {
+        ur.perms.value = List.generate(AllTables.tablesType.length, (i) {
+          return [0, 0, 0, 0];
+        });
+      }
+      for (var i = 0; i < df.length; i++) {
+        final b = modelKeysString.indexWhere((test) => test == df[i]);
+        if (b != -1) {
+          ur.perms[b] = [1, 1, 1, 1];
+        }
+      }
+      ur.perms.refresh();
+    });
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CustomMultiDropdown(
+          modelKeys.map((e) => e.toString()).toList(),
+          modelKeys.map((e) => e.toString()).toList(),
+          tec,
+          "Multi Select Models",
+        ),
+        Row(
+          children: [
+            Expanded(flex: 3, child: AppText.bold("Models")),
+            Expanded(
+                flex: 1,
+                child: AppText.thin("Add", alignment: TextAlign.center)),
+            Expanded(
+                flex: 1,
+                child: AppText.thin("View", alignment: TextAlign.center)),
+            Expanded(
+                flex: 1,
+                child: AppText.thin("Edit", alignment: TextAlign.center)),
+            Expanded(
+                flex: 1,
+                child: AppText.thin("Delete", alignment: TextAlign.center)),
+          ],
+        ),
+        ...List.generate(modelKeys.length, (i) {
+          final ij = i;
+          return Row(
+            children: [
+              Expanded(flex: 3, child: AppText.thin(modelKeys[i].toString())),
+              ...List.generate(4, (j) {
+                return Expanded(
+                    flex: 1,
+                    child: Obx(() {
+                      return Checkbox(
+                          value: ur.perms[ij][j] == 1,
+                          onChanged: (g) {
+                            ur.perms[ij][j] = (g ?? false) ? 1 : 0;
+                            ur.perms.refresh();
+                          });
+                    }));
+              })
+            ],
+          );
+        })
+      ],
     );
   }
 }

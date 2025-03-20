@@ -2,11 +2,12 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:inventory/models/inner_models/base_model.dart';
 import 'package:inventory/tools/extensions.dart';
+import '../../tools/service.dart';
 
 class Expenses extends BaseModel {
-  int expensesTypeId;
+  int expensesTypeId,stationId;
   double cost;
-  String expensesType,expensesCategoryId;
+  String station,expensesType,expensesCategoryId;
   RxDouble rawCost=0.0.obs;
 
   Expenses({
@@ -17,6 +18,8 @@ class Expenses extends BaseModel {
     super.updatedAt,
     this.expensesType = "",
     this.expensesCategoryId = "OPEX",
+    this.stationId=0,
+    this.station=""
   }) {
     rawCost.value = cost;
   }
@@ -24,7 +27,7 @@ class Expenses extends BaseModel {
   // Convert Product object to JSON
   @override
   Map<String, dynamic> toJson() {
-    return {'expensesTypeId': expensesTypeId, 'cost': rawCost.value,'expensesCategoryId':expensesCategoryId};
+    return {'expensesTypeId': expensesTypeId, 'cost': rawCost.value,'expensesCategoryId':expensesCategoryId,"stationId": Get.find<AppService>().currentStation.value,};
   }
 
   @override
@@ -41,7 +44,7 @@ class Expenses extends BaseModel {
 
   @override
   bool validate() {
-    return cost != 0 && expensesTypeId != 0 && expensesCategoryId != "";
+    return cost != 0 && expensesTypeId != 0 && expensesCategoryId != "" && stationId != 0;
   }
 
   // Create Product object from JSON
@@ -54,6 +57,8 @@ class Expenses extends BaseModel {
       createdAt: DateTime.tryParse(json['createdAt']),
       updatedAt: DateTime.tryParse(json['updatedAt']),
       cost: double.tryParse(json['cost'].toString()) ?? 0,
+      station: json['station'] ?? "",
+      stationId: int.tryParse(json['stationId'].toString()) ?? 0,
     );
   }
 }

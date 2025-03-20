@@ -67,7 +67,7 @@ class ProfilePage extends StatelessWidget {
                     tecs[1],
                     readOnly: !controller.editOn.value,
                   ),
-                  CustomTextField2.dropdown<String>(controller.userRoles,controller.userRoles, tecs[2], "Role",
+                  CustomTextField2.dropdown<dynamic>(controller.filterOptions["roleId"]!.titles,controller.filterOptions["roleId"]!.values, tecs[2], "Role",
                       initOption: tecs[2].text),
                   CustomTextField2(
                     "Email",
