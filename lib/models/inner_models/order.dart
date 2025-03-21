@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:get/get.dart';
 import 'package:inventory/models/inner_models/barrel.dart';
+import 'package:inventory/tools/extensions.dart';
 import '../../tools/service.dart';
 import 'base_model.dart';
 
@@ -78,7 +79,7 @@ Map<String, dynamic> toJson() {
       'servicesPerformed': jsonEncode(servicesPerformed),
       'conditions': jsonEncode(conditions),
       'lostSales': lostSales,
-      'dispatchedAt': dispatchedAt?.toString(),
+      'dispatchedAt': dispatchedAt?.toSQLDate(),
       'cost': cost,
       'mileageImage': mileageImage,
       'customerImage': customerImage,

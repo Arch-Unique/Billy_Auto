@@ -239,6 +239,16 @@ class _OrderSummaryState extends State<OrderSummary> {
               })),
               Ui.boxHeight(24),
               if (widget.order.id == 0)
+              Builder(builder: (context) {
+                return SignatureView(Get.find<AppController>().userSig, "Customer Signature",
+                    size: wideUi(context));
+              }),
+              if (widget.order.id != 0)
+              LockedSignatureWidget(
+                title: "Customer Signature",
+                signature: widget.order.customerDetails!.signature),
+              Ui.boxHeight(24),
+              if (widget.order.id == 0)
                 SizedBox(
                   width: wideUi(context),
                   child: AppButton(

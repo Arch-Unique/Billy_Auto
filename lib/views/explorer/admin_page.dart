@@ -1000,6 +1000,10 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
       );
     }
 
+    //Tanks ,Product,Capacity
+    //Products ,Name,PPL,Spec,CostPrice,SellingPrice
+    //Transaction ,Product,AmtInltr,Order
+
     return CustomTextField(
       _formatFieldName(fieldName),
       _controllers[fieldName]!,
@@ -1822,20 +1826,7 @@ class BulkMarkup extends StatelessWidget {
             pending.value = v;
             selectedProducts.refresh();
           }),
-          CustomTextField.dropdown(
-              controller.filterOptions["markup"]!.titles,
-              controller.filterOptions["markup"]!.values,
-              TextEditingController(),
-              "Markup",
-              initOption: markup.value, onChanged: (v) {
-            markup.value = v;
-            for (var element in selectedProducts) {
-              element.markup = v;
-              element.sellingPrice =
-                  controller.calcNewSellingPrice(element.cost, v);
-            }
-            selectedProducts.refresh();
-          }),
+         
           Ui.align(child: AppText.bold("Select Products")),
           Obx(() {
             return Column(
@@ -1894,7 +1885,8 @@ class BulkMarkup extends StatelessWidget {
                             controller: costTec,
                             keyboardType: TextInputType.number,
                             textInputAction: TextInputAction.next,
-                            readOnly: true,
+                            
+                            
                             textAlign: TextAlign.center,
                           ),
                         )),
@@ -1906,7 +1898,7 @@ class BulkMarkup extends StatelessWidget {
                             controller: priceTec,
                             keyboardType: TextInputType.number,
                             textInputAction: TextInputAction.next,
-                            readOnly: true,
+                            
                             textAlign: TextAlign.center,
                           ),
                         )),
@@ -1926,6 +1918,20 @@ class BulkMarkup extends StatelessWidget {
             selectedProducts.refresh();
           }),
           Ui.boxHeight(24),
+           CustomTextField.dropdown(
+              controller.filterOptions["markup"]!.titles,
+              controller.filterOptions["markup"]!.values,
+              TextEditingController(),
+              "Markup",
+              initOption: markup.value, onChanged: (v) {
+            markup.value = v;
+            for (var element in selectedProducts) {
+              element.markup = v;
+              element.sellingPrice =
+                  controller.calcNewSellingPrice(element.cost, v);
+            }
+            selectedProducts.refresh();
+          }),
           SizedBox(
               width: Ui.width(context) / 2,
               child: AppButton(

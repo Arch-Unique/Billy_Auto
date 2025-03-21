@@ -70,9 +70,9 @@ class AppPages {
 class AuthMiddleWare extends GetMiddleware {
   @override
   RouteSettings? redirect(String? route) {
-    if(GetPlatform.isMobile){
-    FlutterNativeSplash.remove();
-    final controller = Get.find<AppService>();
+    if (GetPlatform.isMobile) {
+      FlutterNativeSplash.remove();
+      final controller = Get.find<AppService>();
       if (controller.hasOpenedOnboarding.value) {
         if (controller.isLoggedIn.value) {
           return RouteSettings(name: AppRoutes.dashboard);
@@ -80,6 +80,7 @@ class AuthMiddleWare extends GetMiddleware {
           return const RouteSettings(name: AppRoutes.auth);
         }
       }
+      return super.redirect(route);
     }
     return super.redirect(route);
   }

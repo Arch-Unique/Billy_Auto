@@ -41,6 +41,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
 
   @override
   void initState() {
+    print("init");
     setPreviousStates();
     screens = [
       customerDetails(),
@@ -51,6 +52,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
       servicePlanDetails(),
       // maintenanceDetails()
     ];
+    print("init ended");
     super.initState();
   }
 
@@ -247,12 +249,14 @@ class _CheckList2PageState extends State<CheckList2Page> {
     );
 
     return [
-      CustomTextField2.dropdown<int>(
+      Builder(builder: (c) {
+        return CustomTextField2.dropdown<int>(
           controller.allCustomer.map((element) => element.fullName).toList(),
           controller.allCustomer.map((element) => element.id).toList(),
           controller.tecs[5],
-          "Select Customer", onChanged: (_) {
-        if (controller.tecs[5].text == "0") {
+          "Select Customer", useOld: false,initOption: currentCustomer.value.id,onChanged: (_) {
+            print(_);
+        if (controller.tecs[5].text == "") {
           currentCustomer.value = Customer(
               email: "",
               phone: "",
@@ -263,7 +267,9 @@ class _CheckList2PageState extends State<CheckList2Page> {
           currentCustomer.value = controller.allCustomer.firstWhere(
               (optv) => optv.id == int.parse(controller.tecs[5].text));
         }
-      }),
+      });
+      })
+      ,
       Obx(() {
         if (currentCustomer.value.id == 0) {
           return Column(
@@ -313,10 +319,10 @@ class _CheckList2PageState extends State<CheckList2Page> {
                   controller.tecs[3],
                   "Customer Type"),
               //Signature
-              Builder(builder: (context) {
-                return SignatureView(controller.userSig, "Customer Signature",
-                    size: wideUi(context));
-              }),
+              // Builder(builder: (context) {
+              //   return SignatureView(controller.userSig, "Customer Signature",
+              //       size: wideUi(context));
+              // }),
               
               ccu
             ],
@@ -406,7 +412,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
                   controller.allCarMakes.map((element) => element.id).toList(),
                   controller.tecs[6],
                   "Car Brand",
-                  initOption: carBrand.value, onChanged: (_) {
+                  initOption: carBrand.value,useOld: true, onChanged: (_) {
                 carBrand.value = controller.allCarMakes
                     .firstWhere(
                         (p0) => p0.id == int.parse(controller.tecs[6].text))
@@ -423,7 +429,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
                         .map((e) => e.id)
                         .toList(),
                     controller.tecs[7],
-                    "Car Model"),
+                    "Car Model",useOld: true),
               ),
               CustomTextField2.dropdown<String>(
                   List.generate(DateTime.now().year - 1980,
@@ -566,7 +572,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
               .toList(),
           controller.allServiceAdvisor.map((element) => element.id).toList(),
           controller.tecs[16],
-          "Select Service Advisor", onChanged: (v) {
+          "Select Service Advisor", onChanged: (_) {
         if ((int.tryParse(controller.tecs[16].text) ?? 0) == 0) {
           serviceAdvisor.value = User();
         } else {
@@ -578,7 +584,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
           controller.allTechnicians.map((element) => element.fullName).toList(),
           controller.allTechnicians.map((element) => element.id).toList(),
           controller.tecs[17],
-          "Select Technician", onChanged: (v) {
+          "Select Technician", onChanged: (_) {
         if ((int.tryParse(controller.tecs[17].text) ?? 0) == 0) {
           technician.value = User();
         } else {

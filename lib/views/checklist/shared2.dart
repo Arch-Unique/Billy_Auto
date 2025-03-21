@@ -224,9 +224,49 @@ class CustomTextField2 extends StatelessWidget {
 
   static dropdown<T>(List<String> optionss, List<T> valuess,
       TextEditingController cont, String label,
-      {Function(String)? onChanged, String? initOption, double? w}) {
+      {Function(String)? onChanged,
+      dynamic initOption,
+      double? w,
+      bool useOld = true}) {
+    if (!useOld) {
+      dynamic curOption;
+
+      final options = List.from(optionss);
+      final values = List.from(valuess);
+      if (options.isEmpty || (options[0] != "None" && values[0] != 0)) {
+        options.insert(0, "None");
+        dynamic defaultValue =
+            options.isEmpty ? 0 : (initOption.runtimeType == String ? "" : 0);
+        values.insert(0, defaultValue);
+      }
+
+      if (initOption.runtimeType == String) {
+        curOption = (initOption == null && initOption.isEmpty)
+            ? values[0]
+            : initOption;
+      } else {
+        curOption = (initOption == null) ? values[0] : initOption;
+      }
+      print("hello ${curOption.runtimeType}");
+      return CustomMultiDropdown(
+        optionss,
+        valuess,
+        cont,
+        label,
+        initValues: [curOption],
+        singleOnly: true,
+        isDrop2: true,
+        onChanged: (v) {
+          if (onChanged == null) return;
+          onChanged(v.toString());
+        },
+        isEnable: true,
+      );
+    }
+
     final options = List.from(optionss);
     final values = List.from(valuess);
+
     if (options.isEmpty || options[0] != "None") {
       options.insert(0, "None");
       T defaultValue = (T == int) ? 0 as T : "" as T;
@@ -248,6 +288,8 @@ class CustomTextField2 extends StatelessWidget {
         (initOption == null || initOption.isEmpty) ? options[0] : initOption;
 
     cont.text = values[options.indexOf(curOption)].toString();
+    print("$curOption --- ${cont.text}");
+
     return StatefulBuilder(builder: (context, setState) {
       return SizedBox(
         width: wideUi(context),
@@ -288,7 +330,7 @@ class CustomTextField2 extends StatelessWidget {
                         dropdownColor: AppColors.white,
                         items: options
                             .map((e) => DropdownMenuItem<String>(
-                                value: e, child: AppText.thin(e,att: true)))
+                                value: e, child: AppText.thin(e, att: true)))
                             .toList(),
                         onChanged: (value) {
                           setState(() {

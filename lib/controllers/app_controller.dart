@@ -375,7 +375,7 @@ class AppController extends GetxController {
           tec: TextEditingController(text: stt.toString()))
     ]);
     allPendingMarkupProducts.value =
-        allProducts.where((optv) => optv.markup == 0).toList();
+        allProducts.where((optv) => optv.markup == 0 && allStockBalances.map((f) => f.productId).contains(optv.id)).toList();
     allSuppliers.value = await _getAll<Supplier>();
     allInventory.value = await _getAll<Inventory>(fm: [
       FilterModel("stationId", "stationId", 0,
@@ -564,6 +564,12 @@ class AppController extends GetxController {
           FilterModel("fullName", "fullName", 1,
               tec: TextEditingController(
                   text: currentOrder.value.customerDetails!.fullName))
+                  ,FilterModel("email", "email", 1,
+              tec: TextEditingController(
+                  text: currentOrder.value.customerDetails!.email)),
+                  FilterModel("phone", "phone", 1,
+              tec: TextEditingController(
+                  text: currentOrder.value.customerDetails!.phone))
         ]);
         if (acust.total == 0) {
           final customer = await appRepo

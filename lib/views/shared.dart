@@ -1335,7 +1335,7 @@ class CustomMultiDropdown extends StatefulWidget {
   final List<dynamic> initValues;
   final TextEditingController controller;
   final String title;
-  final bool isEnable, singleOnly;
+  final bool isEnable, singleOnly,isDrop2;
   final Function(dynamic)? onChanged;
   const CustomMultiDropdown(
       this.options, this.values, this.controller, this.title,
@@ -1343,6 +1343,7 @@ class CustomMultiDropdown extends StatefulWidget {
       this.isEnable = true,
       this.onChanged,
       this.singleOnly = false,
+      this.isDrop2=false,
       super.key});
 
   @override
@@ -1357,6 +1358,33 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
       md = getMultiDropDown<String>();
     } else {
       md = getMultiDropDown<int>();
+    }
+    if(widget.isDrop2){
+      return StatefulBuilder(
+      builder: (context, setState) {
+        return SizedBox(
+          width: MediaQuery.of(context).size.width - 48,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+              children: [
+                if (widget.title.isNotEmpty) 
+                SizedBox(
+                    width: 100,
+                    child: AppText.thin(widget.title),),
+                Expanded(
+                  child: md,
+                ),
+              ],
+            ),
+              if (widget.title.isNotEmpty) const SizedBox(height: 32),
+            ],
+          ),
+        );
+      },
+    );
     }
 
     return StatefulBuilder(
@@ -1383,13 +1411,9 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       for (var element in widget.initValues) {
-        print(mdcont.selectedItems);
-        print(element);
-
         mdcont.selectWhere((p) {
           return element == p.value;
         });
-        print(mdcont.selectedItems);
       }
     });
 
@@ -1400,7 +1424,7 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
       selectedTextColor: AppColors.white,
     );
     final fdec = FieldDecoration(
-        hintText: "${widget.title}",
+        hintText: widget.title,
         suffixIcon: Icon(
           Icons.keyboard_arrow_down_rounded,
           color: AppColors.primaryColor,
@@ -1421,6 +1445,9 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
       onSelectionChange: (selectedItems) {
         if (selectedItems.isEmpty) {
           widget.controller.text = "";
+          if (widget.singleOnly && widget.isDrop2) {
+            widget.onChanged!("");
+          }
         } else {
           if (widget.singleOnly) {
             widget.controller.text = selectedItems[0].toString();

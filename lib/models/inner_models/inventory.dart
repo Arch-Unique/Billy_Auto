@@ -150,7 +150,7 @@ class InventoryMetricStockBalances extends UneditableModel {
 
   factory InventoryMetricStockBalances.fromJson(Map<String, dynamic> json) {
     return InventoryMetricStockBalances(
-      location: json["location"],
+      location: json["location"] ?? "Store 1",
       productId: json["productId"] ?? 0,
       productName: json["productName"],
       quantity: int.tryParse(json['quantity'].toString()) ?? 0,
