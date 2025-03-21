@@ -21,6 +21,7 @@ abstract class ApiService {
   Future<Response> post(String url, {dynamic data});
   Future<Response> patch(String url, {dynamic data});
   Future<Response> delete(String url, {dynamic data});
+  Future<Response> download(String url,String savePath);
   Future<Response> retryLastRequest();
   void cancelLastRequest();
 }
@@ -97,6 +98,16 @@ class DioApiService extends GetxService implements ApiService {
   @override
   Future<Response> get(String url, {bool hasToken = true}) async {
     final response = await _dio.get(url,
+        cancelToken: _cancelToken,
+        options: Options(headers: _getHeader(hasToken)));
+    _lastRequestOptions = response.requestOptions;
+
+    return response;
+  }
+
+    @override
+  Future<Response> download(String url,String savePath, {bool hasToken = true}) async {
+    final response = await _dio.download(url,savePath,
         cancelToken: _cancelToken,
         options: Options(headers: _getHeader(hasToken)));
     _lastRequestOptions = response.requestOptions;

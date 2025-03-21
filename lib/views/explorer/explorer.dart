@@ -102,12 +102,12 @@ class _ExplorerPageState extends State<ExplorerPage> {
             HeaderItem("Inventory", vb: () {
               controller.setCurrentTypeTable<Inventory>();
             }),
-          if (perm?.perms[AllTables.tablesType.indexOf(Expenses)]
-                  [1] ==
-              1)
-            HeaderItem("Bulk Expenses", vb: () {
-              controller.setCurrentTypeTable<BulkExpenses>();
-            }),
+          // if (perm?.perms[AllTables.tablesType.indexOf(Expenses)]
+          //         [1] ==
+          //     1)
+          //   HeaderItem("Bulk Expenses", vb: () {
+          //     controller.setCurrentTypeTable<BulkExpenses>();
+          //   }),
           if (perm?.perms[AllTables.tablesType.indexOf(Inventory)]
                   [1] ==
               1)

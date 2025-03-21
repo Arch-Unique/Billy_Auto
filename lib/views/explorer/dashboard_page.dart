@@ -51,42 +51,41 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
             Colors.red[100]!.withOpacity(0.7)),
         itemDataWidget("Total Revenue", controller.totalSales.toCurrency(),
             Colors.lightGreen[100]!.withOpacity(0.7)),
-        itemDataWidget(
-            "Total Expenses",
-            controller.totalExpenses.toCurrency(),
-            Colors.lightGreen[100]!.withOpacity(0.7)),
+        if (controller.appRepo.appService.currentUser.value.isAdmin)
+          itemDataWidget(
+              "Total Expenses",
+              controller.totalExpenses.toCurrency(),
+              Colors.lightGreen[100]!.withOpacity(0.7)),
         itemDataWidget(
             "Total Cost Of Goods Sold",
             controller.totalProductCost.toCurrency(),
             Colors.lightGreen[100]!.withOpacity(0.7)),
-        itemDataWidget(
-            "Total Gross Profit",
-            controller.totalProfit.toCurrency(),
-            controller.totalProfit <= 0
-                ? Colors.red[100]!.withOpacity(0.7)
-                : Colors.lightGreen[100]!.withOpacity(0.7)),
+        if (controller.appRepo.appService.currentUser.value.isAdmin)
+          itemDataWidget(
+              "Total Gross Profit",
+              controller.totalProfit.toCurrency(),
+              controller.totalProfit <= 0
+                  ? Colors.red[100]!.withOpacity(0.7)
+                  : Colors.lightGreen[100]!.withOpacity(0.7)),
       ];
-      return 
-      // Ui.width(context) < 975
-      //     ? Wrap(
-      //         children: cf
-      //             .map((e) => SizedBox(
-      //                   width: (Ui.width(context) - 48) / 2,
-      //                   child: e,
-      //                 ))
-      //             .toList(),
-      //       )
-      //     : 
-          SmartJustifyRow(
-            runSpacing: 16,
-            spacing: 16,
-              children: cf
-                  // .map((e) => Flexible(
-                  //       // width: (Ui.width(context) - 48) / 5,
-                  //       child: e,
-                  //     ))
-                  // .toList(),
-            );
+      return
+          // Ui.width(context) < 975
+          //     ? Wrap(
+          //         children: cf
+          //             .map((e) => SizedBox(
+          //                   width: (Ui.width(context) - 48) / 2,
+          //                   child: e,
+          //                 ))
+          //             .toList(),
+          //       )
+          //     :
+          SmartJustifyRow(runSpacing: 16, spacing: 16, children: cf
+              // .map((e) => Flexible(
+              //       // width: (Ui.width(context) - 48) / 5,
+              //       child: e,
+              //     ))
+              // .toList(),
+              );
     });
     return SingleChildScrollView(
       child: Padding(
@@ -113,27 +112,26 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
             Ui.boxHeight(24),
             cl,
             if (Ui.width(context) < 975)
-            Column(
-                          children: [
-                            SizedBox(
-                              height: Ui.height(context) / 2,
-                              width: Ui.width(context)-48,
-                              child: MyBarChart(),
-                            ),
-                            SizedBox(
-                              height: Ui.height(context) / 2,
-                              width: Ui.width(context)-48,
-                              child: ProfitChart(),
-                            )
-                          ],
-                        ),
+              Column(
+                children: [
+                  SizedBox(
+                    height: Ui.height(context) / 2,
+                    width: Ui.width(context) - 48,
+                    child: MyBarChart(),
+                  ),
+                  SizedBox(
+                    height: Ui.height(context) / 2,
+                    width: Ui.width(context) - 48,
+                    child: ProfitChart(),
+                  )
+                ],
+              ),
             if (Ui.width(context) >= 975)
               SizedBox(
                   height: Ui.height(context),
                   child: Align(
                     alignment: Alignment.topCenter,
                     child: Row(
-                      
                       children: [
                         Column(
                           children: [
@@ -351,8 +349,9 @@ class _MyBarChartState extends State<MyBarChart> {
     // Group orders by month-year
     groupedOrdersByMonth = {};
     for (var order in Get.find<AppController>().allOrders) {
-      if(!order.isDispatched) continue;
-      DateTime month = DateTime(order.dispatchedAt!.year, order.dispatchedAt!.month);
+      if (!order.isDispatched) continue;
+      DateTime month =
+          DateTime(order.dispatchedAt!.year, order.dispatchedAt!.month);
       if (groupedOrdersByMonth.containsKey(month)) {
         groupedOrdersByMonth[month] = groupedOrdersByMonth[month]! + 1;
       } else {
@@ -363,9 +362,9 @@ class _MyBarChartState extends State<MyBarChart> {
     // Group orders by day
     groupedOrdersByDay = {};
     for (var order in Get.find<AppController>().allOrders) {
-      if(!order.isDispatched) continue;
-      DateTime day = DateTime(
-          order.dispatchedAt!.year, order.dispatchedAt!.month, order.dispatchedAt!.day);
+      if (!order.isDispatched) continue;
+      DateTime day = DateTime(order.dispatchedAt!.year,
+          order.dispatchedAt!.month, order.dispatchedAt!.day);
       if (groupedOrdersByDay.containsKey(day)) {
         groupedOrdersByDay[day] = groupedOrdersByDay[day]! + 1;
       } else {
@@ -376,7 +375,7 @@ class _MyBarChartState extends State<MyBarChart> {
     // Group orders by year
     groupedOrdersByYear = {};
     for (var order in Get.find<AppController>().allOrders) {
-      if(!order.isDispatched) continue;
+      if (!order.isDispatched) continue;
       DateTime year = DateTime(order.dispatchedAt!.year);
       if (groupedOrdersByYear.containsKey(year)) {
         groupedOrdersByYear[year] = groupedOrdersByYear[year]! + 1;
@@ -409,7 +408,11 @@ class _MyBarChartState extends State<MyBarChart> {
       last6Months.add(month);
       orderCnt.add(groupedOrdersByMonth[month] ?? 0);
     }
-    orderMax = Get.find<AppController>().appConstants.value.monthlyOrdersTarget.toInt();
+    orderMax = Get.find<AppController>()
+        .appConstants
+        .value
+        .monthlyOrdersTarget
+        .toInt();
     return last6Months;
   }
 
@@ -424,7 +427,8 @@ class _MyBarChartState extends State<MyBarChart> {
       last6Days.add(day);
       orderCnt.add(groupedOrdersByDay[day] ?? 0);
     }
-    orderMax = Get.find<AppController>().appConstants.value.dailyOrdersTarget.toInt();
+    orderMax =
+        Get.find<AppController>().appConstants.value.dailyOrdersTarget.toInt();
     return last6Days;
   }
 
@@ -438,7 +442,8 @@ class _MyBarChartState extends State<MyBarChart> {
       last6Years.add(year);
       orderCnt.add(groupedOrdersByYear[year] ?? 0);
     }
-    orderMax = Get.find<AppController>().appConstants.value.yearlyOrdersTarget.toInt();
+    orderMax =
+        Get.find<AppController>().appConstants.value.yearlyOrdersTarget.toInt();
     return last6Years;
   }
 
@@ -520,8 +525,7 @@ class _MyBarChartState extends State<MyBarChart> {
           axisNameWidget: Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: AppText.bold("Orders per ${currentFilter}",
-            fontSize: 14,
-                fontFamily: Assets.appFontFamily2),
+                fontSize: 14, fontFamily: Assets.appFontFamily2),
           ),
           sideTitles: const SideTitles(showTitles: false),
         ),
@@ -563,36 +567,35 @@ class _MyBarChartState extends State<MyBarChart> {
 
   // LinearGradient get _barsGradient => const ;
 
-  List<BarChartGroupData> get barGroups => List.generate(
-      datePoints.length,
-      (index) {
+  List<BarChartGroupData> get barGroups =>
+      List.generate(datePoints.length, (index) {
         final lp = orderCnt[index] < orderMax;
         return BarChartGroupData(
-            x: index,
-            barRods: [
-              BarChartRodData(
-                  toY: orderCnt[index].toDouble(),
-                  // color: lp ? AppColors.,
-                  gradient: 
-                  LinearGradient(
-        colors: [
-          
-          lp ? AppColors.primaryColor : AppColors.green.withOpacity(0.9), 
-          lp ? AppColors.orange : AppColors.green,
-        ],
-        begin: Alignment.bottomCenter,
-        end: Alignment.topCenter,
-      ),
-                  borderRadius: BorderRadius.circular(8),
-                  width: 56)
-            ],
-            showingTooltipIndicators: [0],
-          );
+          x: index,
+          barRods: [
+            BarChartRodData(
+                toY: orderCnt[index].toDouble(),
+                // color: lp ? AppColors.,
+                gradient: LinearGradient(
+                  colors: [
+                    lp
+                        ? AppColors.primaryColor
+                        : AppColors.green.withOpacity(0.9),
+                    lp ? AppColors.orange : AppColors.green,
+                  ],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                ),
+                borderRadius: BorderRadius.circular(8),
+                width: 56)
+          ],
+          showingTooltipIndicators: [0],
+        );
       });
 }
 
 class ChartHeaderChooser extends StatelessWidget {
-  const ChartHeaderChooser(this.title,{super.key});
+  const ChartHeaderChooser(this.title, {super.key});
   final String title;
 
   @override
@@ -733,7 +736,8 @@ class _ProfitChartState extends State<ProfitChart> {
               p.date.day == date.day,
           orElse: () => InventoryMetricDailyProfit(date: date),
         );
-        profitMax = Get.find<AppController>().appConstants.value.dailyProfitTarget;
+        profitMax =
+            Get.find<AppController>().appConstants.value.dailyProfitTarget;
         return getProfitValue(profit);
 
       case "Month":
@@ -741,7 +745,8 @@ class _ProfitChartState extends State<ProfitChart> {
           (p) => p.date.year == date.year && p.date.month == date.month,
           orElse: () => InventoryMetricMonthlyProfit(date: date),
         );
-        profitMax = Get.find<AppController>().appConstants.value.monthlyProfitTarget;
+        profitMax =
+            Get.find<AppController>().appConstants.value.monthlyProfitTarget;
         return getProfitValue(profit);
 
       case "Year":
@@ -749,7 +754,8 @@ class _ProfitChartState extends State<ProfitChart> {
           (p) => p.date.year == date.year,
           orElse: () => InventoryMetricYearlyProfit(date: date),
         );
-        profitMax = Get.find<AppController>().appConstants.value.yearlyProfitTarget;
+        profitMax =
+            Get.find<AppController>().appConstants.value.yearlyProfitTarget;
         return getProfitValue(profit);
 
       default:
@@ -786,8 +792,9 @@ class _ProfitChartState extends State<ProfitChart> {
                         width: 150,
                         margin: const EdgeInsets.only(right: 8),
                         child: CustomTextField.dropdown(
-                            ["Sales", "Profit", "Expenses"],
-                            ["Sales", "Profit", "Expenses"],
+                            (Get.find<AppController>().appRepo.appService.currentUser.value.isAdmin) ? ["Sales", "Profit", "Expenses"] : ["Sales"],
+                            (Get.find<AppController>().appRepo.appService.currentUser.value.isAdmin) ? ["Sales", "Profit", "Expenses"] : ["Sales"],
+                            
                             profitTypeTec,
                             "",
                             initOption: profitType, onChanged: (value) {
@@ -903,13 +910,16 @@ class _ProfitChartState extends State<ProfitChart> {
                 final lp = getProfitForDate(datePoints[index]) < profitMax;
                 return FlDotCirclePainter(
                   radius: 8,
-                  color: lp ? AppColors.primaryColor: (profitType == "Expenses" ? AppColors.primaryColor : AppColors.green),
+                  color: lp
+                      ? AppColors.primaryColor
+                      : (profitType == "Expenses"
+                          ? AppColors.primaryColor
+                          : AppColors.green),
                   strokeWidth: 1,
                   strokeColor: Colors.white,
                 );
               },
             ),
-
             belowBarData: BarAreaData(
               show: true,
               color: AppColors.primaryColor.withOpacity(0.2),

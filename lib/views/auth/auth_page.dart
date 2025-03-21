@@ -7,8 +7,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:inventory/controllers/app_controller.dart';
 import 'package:inventory/repo/app_repo.dart';
 import 'package:inventory/tools/assets.dart';
+import 'package:inventory/tools/auto_updater.dart';
 import 'package:inventory/tools/enums.dart';
 import 'package:inventory/tools/service.dart';
+import 'package:inventory/tools/urls.dart';
 import 'package:inventory/tools/validators.dart';
 import 'package:inventory/views/checklist/checklist2.dart';
 import 'package:inventory/views/checklist/history.dart';
@@ -94,10 +96,25 @@ class _AuthPageState extends State<AuthPage> {
 }
 
 //ONLY IN DEMO
-class ChoosePage extends StatelessWidget {
+class ChoosePage extends StatefulWidget {
   const ChoosePage({super.key});
   static final pages = ["Service Order", "Order History", "Admin Dashboard"];
   static final assets = [Assets.s1, Assets.s2, Assets.s3];
+
+  @override
+  State<ChoosePage> createState() => _ChoosePageState();
+}
+
+class _ChoosePageState extends State<ChoosePage> {
+  final au = AutoUpdater(updateUrl: AppUrls.storage);
+  RxInt version = 0.obs;
+
+  getLatestUpdate() async {
+    if (GetPlatform.isDesktop &&
+        version.value < Get.find<AppController>().appConstants.value.version) {
+      await au.performUpdate();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +167,7 @@ class ChoosePage extends StatelessWidget {
                         ? 3
                         : 2,
                     (index) => CurvedContainer(
-                          height: 100,
+                          height: 84,
                           width: wideUi(context),
                           radius: 16,
                           onPressed: () {
@@ -176,7 +193,7 @@ class ChoosePage extends StatelessWidget {
                                       width: 100,
                                       color: AppColors.white,
                                       child: Image.asset(
-                                        assets[index],
+                                        ChoosePage.assets[index],
                                         height: 100,
                                         width: 100,
                                         fit: BoxFit.cover,
@@ -196,7 +213,7 @@ class ChoosePage extends StatelessWidget {
                                 ],
                               ),
                               Ui.spacer(),
-                              AppText.bold(pages[index],
+                              AppText.bold(ChoosePage.pages[index],
                                   fontSize: 20, color: AppColors.primaryColor),
                               Ui.spacer(),
                               SizedBox(
@@ -205,85 +222,123 @@ class ChoosePage extends StatelessWidget {
                             ],
                           ),
                         )),
-                // actionBody("Service Order", "Order History", Assets.s1, Assets.s2,
-                //     () {
-                //   Get.to(CheckList2Page());
-                // }, () {
-                //   Get.to(OrderHistoryPage());
-                // }),
-                // Ui.boxHeight(24),
-                // if (!GetPlatform.isMobile)
-                //   actionItem("Inventory", Assets.s3, () {
-                //     Get.to(ExplorerPage());
-                //   }),
                 Ui.spacer(),
-                InkWell(
-                  onTap: () {
-                    Get.dialog(AppDialog(
-                        title: AppText.medium("Change Station"),
-                        content: SingleChildScrollView(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: List.generate(
-                                Get.find<AppController>().allStations.length,
-                                (i) {
-                              return Ui.padding(
-                                child: ListTile(
-                                  tileColor: AppColors.primaryColor,
-                                  selectedTileColor: AppColors.orange,
-                                  selected: Get.find<AppController>()
-                                            .allStations[i]
-                                            .id ==
-                                        Get.find<AppService>()
-                                            .currentStation
-                                            .value,
-                                  title: AppText.thin(Get.find<AppController>()
-                                      .allStations[i]
-                                      .name,color: AppColors.white),
-                                  onTap: () async {
-                                    if (Get.find<AppController>()
-                                            .allStations[i]
-                                            .id !=
-                                        Get.find<AppService>()
-                                            .currentStation
-                                            .value) {
-                                      await Get.find<AppService>().saveStation(
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        Get.dialog(AppDialog(
+                            title: AppText.medium("Change Station"),
+                            content: SingleChildScrollView(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: List.generate(
+                                    Get.find<AppController>()
+                                        .allStations
+                                        .length, (i) {
+                                  return Ui.padding(
+                                    child: ListTile(
+                                      tileColor: AppColors.primaryColor,
+                                      selectedTileColor: AppColors.orange,
+                                      selected: Get.find<AppController>()
+                                              .allStations[i]
+                                              .id ==
+                                          Get.find<AppService>()
+                                              .currentStation
+                                              .value,
+                                      title: AppText.thin(
                                           Get.find<AppController>()
                                               .allStations[i]
-                                              .id);
-                                      await Get.find<AppController>()
-                                          .refreshAllData();
-                                    }
-                                    Get.back();
-                                  },
-                                ),
-                              );
+                                              .name,
+                                          color: AppColors.white),
+                                      onTap: () async {
+                                        if (Get.find<AppController>()
+                                                .allStations[i]
+                                                .id !=
+                                            Get.find<AppService>()
+                                                .currentStation
+                                                .value) {
+                                          await Get.find<AppService>()
+                                              .saveStation(
+                                                  Get.find<AppController>()
+                                                      .allStations[i]
+                                                      .id);
+                                          await Get.find<AppController>()
+                                              .refreshAllData();
+                                        }
+                                        Get.back();
+                                      },
+                                    ),
+                                  );
+                                }),
+                              ),
+                            )));
+                      },
+                      child: Ui.padding(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AppIcon(
+                              Icons.location_city_rounded,
+                              color: AppColors.primaryColor,
+                            ),
+                            Ui.boxWidth(12),
+                            Obx(() {
+                              return AppText.thin(Get.find<AppController>()
+                                  .allStations
+                                  .where((test) =>
+                                      test.id ==
+                                      Get.find<AppService>()
+                                          .currentStation
+                                          .value)
+                                  .first
+                                  .name);
                             }),
-                          ),
-                        )));
-                  },
-                  child: Ui.padding(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        AppIcon(
-                          Icons.location_city_rounded,
-                          color: AppColors.primaryColor,
+                          ],
                         ),
-                        Ui.boxWidth(12),
-                        Obx(() {
-                          return AppText.thin(Get.find<AppController>()
-                              .allStations
-                              .where((test) =>
-                                  test.id ==
-                                  Get.find<AppService>().currentStation.value)
-                              .first
-                              .name);
-                        })
-                      ],
+                      ),
                     ),
-                  ),
-                )
+                    // if (GetPlatform.isDesktop)
+                    //   Obx(() {
+                    //     return InkWell(
+                    //       onTap: () async {
+                    //         Get.dialog(
+                    //           AppDialog.normal("Update App",
+                    //               "Are you sure you want to update this app ? The current version will be closed and the setup of the new one will be downloaded and installed",
+                    //               titleA: "Yes",
+                    //               titleB: "No", onPressedA: () async {
+                    //             await getLatestUpdate();
+                    //           }, onPressedB: () {
+                    //             Get.back();
+                    //           }),
+                    //         );
+                    //       },
+                    //       child: Padding(
+                    //         padding: EdgeInsets.all(8),
+                    //         child: AppText.thin(
+                    //             Get.find<AppController>()
+                    //                         .appConstants
+                    //                         .value
+                    //                         .version !=
+                    //                     version.value
+                    //                 ? "Version ${version.value} - A new version is available (Click to Download)"
+                    //                 : "Version ${version.value}",
+                    //             fontSize: 12,
+                    //             color: Get.find<AppController>()
+                    //                         .appConstants
+                    //                         .value
+                    //                         .version !=
+                    //                     version.value
+                    //                 ? AppColors.primaryColor
+                    //                 : AppColors.textColor),
+                    //       ),
+                    //     );
+                    //   }),
+                  
+                  ],
+                ),
+                Ui.boxHeight(24),
               ],
             ),
           ),

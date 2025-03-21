@@ -355,7 +355,6 @@ class AppController extends GetxController {
           tec: TextEditingController(text: stt.toString()))
     ]);
     appConstants.value = allAC.isEmpty ? AppConstants() : allAC[0];
-    
 
     await initMetrics();
     allBillyServices.value = await _getAll<BillyServices>();
@@ -560,17 +559,48 @@ class AppController extends GetxController {
           currentOrder.value.customerDetails?.signature =
               await appRepo.uploadPhoto(imgPath.path) ?? "";
         }
-        final customer =
-            await appRepo.create<Customer>(currentOrder.value.customerDetails!);
-        currentOrder.value.customerId = customer;
-        currentOrder.value.customerCar?.customerId = customer;
+        //first check if customer exists
+        final acust = await appRepo.getAll<Customer>(fm: [
+          FilterModel("fullName", "fullName", 1,
+              tec: TextEditingController(
+                  text: currentOrder.value.customerDetails!.fullName))
+        ]);
+        if (acust.total == 0) {
+          final customer = await appRepo
+              .create<Customer>(currentOrder.value.customerDetails!);
+          currentOrder.value.customerId = customer;
+          currentOrder.value.customerCar?.customerId = customer;
+        } else {
+          currentOrder.value.customerId = acust.data[0].id;
+          currentOrder.value.customerCar?.customerId = acust.data[0].id;
+        }
       }
       if (currentOrder.value.carId == 0) {
-        final car =
-            await appRepo.create<CustomerCar>(currentOrder.value.customerCar!);
-        currentOrder.value.carId = car;
+        //first check if car exists
+        final acust = await appRepo.getAll<CustomerCar>(fm: [
+          FilterModel("modelId", "modelId", 1,
+              tec: TextEditingController(
+                  text: currentOrder.value.customerCar!.modelId.toString())),
+          FilterModel("makeId", "makeId", 1,
+              tec: TextEditingController(
+                  text: currentOrder.value.customerCar!.makeId.toString())),
+          FilterModel("year", "year", 1,
+              tec: TextEditingController(
+                  text: currentOrder.value.customerCar!.year)),
+          FilterModel("customerId", "customerId", 1,
+              tec: TextEditingController(
+                  text: currentOrder.value.customerCar!.customerId.toString()))
+        ]);
+        if (acust.total == 0) {
+          final car = await appRepo
+              .create<CustomerCar>(currentOrder.value.customerCar!);
+          currentOrder.value.carId = car;
+        } else {
+          currentOrder.value.carId = acust.data[0].id;
+        }
       }
-      currentOrder.value.stationId = Get.find<AppService>().currentStation.value;
+      currentOrder.value.stationId =
+          Get.find<AppService>().currentStation.value;
       if (!currentOrder.value.validate()) {
         throw "Order Details incomplete";
       }

@@ -7,9 +7,8 @@ import 'package:inventory/views/onboarding/splashscreen.dart';
 
 abstract class AppUrls {
   static const String baseURL = 'https://billy.archyuniq.com';
-
-
   static const String profile = "/profile";
+  static const String storage = "$baseURL/storage/billyautoplussetup.exe";
 
   static const String user = "/user";
   static const String supplier = "/supplier$profile";

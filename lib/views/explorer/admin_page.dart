@@ -143,73 +143,75 @@ class _CustomTableState extends State<CustomTable> {
                       },
                       text: "Export"),
                 ),
-                if(perm?.perms[AllTables.tablesType.indexOf(controller.currentBaseModel.value.runtimeType)][0] == 1)
-                Material(
-                  color: AppColors.green,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: AppIcon(
-                    Icons.add,
-                    color: AppColors.white,
-                    onTap: () async {
-                      if (controller.noActionModel()) return;
-                      if (!Get.find<AppService>()
-                          .currentUser
-                          .value
-                          .isServiceAdvisor) {
-                        Ui.showError("Not enough permissions");
-                        return;
-                      }
-                      Get.find<AppController>().startLoading();
-                      if (controller.currentBaseModel.value.runtimeType ==
-                          BulkExpenses) {
-                        (controller.currentBaseModel.value as BulkExpenses)
-                            .expenses = (await Get.find<AppRepo>()
-                                .getAll<Expenses>(
-                                    rurl: AppUrls.expensesMetric,
-                                    date: (controller.currentBaseModel.value
-                                            as BulkExpenses)
-                                        .date
-                                        .toSQLDate()))
-                            .data;
-                      }
-
-                      Get.find<AppController>().stopLoading();
-                      if (controller.currentBaseModel.value.runtimeType ==
-                          BulkExpenses) {
-                        Get.dialog(AppDialog(
-                            title: AppText.medium("Add/Edit New Record"),
-                            content: Obx(() {
-                              return DynamicFormGenerator(
-                                  model: controller.currentBaseModel.value,
-                                  isNew: (controller.currentBaseModel.value
-                                              .runtimeType !=
-                                          BulkExpenses &&
-                                      (controller.currentBaseModel.value
+                if (perm?.perms[AllTables.tablesType.indexOf(
+                        controller.currentBaseModel.value.runtimeType)][0] ==
+                    1)
+                  Material(
+                    color: AppColors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: AppIcon(
+                      Icons.add,
+                      color: AppColors.white,
+                      onTap: () async {
+                        if (controller.noActionModel()) return;
+                        if (!Get.find<AppService>()
+                            .currentUser
+                            .value
+                            .isServiceAdvisor) {
+                          Ui.showError("Not enough permissions");
+                          return;
+                        }
+                        Get.find<AppController>().startLoading();
+                        if (controller.currentBaseModel.value.runtimeType ==
+                            BulkExpenses) {
+                          (controller.currentBaseModel.value as BulkExpenses)
+                              .expenses = (await Get.find<AppRepo>()
+                                  .getAll<Expenses>(
+                                      rurl: AppUrls.expensesMetric,
+                                      date: (controller.currentBaseModel.value
                                               as BulkExpenses)
-                                          .expenses
-                                          .isEmpty),
-                                  onSave: (v) async {
-                                    await controller.saveNewRecord(v);
-                                  });
-                            })));
-                      } else {
-                        Get.dialog(AppDialog(
-                            title: AppText.medium("Add New Record"),
-                            content: Obx(() {
-                              return DynamicFormGenerator(
-                                  model: controller.currentBaseModel.value,
-                                  isNew: true,
-                                  onSave: (v) async {
-                                    await controller.saveNewRecord(v);
-                                  });
-                            })));
-                      }
-                    },
-                    size: 40,
-                  ),
-                ), //add new
+                                          .date
+                                          .toSQLDate()))
+                              .data;
+                        }
+
+                        Get.find<AppController>().stopLoading();
+                        if (controller.currentBaseModel.value.runtimeType ==
+                            BulkExpenses) {
+                          Get.dialog(AppDialog(
+                              title: AppText.medium("Add/Edit New Record"),
+                              content: Obx(() {
+                                return DynamicFormGenerator(
+                                    model: controller.currentBaseModel.value,
+                                    isNew: (controller.currentBaseModel.value
+                                                .runtimeType !=
+                                            BulkExpenses &&
+                                        (controller.currentBaseModel.value
+                                                as BulkExpenses)
+                                            .expenses
+                                            .isEmpty),
+                                    onSave: (v) async {
+                                      await controller.saveNewRecord(v);
+                                    });
+                              })));
+                        } else {
+                          Get.dialog(AppDialog(
+                              title: AppText.medium("Add New Record"),
+                              content: Obx(() {
+                                return DynamicFormGenerator(
+                                    model: controller.currentBaseModel.value,
+                                    isNew: true,
+                                    onSave: (v) async {
+                                      await controller.saveNewRecord(v);
+                                    });
+                              })));
+                        }
+                      },
+                      size: 40,
+                    ),
+                  ), //add new
               ],
               columns: Ui.width(context) < 975
                   ? [
@@ -736,6 +738,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
   final _formKey = GlobalKey<FormState>();
   final Map<String, dynamic> _formData = {};
   final Map<String, TextEditingController> _controllers = {};
+  RxInt makeId = 1.obs;
 
   @override
   void initState() {
@@ -792,10 +795,15 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
                   fieldName == "status"))) {
         return SizedBox();
       }
-      return CustomTextField.dropdown(
+      List<String> titles =
           Get.find<AppController>().filterOptions[fieldName]?.titles ??
-              ["None"],
-          Get.find<AppController>().filterOptions[fieldName]?.values ?? [0],
+              ["None"];
+      List<dynamic> values =
+          Get.find<AppController>().filterOptions[fieldName]?.values ?? [0];
+
+      final cdd = CustomTextField.dropdown(
+          titles,
+          values,
           _controllers[fieldName]!,
           "Select ${_formatFieldName(fieldName).replaceAll(" id", "")}",
           useOld: false,
@@ -838,6 +846,9 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
             final pd = double.tryParse(_controllers["cost"]!.text) ?? 0;
             _controllers["sellingPrice"]!.text =
                 Get.find<AppController>().calcNewSellingPrice(pd, a).toString();
+          } else if (widget.model.runtimeType == CustomerCar &&
+              fieldName == "makeId") {
+            makeId.value = a;
           }
         } catch (e) {
           // TODO
@@ -845,6 +856,27 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
           print(e);
         }
       });
+
+      if (widget.model.runtimeType == CustomerCar && fieldName == "modelId") {
+        return Obx(() {
+          print(makeId.value);
+          final nt = Get.find<AppController>().allCarModels.where((p0) =>
+              p0.makeId == (int.tryParse(_controllers["makeId"]!.text) ?? 0));
+          titles = nt.map((e) => e.model).toList();
+          values = nt.map((e) => e.id).toList();
+          return CustomTextField.dropdown(
+            titles,
+            values,
+            _controllers[fieldName]!,
+            "Select ${_formatFieldName(fieldName).replaceAll(" id", "")}",
+            useOld: false,
+            initOption: value,
+            onChanged: (_){}
+          );
+        });
+      } else {
+        return cdd;
+      }
     }
 
     if (fieldName.endsWith("signature")) {

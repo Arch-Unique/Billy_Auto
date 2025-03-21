@@ -13,6 +13,7 @@ import 'controllers/dependency.dart';
 import 'tools/urls.dart';
 // import 'views/test.dart';
 
+
 void main() async {
   final wd = WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
@@ -45,6 +46,7 @@ void main() async {
   }
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
