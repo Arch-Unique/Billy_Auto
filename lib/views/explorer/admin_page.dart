@@ -865,14 +865,13 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
           titles = nt.map((e) => e.model).toList();
           values = nt.map((e) => e.id).toList();
           return CustomTextField.dropdown(
-            titles,
-            values,
-            _controllers[fieldName]!,
-            "Select ${_formatFieldName(fieldName).replaceAll(" id", "")}",
-            useOld: false,
-            initOption: value,
-            onChanged: (_){}
-          );
+              titles,
+              values,
+              _controllers[fieldName]!,
+              "Select ${_formatFieldName(fieldName).replaceAll(" id", "")}",
+              useOld: false,
+              initOption: value,
+              onChanged: (_) {});
         });
       } else {
         return cdd;
@@ -915,13 +914,17 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
           .allBillyConditions
           .map((element) => element.id)
           .toList();
+
       List<dynamic> conds = (jsonDecode(value) as List);
       List<int> newConds = [];
-      for (var i = 0; i < options.length; i++) {
-        if (conds[i] as int != 0) {
-          newConds.add(values[i]);
+      if (!widget.isNew) {
+        for (var i = 0; i < options.length; i++) {
+          if (conds[i] as int != 0) {
+            newConds.add(values[i]);
+          }
         }
       }
+
       return CustomMultiDropdown(
         options,
         values,
