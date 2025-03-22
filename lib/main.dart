@@ -13,22 +13,23 @@ import 'controllers/dependency.dart';
 import 'tools/urls.dart';
 // import 'views/test.dart';
 
-
 void main() async {
   final wd = WidgetsFlutterBinding.ensureInitialized();
-  await windowManager.ensureInitialized();
-  final isRunning = await FlutterSingleInstance().isFirstInstance();
+  if (GetPlatform.isDesktop) {
+    await windowManager.ensureInitialized();
+    final isRunning = await FlutterSingleInstance().isFirstInstance();
 
-  if (!isRunning) {
-    print("App is already running");
+    if (!isRunning) {
+      print("App is already running");
 
-    final err = await FlutterSingleInstance().focus();
+      final err = await FlutterSingleInstance().focus();
 
-    if (err != null) {
-      print("Error focusing running instance: $err");
+      if (err != null) {
+        print("Error focusing running instance: $err");
+      }
+
+      exit(0);
     }
-
-    exit(0);
   }
 
   await GetStorage.init();
@@ -46,7 +47,6 @@ void main() async {
   }
   runApp(const MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
