@@ -53,7 +53,7 @@ class _OrderSummaryState extends State<OrderSummary> {
       if (fg.isNotEmpty) {
         invoice.value = fg.first;
       }
-      ltec.text = invoice.value.labourCost.toString();
+      ltec.text = invoice.value.labourCost.toCurrencyString();
     }
     print(ltec.text);
     super.initState();

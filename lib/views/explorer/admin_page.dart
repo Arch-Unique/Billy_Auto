@@ -772,13 +772,16 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
             fieldName == "sellingPrice")) {
       return SizedBox();
     }
-    if (!Get.find<AppService>().currentUser.value.isAdmin &&
+    if (
+      // !Get.find<AppService>().currentUser.value.isAdmin &&
         (fieldName == "markup")) {
       return SizedBox();
     }
-    if (!Get.find<AppService>().currentUser.value.isAdmin &&
+    if (
+      // !Get.find<AppService>().currentUser.value.isAdmin &&
         (fieldName == "sellingPrice") &&
-        (double.tryParse(_controllers["markup"]!.text) ?? 0) == 0) {
+        ((double.tryParse(_controllers["markup"]!.text) ?? 0) == 0 ||
+            (double.tryParse(_controllers["sellingPrice"]!.text) ?? 0) == 0)) {
       return SizedBox();
     }
     if (fieldName.endsWith("Id") ||
@@ -844,8 +847,9 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
           } else if (widget.model.runtimeType == Inventory &&
               fieldName == "markup") {
             final pd = double.tryParse(_controllers["cost"]!.text) ?? 0;
-            _controllers["sellingPrice"]!.text =
-                Get.find<AppController>().calcNewSellingPrice(pd, a).toString();
+            _controllers["sellingPrice"]!.text = Get.find<AppController>()
+                .calcNewSellingPrice(pd, a)
+                .toCurrencyString();
           } else if (widget.model.runtimeType == CustomerCar &&
               fieldName == "makeId") {
             makeId.value = a;
@@ -1021,7 +1025,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
           } else {
             _controllers["sellingPrice"]!.text = Get.find<AppController>()
                 .calcNewSellingPrice(cd, pd)
-                .toString();
+                .toCurrencyString();
           }
         }
       },
@@ -1130,7 +1134,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
     if (widget.model.runtimeType == Invoice) {
       Rx<Invoice> inv = (widget.model as Invoice).obs;
       TextEditingController ltec =
-          TextEditingController(text: inv.value.labourCost.toString());
+          TextEditingController(text: inv.value.labourCost.toCurrencyString());
       if (widget.isNew) {
         inv.value = Invoice(servicesUsed: [], productsUsed: []);
       }
@@ -1361,7 +1365,8 @@ class ExpensesItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final qtyTec = TextEditingController(text: expense.rawCost.toString());
+    final qtyTec =
+        TextEditingController(text: expense.rawCost.value.toCurrencyString());
 
     return SizedBox(
       width: Ui.width(context),
@@ -1826,16 +1831,32 @@ class BulkMarkup extends StatelessWidget {
             pending.value = v;
             selectedProducts.refresh();
           }),
-          Ui.align(child: AppText.bold("Select Products")),
+          Row(
+            children: [
+              Expanded(flex: 3, child: AppText.bold("Select Products")),
+              Expanded(
+                  flex: 1,
+                  child: AppText.thin("Cost\nPrice",
+                      att: true, alignment: TextAlign.center)),
+              Expanded(
+                  flex: 1,
+                  child: AppText.thin("Markup",
+                      att: true, alignment: TextAlign.center)),
+              Expanded(
+                  flex: 1,
+                  child: AppText.thin("Selling\nPrice",
+                      att: true, alignment: TextAlign.center)),
+            ],
+          ),
           Obx(() {
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: List.generate(selectedProducts.length, (i) {
                 // Product e = selectedProducts[i];
                 final costTec = TextEditingController(
-                    text: selectedProducts[i].cost.toString());
+                    text: selectedProducts[i].cost.toCurrencyString());
                 final priceTec = TextEditingController(
-                    text: selectedProducts[i].sellingPrice.toCurrency());
+                    text: selectedProducts[i].sellingPrice.toCurrencyString());
                 final ctt = controller
                     .filterOptions[
                         pending.value == 1 ? "productId" : "productId3"]!
@@ -1862,15 +1883,20 @@ class BulkMarkup extends StatelessWidget {
                                 : controller.allPendingMarkupProducts
                                     .where((b) => b.id == p0)
                                     .first;
+                            if (pending.value != 1) {
+                              selectedProducts[i].sellingPrice =
+                                  controller.calcNewSellingPrice(
+                                      selectedProducts[i].cost,
+                                      selectedProducts[i].markup);
+                              selectedProducts[i].markup =
+                                  selectedProducts[i].markup;
+                            }
 
-                            selectedProducts[i].sellingPrice =
-                                controller.calcNewSellingPrice(
-                                    selectedProducts[i].cost, markup.value);
-                            selectedProducts[i].markup = markup.value;
-                            priceTec.text =
-                                selectedProducts[i].sellingPrice.toCurrency();
+                            priceTec.text = selectedProducts[i]
+                                .sellingPrice
+                                .toCurrencyString();
                             costTec.text =
-                                selectedProducts[i].cost.toString();
+                                selectedProducts[i].cost.toCurrencyString();
                             selectedProducts.refresh();
                           }
                         })),
@@ -1887,16 +1913,36 @@ class BulkMarkup extends StatelessWidget {
                                   double.tryParse(costTec.text) ?? 0;
                               selectedProducts[i].sellingPrice =
                                   controller.calcNewSellingPrice(
-                                      selectedProducts[i].cost, markup.value);
-                              selectedProducts[i].markup = markup.value;
-                              priceTec.text =
-                                  selectedProducts[i].sellingPrice.toCurrency();
-                              
+                                      selectedProducts[i].cost,
+                                      selectedProducts[i].markup);
+                              selectedProducts[i].markup =
+                                  selectedProducts[i].markup;
+                              priceTec.text = selectedProducts[i]
+                                  .sellingPrice
+                                  .toCurrencyString();
+
                               // selectedProducts.refresh();
                             },
                             textAlign: TextAlign.center,
                           ),
                         )),
+                    Expanded(
+                      flex: 1,
+                      child: CustomTextField.dropdown(
+                          controller.filterOptions["markup"]!.titles,
+                          controller.filterOptions["markup"]!.values,
+                          TextEditingController(),
+                          "",
+                          initOption: selectedProducts[i].markup,
+                          onChanged: (v) {
+                        markup.value = v;
+                        selectedProducts[i].markup = v;
+                        selectedProducts[i].sellingPrice = controller
+                            .calcNewSellingPrice(selectedProducts[i].cost, v);
+                        priceTec.text =
+                            selectedProducts[i].sellingPrice.toCurrencyString();
+                      }),
+                    ),
                     Expanded(
                         flex: 1,
                         child: Padding(
@@ -1906,7 +1952,10 @@ class BulkMarkup extends StatelessWidget {
                             keyboardType: TextInputType.number,
                             textInputAction: TextInputAction.next,
                             textAlign: TextAlign.center,
-                            readOnly: true,
+                            onChanged: (v) {
+                              selectedProducts[i].sellingPrice =
+                                  double.tryParse(priceTec.text) ?? 0;
+                            },
                           ),
                         )),
                   ],
@@ -1925,20 +1974,20 @@ class BulkMarkup extends StatelessWidget {
             selectedProducts.refresh();
           }),
           Ui.boxHeight(24),
-          CustomTextField.dropdown(
-              controller.filterOptions["markup"]!.titles,
-              controller.filterOptions["markup"]!.values,
-              TextEditingController(),
-              "Markup",
-              initOption: markup.value, onChanged: (v) {
-            markup.value = v;
-            for (var element in selectedProducts) {
-              element.markup = v;
-              element.sellingPrice =
-                  controller.calcNewSellingPrice(element.cost, v);
-            }
-            selectedProducts.refresh();
-          }),
+          // CustomTextField.dropdown(
+          //     controller.filterOptions["markup"]!.titles,
+          //     controller.filterOptions["markup"]!.values,
+          //     TextEditingController(),
+          //     "Markup",
+          //     initOption: markup.value, onChanged: (v) {
+          //   markup.value = v;
+          //   for (var element in selectedProducts) {
+          //     element.markup = v;
+          //     element.sellingPrice =
+          //         controller.calcNewSellingPrice(element.cost, v);
+          //   }
+          //   selectedProducts.refresh();
+          // }),
           SizedBox(
               width: Ui.width(context) / 2,
               child: AppButton(

@@ -49,6 +49,10 @@ extension NumExtension on num {
   int nearest10() {
     return (this / 100).ceil() * 100;
   }
+
+  String toCurrencyString(){
+    return nearest10().toString();
+  }
 }
 
 extension DateExtension on DateTime {

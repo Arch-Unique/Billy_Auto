@@ -138,7 +138,7 @@ class AppController extends GetxController {
   Map<DateTime, int> groupedOrdersByDay = {};
   Map<DateTime, int> groupedOrdersByYear = {};
 
-  List<int> allMarkups = [0, 20, 25, 30, 35, 40, 45, 50];
+  List<int> allMarkups = [0, 20, 25, 30, 35, 40, 45, 50,55,60,65,70,75,80,85,90,95,100];
 
   Map<String, FilterOptionsModel> filterOptions = {};
   RxBool isLoading = false.obs;
@@ -375,7 +375,7 @@ class AppController extends GetxController {
           tec: TextEditingController(text: stt.toString()))
     ]);
     allPendingMarkupProducts.value =
-        allProducts.where((optv) => optv.markup == 0 && allStockBalances.map((f) => f.productId).contains(optv.id)).toList();
+        allProducts.where((optv) => optv.sellingPrice == 0 && allStockBalances.map((f) => f.productId).contains(optv.id)).toList();
     allSuppliers.value = await _getAll<Supplier>();
     allInventory.value = await _getAll<Inventory>(fm: [
       FilterModel("stationId", "stationId", 0,
@@ -863,4 +863,6 @@ class AppController extends GetxController {
     final markup1 = (c * d) / 100;
     return double.parse((c + vat + markup1).toStringAsFixed(2));
   }
+
+    
 }
