@@ -1564,7 +1564,7 @@ class MarkupTargetsPage extends StatelessWidget {
                   });
             })));
       },
-      color: value > targetValue || isMarkup
+      color: value >= targetValue || isMarkup
           ? Colors.lightGreen[100]!.withOpacity(0.7)
           : Colors.red[100]!.withOpacity(0.7),
       child: Row(
@@ -1826,7 +1826,6 @@ class BulkMarkup extends StatelessWidget {
             pending.value = v;
             selectedProducts.refresh();
           }),
-         
           Ui.align(child: AppText.bold("Select Products")),
           Obx(() {
             return Column(
@@ -1834,7 +1833,7 @@ class BulkMarkup extends StatelessWidget {
               children: List.generate(selectedProducts.length, (i) {
                 // Product e = selectedProducts[i];
                 final costTec = TextEditingController(
-                    text: selectedProducts[i].cost.toCurrency());
+                    text: selectedProducts[i].cost.toString());
                 final priceTec = TextEditingController(
                     text: selectedProducts[i].sellingPrice.toCurrency());
                 final ctt = controller
@@ -1854,8 +1853,6 @@ class BulkMarkup extends StatelessWidget {
                             ctt, vtt, TextEditingController(), "",
                             initOption: selectedProducts[i].id,
                             onChanged: (p0) {
-                          print(p0);
-                          print(i);
                           // selectedProducts[i].id = p0;
                           if (p0 != 0) {
                             selectedProducts[i] = pending.value == 1
@@ -1865,7 +1862,7 @@ class BulkMarkup extends StatelessWidget {
                                 : controller.allPendingMarkupProducts
                                     .where((b) => b.id == p0)
                                     .first;
-                            print(selectedProducts[i].toJson());
+
                             selectedProducts[i].sellingPrice =
                                 controller.calcNewSellingPrice(
                                     selectedProducts[i].cost, markup.value);
@@ -1873,7 +1870,7 @@ class BulkMarkup extends StatelessWidget {
                             priceTec.text =
                                 selectedProducts[i].sellingPrice.toCurrency();
                             costTec.text =
-                                selectedProducts[i].cost.toCurrency();
+                                selectedProducts[i].cost.toString();
                             selectedProducts.refresh();
                           }
                         })),
@@ -1885,8 +1882,18 @@ class BulkMarkup extends StatelessWidget {
                             controller: costTec,
                             keyboardType: TextInputType.number,
                             textInputAction: TextInputAction.next,
-                            
-                            
+                            onChanged: (v) {
+                              selectedProducts[i].cost =
+                                  double.tryParse(costTec.text) ?? 0;
+                              selectedProducts[i].sellingPrice =
+                                  controller.calcNewSellingPrice(
+                                      selectedProducts[i].cost, markup.value);
+                              selectedProducts[i].markup = markup.value;
+                              priceTec.text =
+                                  selectedProducts[i].sellingPrice.toCurrency();
+                              
+                              // selectedProducts.refresh();
+                            },
                             textAlign: TextAlign.center,
                           ),
                         )),
@@ -1898,8 +1905,8 @@ class BulkMarkup extends StatelessWidget {
                             controller: priceTec,
                             keyboardType: TextInputType.number,
                             textInputAction: TextInputAction.next,
-                            
                             textAlign: TextAlign.center,
+                            readOnly: true,
                           ),
                         )),
                   ],
@@ -1918,7 +1925,7 @@ class BulkMarkup extends StatelessWidget {
             selectedProducts.refresh();
           }),
           Ui.boxHeight(24),
-           CustomTextField.dropdown(
+          CustomTextField.dropdown(
               controller.filterOptions["markup"]!.titles,
               controller.filterOptions["markup"]!.values,
               TextEditingController(),
