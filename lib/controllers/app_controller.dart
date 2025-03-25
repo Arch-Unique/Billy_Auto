@@ -560,6 +560,7 @@ class AppController extends GetxController {
               await appRepo.uploadPhoto(imgPath.path) ?? "";
         }
         //first check if customer exists
+        print(currentOrder.value.customerDetails!.fullName);
         final acust = await appRepo.getAll<Customer>(fm: [
           FilterModel("fullName", "fullName", 1,
               tec: TextEditingController(
@@ -571,6 +572,7 @@ class AppController extends GetxController {
               tec: TextEditingController(
                   text: currentOrder.value.customerDetails!.phone))
         ]);
+        print(acust.total);
         if (acust.total == 0) {
           final customer = await appRepo
               .create<Customer>(currentOrder.value.customerDetails!);
@@ -618,6 +620,7 @@ class AppController extends GetxController {
       Ui.showInfo("Successfully created order");
 
       await initApp();
+      currentOrder.value = Order(customerId: 0);
       return true;
     } catch (e) {
       Ui.showError(e.toString());
