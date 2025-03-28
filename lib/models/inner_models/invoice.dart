@@ -128,10 +128,12 @@ class Invoice extends BaseModel {
 }
 
 class InvoiceItem {
-  int id, qty;
+  int id;
+  double qty;
   double unitPrice;
 
-  RxInt rawId = 0.obs, rawQty = 1.obs;
+  RxInt rawId = 0.obs;
+  RxDouble rawQty = 1.0.obs;
   RxDouble rawUnitPrice = 0.0.obs;
 
   double get totalPrice => rawQty.value * rawUnitPrice.value;
@@ -153,7 +155,7 @@ class InvoiceItem {
   factory InvoiceItem.fromJson(Map<String, dynamic> json) {
     return InvoiceItem(
       id: int.parse((json['id'] ?? 0).toString()),
-      qty: int.parse((json['qty'] ?? 1).toString()),
+      qty: double.parse((json['qty'] ?? 1).toString()),
       unitPrice: double.parse((json['unitPrice'] ?? 0).toString()),
     );
   }

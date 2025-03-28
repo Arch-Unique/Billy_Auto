@@ -1812,12 +1812,26 @@ class ReportDS extends AsyncDataTableSource {
   }
 }
 
-class BulkMarkup extends StatelessWidget {
+class BulkMarkup extends StatefulWidget {
   BulkMarkup({super.key});
+
+  @override
+  State<BulkMarkup> createState() => _BulkMarkupState();
+}
+
+class _BulkMarkupState extends State<BulkMarkup> {
   final controller = Get.find<AppController>();
   RxList<Product> selectedProducts = <Product>[].obs;
   RxInt markup = 0.obs;
   RxInt pending = 0.obs;
+ 
+@override
+  initState(){
+selectedProducts.value = pending.value == 1
+                                ? controller.allProducts
+                                : controller.allPendingMarkupProducts;
+    super.initState();
+}
 
   @override
   Widget build(BuildContext context) {
@@ -1827,8 +1841,12 @@ class BulkMarkup extends StatelessWidget {
           CustomTextField.dropdown(["Pending", "All Products"], [0, 1],
               TextEditingController(), "Product", initOption: pending.value,
               onChanged: (v) {
-            selectedProducts.value = [];
+            // selectedProducts.value = [];
             pending.value = v;
+            selectedProducts.value = pending.value == 1
+                                ? controller.allProducts
+                                : controller.allPendingMarkupProducts;
+            
             selectedProducts.refresh();
           }),
           Row(
@@ -1873,32 +1891,33 @@ class BulkMarkup extends StatelessWidget {
                         child: CustomTextField.dropdown(
                             ctt, vtt, TextEditingController(), "",
                             initOption: selectedProducts[i].id,
+                            isEnabled: false,
                             onChanged: (p0) {
                           // selectedProducts[i].id = p0;
-                          if (p0 != 0) {
-                            selectedProducts[i] = pending.value == 1
-                                ? controller.allProducts
-                                    .where((b) => b.id == p0)
-                                    .first
-                                : controller.allPendingMarkupProducts
-                                    .where((b) => b.id == p0)
-                                    .first;
-                            if (pending.value != 1) {
-                              selectedProducts[i].sellingPrice =
-                                  controller.calcNewSellingPrice(
-                                      selectedProducts[i].cost,
-                                      selectedProducts[i].markup);
-                              selectedProducts[i].markup =
-                                  selectedProducts[i].markup;
-                            }
+                          // if (p0 != 0) {
+                          //   selectedProducts[i] = pending.value == 1
+                          //       ? controller.allProducts
+                          //           .where((b) => b.id == p0)
+                          //           .first
+                          //       : controller.allPendingMarkupProducts
+                          //           .where((b) => b.id == p0)
+                          //           .first;
+                          //   if (pending.value != 1) {
+                          //     selectedProducts[i].sellingPrice =
+                          //         controller.calcNewSellingPrice(
+                          //             selectedProducts[i].cost,
+                          //             selectedProducts[i].markup);
+                          //     selectedProducts[i].markup =
+                          //         selectedProducts[i].markup;
+                          //   }
 
-                            priceTec.text = selectedProducts[i]
-                                .sellingPrice
-                                .toCurrencyString();
-                            costTec.text =
-                                selectedProducts[i].cost.toCurrencyString();
-                            selectedProducts.refresh();
-                          }
+                          //   priceTec.text = selectedProducts[i]
+                          //       .sellingPrice
+                          //       .toCurrencyString();
+                          //   costTec.text =
+                          //       selectedProducts[i].cost.toCurrencyString();
+                          //   selectedProducts.refresh();
+                          // }
                         })),
                     Expanded(
                         flex: 1,
@@ -1963,16 +1982,16 @@ class BulkMarkup extends StatelessWidget {
               }).toList(),
             );
           }),
-          InvoiceItemCounter(() {
-            selectedProducts
-                .add(Product(name: "", productCategoryId: 0, productTypeId: 0));
-            selectedProducts.refresh();
-          }, () {
-            if (selectedProducts.isNotEmpty) {
-              selectedProducts.removeLast();
-            }
-            selectedProducts.refresh();
-          }),
+          // InvoiceItemCounter(() {
+          //   selectedProducts
+          //       .add(Product(name: "", productCategoryId: 0, productTypeId: 0));
+          //   selectedProducts.refresh();
+          // }, () {
+          //   if (selectedProducts.isNotEmpty) {
+          //     selectedProducts.removeLast();
+          //   }
+          //   selectedProducts.refresh();
+          // }),
           Ui.boxHeight(24),
           // CustomTextField.dropdown(
           //     controller.filterOptions["markup"]!.titles,

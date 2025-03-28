@@ -6,7 +6,7 @@ import 'base_model.dart';
 
 class Inventory extends BaseModel {
   int productId;
-  int qty;
+  double qty;
   String transactionType;
   String status;
   int supplierId;
@@ -113,7 +113,7 @@ class Inventory extends BaseModel {
       id: json['id'] ?? 0,
       productId: int.tryParse(json['productId'].toString()) ?? 0,
       product: json['product'] ?? "",
-      qty: int.tryParse(json['qty'].toString()) ?? 0,
+      qty: double.tryParse(json['qty'].toString()) ?? 0,
       transactionType: json['transactionType'],
       status: json['status'],
       supplierId: int.tryParse(json['supplierId'].toString()) ?? 0,
@@ -140,7 +140,8 @@ class Inventory extends BaseModel {
 
 class InventoryMetricStockBalances extends UneditableModel {
   final String productName, location;
-  final int productId, quantity;
+  final int productId;
+  final double quantity;
 
   InventoryMetricStockBalances(
       {this.location = "",
@@ -153,7 +154,7 @@ class InventoryMetricStockBalances extends UneditableModel {
       location: json["location"] ?? "Store 1",
       productId: json["productId"] ?? 0,
       productName: json["productName"],
-      quantity: int.tryParse(json['quantity'].toString()) ?? 0,
+      quantity: double.tryParse(json['quantity'].toString()) ?? 0,
     );
   }
 
@@ -197,7 +198,8 @@ class InventoryMetricProductPrice {
 
 class InventoryMetricStockBalancesCost {
   final String productName, location;
-  final int productId, inboundQty, soldQty;
+  final int productId;
+  double inboundQty, soldQty;
   double inboundCost, outboundSales, revenue;
 
   InventoryMetricStockBalancesCost({
@@ -216,8 +218,8 @@ class InventoryMetricStockBalancesCost {
       location: json["location"],
       productId: json["productId"] ?? 0,
       productName: json["productName"],
-      inboundQty: int.tryParse(json['inboundQty'].toString()) ?? 0,
-      soldQty: int.tryParse(json['soldQty'].toString()) ?? 0,
+      inboundQty: double.tryParse(json['inboundQty'].toString()) ?? 0,
+      soldQty: double.tryParse(json['soldQty'].toString()) ?? 0,
       inboundCost: double.tryParse(json['inboundCost'].toString()) ?? 0,
       outboundSales: double.tryParse(json['outboundSales'].toString()) ?? 0,
       revenue: double.tryParse(json['revenue'].toString()) ?? 0,

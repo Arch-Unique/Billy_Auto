@@ -1199,7 +1199,7 @@ class InvoiceItemWidget extends StatelessWidget {
     final upTec = TextEditingController();
     if (item != null) {
       qtyTec.text = item!.rawQty.value.toString();
-      upTec.text = item!.rawUnitPrice.value.toString();
+      upTec.text = item!.rawUnitPrice.value.toCurrencyString();
     }
     return SizedBox(
       width: Ui.width(context),
@@ -1240,7 +1240,7 @@ class InvoiceItemWidget extends StatelessWidget {
                           .cost;
                     }
 
-                    upTec.text = item!.rawUnitPrice.value.toString();
+                    upTec.text = item!.rawUnitPrice.value.toCurrencyString();
                   } catch (e) {
                     // TODO
                   }
@@ -1263,9 +1263,9 @@ class InvoiceItemWidget extends StatelessWidget {
                     onChanged: (_) {
                       final maxQty = (Get.find<AppController>().allStockBalances.where((optv) => optv.productId == item!.rawId.value).firstOrNull?.quantity ?? 0);
                       item!.rawQty.value =
-                          int.tryParse(qtyTec.text) ?? item!.qty;
+                          double.tryParse(qtyTec.text) ?? item!.qty;
                           if(item!.rawQty.value > maxQty){
-                            item!.rawQty.value = maxQty;
+                            item!.rawQty.value = maxQty.toDouble();
                             qtyTec.text = maxQty.toString();
                             Ui.showError("Qty exceeds available in store");
                           }

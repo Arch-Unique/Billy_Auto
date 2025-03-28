@@ -390,20 +390,20 @@ class _MyBarChartState extends State<MyBarChart> {
     orderCnt = [];
 
     if (currentFilter == "Month") {
-      datePoints = getLast6Months();
+      datePoints = getLast12Months();
     } else if (currentFilter == "Day") {
-      datePoints = getLast6Days();
+      datePoints = getLast30Days();
     } else if (currentFilter == "Year") {
       datePoints = getLast6Years();
     }
   }
 
-  List<DateTime> getLast6Months() {
+  List<DateTime> getLast12Months() {
     DateTime currentDate = DateTime.now();
     List<DateTime> last6Months = [];
     orderCnt = [];
 
-    for (int i = 5; i >= 0; i--) {
+    for (int i = 12; i >= 0; i--) {
       DateTime month = DateTime(currentDate.year, currentDate.month - i);
       last6Months.add(month);
       orderCnt.add(groupedOrdersByMonth[month] ?? 0);
@@ -416,12 +416,12 @@ class _MyBarChartState extends State<MyBarChart> {
     return last6Months;
   }
 
-  List<DateTime> getLast6Days() {
+  List<DateTime> getLast30Days() {
     DateTime currentDate = DateTime.now();
     List<DateTime> last6Days = [];
     orderCnt = [];
 
-    for (int i = 5; i >= 0; i--) {
+    for (int i = 30; i >= 0; i--) {
       DateTime day =
           DateTime(currentDate.year, currentDate.month, currentDate.day - i);
       last6Days.add(day);
@@ -463,22 +463,25 @@ class _MyBarChartState extends State<MyBarChart> {
   }
 
   BarTouchData get barTouchData => BarTouchData(
-        enabled: true,
+        enabled: false,
         touchTooltipData: BarTouchTooltipData(
           tooltipBgColor: Colors.transparent,
-          tooltipPadding: const EdgeInsets.only(bottom: 4),
-          tooltipMargin: 12,
+          tooltipPadding: const EdgeInsets.only(bottom: 0),
+          tooltipMargin: 4,
+          
           getTooltipItem: (
             BarChartGroupData group,
             int groupIndex,
             BarChartRodData rod,
             int rodIndex,
           ) {
+            if(groupIndex >= datePoints.length) return BarTooltipItem("",TextStyle());
             return BarTooltipItem(
               rod.toY.round().toString(),
               const TextStyle(
                 color: AppColors.primaryColor,
                 fontWeight: FontWeight.bold,
+                fontSize: 12
               ),
             );
           },
@@ -493,10 +496,10 @@ class _MyBarChartState extends State<MyBarChart> {
     String text;
     switch (currentFilter) {
       case "Month":
-        text = DateFormat("MMM yyyy").format(datePoints[value.toInt()]);
+        text = DateFormat("MM/yyyy").format(datePoints[value.toInt()]);
         break;
       case "Day":
-        text = DateFormat("dd MMM").format(datePoints[value.toInt()]);
+        text = DateFormat("dd/MM").format(datePoints[value.toInt()]);
         break;
       case "Year":
         text = DateFormat("yyyy").format(datePoints[value.toInt()]);
@@ -508,7 +511,8 @@ class _MyBarChartState extends State<MyBarChart> {
     return SideTitleWidget(
       axisSide: AxisSide.bottom,
       space: 4,
-      child: AppText.bold(text),
+      angle: pi/4,
+      child: AppText.bold(text,fontSize: 12),
     );
   }
 
@@ -586,8 +590,8 @@ class _MyBarChartState extends State<MyBarChart> {
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                 ),
-                borderRadius: BorderRadius.circular(8),
-                width: 56)
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(8),topRight: Radius.circular(8)),
+                width: 12)
           ],
           showingTooltipIndicators: [0],
         );
@@ -662,10 +666,10 @@ class _ProfitChartState extends State<ProfitChart> {
 
     switch (currentFilter) {
       case "Month":
-        datePoints = getLast6Months();
+        datePoints = getLast12Months();
         break;
       case "Day":
-        datePoints = getLast6Days();
+        datePoints = getLast30Days();
         break;
       case "Year":
         datePoints = getLast6Years();
@@ -673,22 +677,22 @@ class _ProfitChartState extends State<ProfitChart> {
     }
   }
 
-  List<DateTime> getLast6Months() {
+  List<DateTime> getLast12Months() {
     DateTime currentDate = DateTime.now();
     List<DateTime> last6Months = [];
 
-    for (int i = 5; i >= 0; i--) {
+    for (int i = 12; i >= 0; i--) {
       DateTime month = DateTime(currentDate.year, currentDate.month - i, 1);
       last6Months.add(month);
     }
     return last6Months;
   }
 
-  List<DateTime> getLast6Days() {
+  List<DateTime> getLast30Days() {
     DateTime currentDate = DateTime.now();
     List<DateTime> last6Days = [];
 
-    for (int i = 5; i >= 0; i--) {
+    for (int i = 30; i >= 0; i--) {
       DateTime day =
           DateTime(currentDate.year, currentDate.month, currentDate.day - i);
       last6Days.add(day);
@@ -801,6 +805,7 @@ class _ProfitChartState extends State<ProfitChart> {
                           if (value != null && value != profitType) {
                             setState(() {
                               profitType = value;
+                              updateChartData();
                             });
                           }
                         }),
@@ -840,12 +845,12 @@ class _ProfitChartState extends State<ProfitChart> {
                 String text;
                 switch (currentFilter) {
                   case "Month":
-                    text = DateFormat("MMM yyyy")
+                    text = DateFormat("MM/yyyy")
                         .format(datePoints[value.toInt()]);
                     break;
                   case "Day":
                     text =
-                        DateFormat("dd MMM ").format(datePoints[value.toInt()]);
+                        DateFormat("dd/MM").format(datePoints[value.toInt()]);
                     break;
                   case "Year":
                     text = DateFormat("yyyy").format(datePoints[value.toInt()]);
@@ -857,7 +862,8 @@ class _ProfitChartState extends State<ProfitChart> {
                 return SideTitleWidget(
                   axisSide: meta.axisSide,
                   space: 8,
-                  child: AppText.bold(text, fontSize: 14),
+                  angle:-56,
+                  child: AppText.bold(text, fontSize: 12),
                 );
               },
             ),
@@ -902,14 +908,15 @@ class _ProfitChartState extends State<ProfitChart> {
             }).toList(),
             isCurved: false,
             color: AppColors.orange,
-            barWidth: 3,
+            barWidth: 1,
             isStrokeCapRound: true,
             dotData: FlDotData(
               show: true,
               getDotPainter: (spot, percent, barData, index) {
+                if(index >= datePoints.length) return FlDotCirclePainter();
                 final lp = getProfitForDate(datePoints[index]) < profitMax;
                 return FlDotCirclePainter(
-                  radius: 8,
+                  radius: 4,
                   color: lp
                       ? AppColors.primaryColor
                       : (profitType == "Expenses"
@@ -937,6 +944,7 @@ class _ProfitChartState extends State<ProfitChart> {
           touchTooltipData: LineTouchTooltipData(
             tooltipBgColor: Colors.blueGrey,
             tooltipRoundedRadius: 8,
+            
             getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
               return touchedBarSpots.map((barSpot) {
                 final date = datePoints[barSpot.x.toInt()];
@@ -967,6 +975,7 @@ class _ProfitChartState extends State<ProfitChart> {
             },
           ),
           handleBuiltInTouches: true,
+          
         ),
       ),
     );
