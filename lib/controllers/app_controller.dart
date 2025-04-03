@@ -866,6 +866,4 @@ class AppController extends GetxController {
     final markup1 = (c * d) / 100;
     return double.parse((c + vat + markup1).toStringAsFixed(2));
   }
-
-    
 }
