@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:inventory/tools/colors.dart';
 import 'package:inventory/views/checklist/shared2.dart';
 import 'package:multi_dropdown/multi_dropdown.dart';
@@ -2039,3 +2040,308 @@ void performLayout() {
 }
 
 class SmartJustifyParentData extends ContainerBoxParentData<RenderBox> {}
+
+
+Future<DateTime?> showMonthPicker({
+  required BuildContext context,
+  required DateTime initialDate,
+  DateTime? firstDate,
+  DateTime? lastDate,
+}) async {
+  return showDialog<DateTime>(
+    context: context,
+    builder: (BuildContext context) {
+      return _MonthPickerDialog(
+        initialDate: initialDate,
+        firstDate: firstDate,
+        lastDate: lastDate,
+      );
+    },
+  );
+}
+
+class _MonthPickerDialog extends StatefulWidget {
+  const _MonthPickerDialog({
+    Key? key,
+    required this.initialDate,
+    this.firstDate,
+    this.lastDate,
+  }) : super(key: key);
+
+  final DateTime initialDate;
+  final DateTime? firstDate;
+  final DateTime? lastDate;
+
+  @override
+  _MonthPickerDialogState createState() => _MonthPickerDialogState();
+}
+
+class _MonthPickerDialogState extends State<_MonthPickerDialog> {
+  late DateTime _selectedDate;
+  late PageController _pageController;
+  late int _currentPageIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = widget.initialDate;
+
+    final initialYear = _selectedDate.year;
+    final firstYear = widget.firstDate?.year ?? DateTime.now().year - 100;
+    final lastYear = widget.lastDate?.year ?? DateTime.now().year + 100;
+
+    _currentPageIndex = initialYear - firstYear;
+    _pageController = PageController(initialPage: _currentPageIndex);
+  }
+
+  void _handleMonthChanged(int month) {
+    setState(() {
+      _selectedDate = DateTime(_selectedDate.year, month);
+    });
+  }
+
+  void _handleYearChanged(int year) {
+    setState(() {
+      _selectedDate = DateTime(year, _selectedDate.month);
+    });
+  }
+
+  void _handleOk() {
+    Navigator.pop(context, _selectedDate);
+  }
+
+  void _handleCancel() {
+    Navigator.pop(context);
+  }
+
+  Widget _buildMonthGrid(int year) {
+    final months = <Widget>[];
+    for (int month = 1; month <= 12; month++) {
+      final date = DateTime(year, month);
+      final isSelected =
+          _selectedDate.year == year && _selectedDate.month == month;
+      final isEnabled = (widget.firstDate == null ||
+              date.isAfter(widget.firstDate!.subtract(const Duration(days: 1)))) &&
+          (widget.lastDate == null ||
+              date.isBefore(widget.lastDate!.add(const Duration(days: 1))));
+
+      months.add(
+        InkWell(
+          onTap: isEnabled ? () => _handleMonthChanged(month) : null,
+          child: Container(
+            padding: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: isSelected ? Theme.of(context).colorScheme.primary : null,
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+            child: Center(
+              child: Text(
+                DateFormat('MMM').format(date),
+                style: TextStyle(
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : isEnabled
+                          ? null
+                          : Colors.grey,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    return GridView.count(
+      crossAxisCount: 4,
+      padding: const EdgeInsets.all(16.0),
+      crossAxisSpacing: 10.0,
+      mainAxisSpacing: 10.0,
+      children: months,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final firstYear = widget.firstDate?.year ?? DateTime.now().year - 100;
+    final lastYear = widget.lastDate?.year ?? DateTime.now().year + 100;
+
+    return AlertDialog(
+      contentPadding: const EdgeInsets.all(0.0),
+      content: SizedBox(
+        width: 300.0,
+        height: 350.0,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // IconButton(
+                  //   icon: const Icon(Icons.chevron_left),
+                  //   onPressed: _currentPageIndex > 0
+                  //       ? () {
+                  //         _handleYearChanged(_selectedDate.year-1);
+                  //           _pageController.previousPage(
+                  //             duration: const Duration(milliseconds: 300),
+                  //             curve: Curves.easeInOut,
+                  //           );
+                  //         }
+                  //       : null,
+                  // ),
+                  GestureDetector(
+                    onTap: () async {
+                      final selectedYear = await showYearPicker(
+                        context: context,
+                        initialYear: _selectedDate.year,
+                        firstYear: firstYear,
+                        lastYear: lastYear,
+                      );
+                      if (selectedYear != null) {
+                        _handleYearChanged(selectedYear);
+                        final newPageIndex = selectedYear - firstYear;
+                        _pageController.animateToPage(
+                          newPageIndex,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    },
+                    child: Text(
+                      '${_selectedDate.year}',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                  ),
+                  // IconButton(
+                  //   icon: const Icon(Icons.chevron_right),
+                  //   onPressed: _currentPageIndex < lastYear - firstYear
+                  //       ? () {
+                  //         _handleYearChanged(_selectedDate.year+1);
+                  //           _pageController.nextPage(
+                  //             duration: const Duration(milliseconds: 300),
+                  //             curve: Curves.easeInOut,
+                  //           );
+                  //         }
+                  //       : null,
+                  // ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: lastYear - firstYear + 1,
+                itemBuilder: (context, index) {
+                  final year = firstYear + index;
+                  return _buildMonthGrid(year);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: _handleCancel,
+          child: Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: _handleOk,
+          child: Text('OK'),
+        ),
+      ],
+    );
+  }
+}
+
+Future<int?> showYearPicker({
+  required BuildContext context,
+  required int initialYear,
+  int? firstYear,
+  int? lastYear,
+}) async {
+  return showDialog<int>(
+    context: context,
+    builder: (BuildContext context) {
+      return _YearPickerDialog(
+        initialYear: initialYear,
+        firstYear: firstYear,
+        lastYear: lastYear,
+      );
+    },
+  );
+}
+
+class _YearPickerDialog extends StatefulWidget {
+  const _YearPickerDialog({
+    Key? key,
+    required this.initialYear,
+    this.firstYear,
+    this.lastYear,
+  }) : super(key: key);
+
+  final int initialYear;
+  final int? firstYear;
+  final int? lastYear;
+
+  @override
+  _YearPickerDialogState createState() => _YearPickerDialogState();
+}
+
+class _YearPickerDialogState extends State<_YearPickerDialog> {
+  late int _selectedYear;
+  late final int _firstYear;
+  late final int _lastYear;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedYear = widget.initialYear;
+    _firstYear = widget.firstYear ?? DateTime.now().year - 100; // Default range
+    _lastYear = widget.lastYear ?? DateTime.now().year + 100; // Default range
+  }
+
+  void _handleYearChanged(int year) {
+    setState(() {
+      _selectedYear = year;
+    });
+  }
+
+  void _handleOk() {
+    Navigator.pop(context, _selectedYear);
+  }
+
+  void _handleCancel() {
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      contentPadding: const EdgeInsets.all(0.0),
+      content: SizedBox(
+        width: 300.0,
+        height: 300.0,
+        child: YearPicker(
+          firstDate: DateTime(_firstYear),
+          lastDate: DateTime(_lastYear),
+          selectedDate: DateTime(_selectedYear),
+          onChanged: (DateTime dateTime) {
+            _handleYearChanged(dateTime.year);
+            _handleOk(); // Optionally close immediately on selection
+          },
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: _handleCancel,
+          child: Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: _handleOk,
+          child: Text('OK'),
+        ),
+      ],
+    );
+  }
+}

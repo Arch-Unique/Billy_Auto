@@ -773,15 +773,16 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
       return SizedBox();
     }
     if (
-      // !Get.find<AppService>().currentUser.value.isAdmin &&
+        // !Get.find<AppService>().currentUser.value.isAdmin &&
         (fieldName == "markup")) {
       return SizedBox();
     }
     if (
-      // !Get.find<AppService>().currentUser.value.isAdmin &&
+        // !Get.find<AppService>().currentUser.value.isAdmin &&
         (fieldName == "sellingPrice") &&
-        ((double.tryParse(_controllers["markup"]!.text) ?? 0) == 0 ||
-            (double.tryParse(_controllers["sellingPrice"]!.text) ?? 0) == 0)) {
+            ((double.tryParse(_controllers["markup"]!.text) ?? 0) == 0 ||
+                (double.tryParse(_controllers["sellingPrice"]!.text) ?? 0) ==
+                    0)) {
       return SizedBox();
     }
     if (fieldName.endsWith("Id") ||
@@ -1418,25 +1419,49 @@ class ExpensesItemWidget extends StatelessWidget {
   }
 }
 
-class MarkupTargetsPage extends StatelessWidget {
-  MarkupTargetsPage({super.key});
+class MarkupTargetsPage extends StatefulWidget {
+  const MarkupTargetsPage({super.key});
 
+  @override
+  State<MarkupTargetsPage> createState() => _MarkupTargetsPageState();
+}
+
+class _MarkupTargetsPageState extends State<MarkupTargetsPage> {
   final controller = Get.find<AppController>();
+
+  List<String> cmdValues = ["All", "Day", "Month", "Year"];
+
+  List<String> cmdTitles = ["All", "Day", "Month", "Year"];
+
+  late DateTime dtrd, dtrm, dtry;
+  final TextEditingController pidTec = TextEditingController();
+  final TextEditingController pmdTec = TextEditingController();
+  final TextEditingController psdTec = TextEditingController();
+  final TextEditingController pcdTec = TextEditingController();
+  final TextEditingController curMonthDay = TextEditingController(text: "All");
+  final TextEditingController curMonthDayTitle = TextEditingController();
+  Rx<DateTime> curDateTime = DateTime(2025).obs;
+  Rx<Product> curProduct =
+      Product(name: "", productCategoryId: 0, productTypeId: 0).obs;
+
+  setDateValues() {
+    DateTime dtt = curDateTime.value;
+    dtrd = DateTime(dtt.year, dtt.month, dtt.day);
+    dtrm = DateTime(dtt.year, dtt.month);
+    dtry = DateTime(dtt.year);
+    curMonthDayTitle.text = DateFormat("dd/MM/yyyy").format(curDateTime.value);
+    
+  }
+
+  @override
+  void initState() {
+    curDateTime.value = DateTime.now();
+    setDateValues();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    DateTime dtt = DateTime.now();
-    final dtrd = DateTime(dtt.year, dtt.month, dtt.day);
-    final dtrm = DateTime(dtt.year, dtt.month);
-    final dtry = DateTime(dtt.year);
-
-    final TextEditingController pidTec = TextEditingController();
-    final TextEditingController pmdTec = TextEditingController();
-    final TextEditingController psdTec = TextEditingController();
-    final TextEditingController pcdTec = TextEditingController();
-    Rx<Product> curProduct =
-        Product(name: "", productCategoryId: 0, productTypeId: 0).obs;
-
     return CurvedContainer(
       width:
           Ui.width(context) < 975 ? wideUi(context) : (Ui.width(context) - 24),
@@ -1453,6 +1478,69 @@ class MarkupTargetsPage extends StatelessWidget {
             children: [
               AppText.medium("Targets",
                   fontFamily: Assets.appFontFamily2, fontSize: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 36.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: Ui.width(context) / 10,
+                      child: CustomTextField.dropdown(
+                          cmdTitles, cmdValues, curMonthDay, "",
+                          initOption: curMonthDay.text, onChanged: (v) {
+                        curMonthDay.text = v;
+                        if (v == "All" || v == "None") {
+                          setDateValues();
+                        }
+                        setState(() {
+        
+      });
+                      }),
+                    ),
+                    Ui.boxWidth(12),
+                    SizedBox(
+                        width: Ui.width(context) / 10,
+                        child: CustomTextField(
+                          "",
+                          curMonthDayTitle,
+                          hasBottomPadding: false,
+                          readOnly: true,
+                          onTap: () async {
+                            if (curMonthDay.text == "Year") {
+                              final f = await showYearPicker(
+                                  context: context, initialYear: 2025);
+                              if (f != null) {
+                                curDateTime.value = DateTime(f);
+                              }
+                            } else if (curMonthDay.text == "Month") {
+                              final f = await showMonthPicker(
+                                  context: context,
+                                  initialDate: DateTime(2025, 2),
+                                  firstDate: DateTime(2025, 2),
+                                  lastDate: DateTime.now());
+                              if (f != null) {
+                                curDateTime.value = f;
+                              }
+                            } else if (curMonthDay.text == "Day") {
+                              final f = await showDatePicker(
+                                  context: context,
+                                  firstDate: DateTime(2025, 2),
+                                  lastDate: DateTime.now());
+                              if (f != null) {
+                                curDateTime.value = f;
+                              }
+                            } else {
+                              curDateTime.value = DateTime.now();
+                            }
+                            setDateValues();
+                            setState(() {
+        
+      });
+                          },
+                        )),
+                  ],
+                ),
+              ),
               Obx(() {
                 if (controller.allPendingMarkupProducts.isNotEmpty) {
                   return Center(
@@ -1489,55 +1577,74 @@ class MarkupTargetsPage extends StatelessWidget {
           ),
           Ui.boxHeight(12),
           SmartJustifyRow(runSpacing: 12, spacing: 12, children: [
-            itemDataWidget(
-                "Daily Orders",
-                controller.appConstants.value.dailyOrdersTarget,
-                (controller.groupedOrdersByDay[dtrd] ?? 0).toDouble()),
+            if (curMonthDay.text == "Day" ||
+                curMonthDay.text == "None" ||
+                curMonthDay.text == "All")
+              itemDataWidget(
+                  "Daily Orders",
+                  controller.appConstants.value.dailyOrdersTarget,
+                  (controller.groupedOrdersByDay[dtrd] ?? 0).toDouble()),
             // itemDataWidget("Weekly Orders", controller.appConstants.value.weeklyOrdersTarget, (controller.groupedOrdersByDay[dtrd] ?? 0).toDouble()),
-            itemDataWidget(
-                "Monthly Orders",
-                controller.appConstants.value.monthlyOrdersTarget,
-                (controller.groupedOrdersByMonth[dtrm] ?? 0).toDouble()),
-            itemDataWidget(
-                "Yearly Orders",
-                controller.appConstants.value.yearlyOrdersTarget,
-                (controller.groupedOrdersByYear[dtry] ?? 0).toDouble()),
+            if (curMonthDay.text == "Month" ||
+                curMonthDay.text == "None" ||
+                curMonthDay.text == "All")
+              itemDataWidget(
+                  "Monthly Orders",
+                  controller.appConstants.value.monthlyOrdersTarget,
+                  (controller.groupedOrdersByMonth[dtrm] ?? 0).toDouble()),
+            if (curMonthDay.text == "Year" ||
+                curMonthDay.text == "None" ||
+                curMonthDay.text == "All")
+              itemDataWidget(
+                  "Yearly Orders",
+                  controller.appConstants.value.yearlyOrdersTarget,
+                  (controller.groupedOrdersByYear[dtry] ?? 0).toDouble()),
           ]),
           Ui.boxHeight(12),
           SmartJustifyRow(runSpacing: 12, spacing: 12, children: [
-            itemDataWidget(
-                "Daily Profit",
-                controller.appConstants.value.dailyProfitTarget,
-                (controller.allDailyProfit
-                        .where((optv) =>
-                            optv.date.year == dtt.year &&
-                            optv.date.month == dtt.month &&
-                            optv.date.day == dtt.day)
-                        .firstOrNull
-                        ?.profit ??
-                    0),
-                isCost: true),
-            // itemDataWidget("Weekly Profit", controller.appConstants.value.weeklyProfitTarget, (controller.allDailyProfit.where((optv) => optv.date.year ==dtt.year && optv.date.month == dtt.month).firstOrNull?.profit ?? 0),isCost: true),
-            itemDataWidget(
-                "Monthly Profit",
-                controller.appConstants.value.monthlyProfitTarget,
-                (controller.allMonthlyProfit
-                        .where((optv) =>
-                            optv.date.year == dtt.year &&
-                            optv.date.month == dtt.month)
-                        .firstOrNull
-                        ?.profit ??
-                    0),
-                isCost: true),
-            itemDataWidget(
-                "Yearly Profit",
-                controller.appConstants.value.yearlyProfitTarget,
-                (controller.allYearlyProfit
-                        .where((optv) => optv.date.year == dtt.year)
-                        .firstOrNull
-                        ?.profit ??
-                    0),
-                isCost: true)
+            if (curMonthDay.text == "Day" ||
+                curMonthDay.text == "None" ||
+                curMonthDay.text == "All")
+              itemDataWidget(
+                  "Daily Profit",
+                  controller.appConstants.value.dailyProfitTarget,
+                  (controller.allDailyProfit
+                          .where((optv) =>
+                              optv.date.year == curDateTime.value.year &&
+                              optv.date.month == curDateTime.value.month &&
+                              optv.date.day == curDateTime.value.day)
+                          .firstOrNull
+                          ?.profit ??
+                      0),
+                  isCost: true),
+            // itemDataWidget("Weekly Profit", controller.appConstants.value.weeklyProfitTarget, (controller.allDailyProfit.where((optv) => optv.date.year ==curDateTime.value.year && optv.date.month == curDateTime.value.month).firstOrNull?.profit ?? 0),isCost: true),
+            if (curMonthDay.text == "Month" ||
+                curMonthDay.text == "None" ||
+                curMonthDay.text == "All")
+              itemDataWidget(
+                  "Monthly Profit",
+                  controller.appConstants.value.monthlyProfitTarget,
+                  (controller.allMonthlyProfit
+                          .where((optv) =>
+                              optv.date.year == curDateTime.value.year &&
+                              optv.date.month == curDateTime.value.month)
+                          .firstOrNull
+                          ?.profit ??
+                      0),
+                  isCost: true),
+            if (curMonthDay.text == "Year" ||
+                curMonthDay.text == "None" ||
+                curMonthDay.text == "All")
+              itemDataWidget(
+                  "Yearly Profit",
+                  controller.appConstants.value.yearlyProfitTarget,
+                  (controller.allYearlyProfit
+                          .where((optv) =>
+                              optv.date.year == curDateTime.value.year)
+                          .firstOrNull
+                          ?.profit ??
+                      0),
+                  isCost: true)
           ]),
           Ui.boxHeight(12),
           SmartJustifyRow(children: [
@@ -1824,14 +1931,14 @@ class _BulkMarkupState extends State<BulkMarkup> {
   RxList<Product> selectedProducts = <Product>[].obs;
   RxInt markup = 0.obs;
   RxInt pending = 0.obs;
- 
-@override
-  initState(){
-selectedProducts.value = pending.value == 1
-                                ? controller.allProducts
-                                : controller.allPendingMarkupProducts;
+
+  @override
+  initState() {
+    selectedProducts.value = pending.value == 1
+        ? controller.allProducts
+        : controller.allPendingMarkupProducts;
     super.initState();
-}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1844,9 +1951,9 @@ selectedProducts.value = pending.value == 1
             // selectedProducts.value = [];
             pending.value = v;
             selectedProducts.value = pending.value == 1
-                                ? controller.allProducts
-                                : controller.allPendingMarkupProducts;
-            
+                ? controller.allProducts
+                : controller.allPendingMarkupProducts;
+
             selectedProducts.refresh();
           }),
           Row(
@@ -1891,8 +1998,7 @@ selectedProducts.value = pending.value == 1
                         child: CustomTextField.dropdown(
                             ctt, vtt, TextEditingController(), "",
                             initOption: selectedProducts[i].id,
-                            isEnabled: false,
-                            onChanged: (p0) {
+                            isEnabled: false, onChanged: (p0) {
                           // selectedProducts[i].id = p0;
                           // if (p0 != 0) {
                           //   selectedProducts[i] = pending.value == 1
