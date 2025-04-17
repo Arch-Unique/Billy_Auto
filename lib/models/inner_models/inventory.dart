@@ -252,7 +252,7 @@ class InventoryMetricDailyProfit extends UneditableModel {
 
   factory InventoryMetricDailyProfit.fromJson(Map<String, dynamic> json) {
     return InventoryMetricDailyProfit(
-      date: DateTime.parse(json["date"]).add(Duration(hours: 1)),
+      date: DateTime.parse(json["date"]).add(Duration(hours: 2)),
       productProfit: double.tryParse(json['productProfit'].toString()) ?? 0,
       serviceProfit: double.tryParse(json['serviceProfit'].toString()) ?? 0,
       laborProfit: double.tryParse(json['labor_profit'].toString()) ?? 0,

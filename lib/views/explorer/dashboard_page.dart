@@ -329,9 +329,7 @@ class _MyBarChartState extends State<MyBarChart> {
   List<DateTime> datePoints = [];
   List<int> orderCnt = [];
   int orderMax = 10;
-  Map<DateTime, int> groupedOrdersByMonth = {};
-  Map<DateTime, int> groupedOrdersByDay = {};
-  Map<DateTime, int> groupedOrdersByYear = {};
+  final controller = Get.find<AppController>();
 
   TextEditingController filterTec = TextEditingController(text: "Day");
   String currentFilter = "Day";
@@ -340,50 +338,50 @@ class _MyBarChartState extends State<MyBarChart> {
   void initState() {
     super.initState();
     // Group orders by month, day and year
-    groupOrderData();
+    controller.groupOrderData();
     // Initialize with last 6 months
     updateChartData();
   }
 
-  void groupOrderData() {
-    // Group orders by month-year
-    groupedOrdersByMonth = {};
-    for (var order in Get.find<AppController>().allOrders) {
-      if (!order.isDispatched) continue;
-      DateTime month =
-          DateTime(order.dispatchedAt!.year, order.dispatchedAt!.month);
-      if (groupedOrdersByMonth.containsKey(month)) {
-        groupedOrdersByMonth[month] = groupedOrdersByMonth[month]! + 1;
-      } else {
-        groupedOrdersByMonth[month] = 1;
-      }
-    }
+  // void groupOrderData() {
+  //   // Group orders by month-year
+  //   groupedOrdersByMonth = {};
+  //   for (var order in Get.find<AppController>().allOrders) {
+  //     if (!order.isDispatched) continue;
+  //     DateTime month =
+  //         DateTime(order.dispatchedAt!.year, order.dispatchedAt!.month);
+  //     if (groupedOrdersByMonth.containsKey(month)) {
+  //       groupedOrdersByMonth[month] = groupedOrdersByMonth[month]! + 1;
+  //     } else {
+  //       groupedOrdersByMonth[month] = 1;
+  //     }
+  //   }
 
-    // Group orders by day
-    groupedOrdersByDay = {};
-    for (var order in Get.find<AppController>().allOrders) {
-      if (!order.isDispatched) continue;
-      DateTime day = DateTime(order.dispatchedAt!.year,
-          order.dispatchedAt!.month, order.dispatchedAt!.day);
-      if (groupedOrdersByDay.containsKey(day)) {
-        groupedOrdersByDay[day] = groupedOrdersByDay[day]! + 1;
-      } else {
-        groupedOrdersByDay[day] = 1;
-      }
-    }
+  //   // Group orders by day
+  //   groupedOrdersByDay = {};
+  //   for (var order in Get.find<AppController>().allOrders) {
+  //     if (!order.isDispatched) continue;
+  //     DateTime day = DateTime(order.dispatchedAt!.year,
+  //         order.dispatchedAt!.month, order.dispatchedAt!.day);
+  //     if (groupedOrdersByDay.containsKey(day)) {
+  //       groupedOrdersByDay[day] = groupedOrdersByDay[day]! + 1;
+  //     } else {
+  //       groupedOrdersByDay[day] = 1;
+  //     }
+  //   }
 
-    // Group orders by year
-    groupedOrdersByYear = {};
-    for (var order in Get.find<AppController>().allOrders) {
-      if (!order.isDispatched) continue;
-      DateTime year = DateTime(order.dispatchedAt!.year);
-      if (groupedOrdersByYear.containsKey(year)) {
-        groupedOrdersByYear[year] = groupedOrdersByYear[year]! + 1;
-      } else {
-        groupedOrdersByYear[year] = 1;
-      }
-    }
-  }
+  //   // Group orders by year
+  //   groupedOrdersByYear = {};
+  //   for (var order in Get.find<AppController>().allOrders) {
+  //     if (!order.isDispatched) continue;
+  //     DateTime year = DateTime(order.dispatchedAt!.year);
+  //     if (groupedOrdersByYear.containsKey(year)) {
+  //       groupedOrdersByYear[year] = groupedOrdersByYear[year]! + 1;
+  //     } else {
+  //       groupedOrdersByYear[year] = 1;
+  //     }
+  //   }
+  // }
 
   void updateChartData() {
     datePoints = [];
@@ -406,7 +404,7 @@ class _MyBarChartState extends State<MyBarChart> {
     for (int i = 12; i >= 0; i--) {
       DateTime month = DateTime(currentDate.year, currentDate.month - i);
       last6Months.add(month);
-      orderCnt.add(groupedOrdersByMonth[month] ?? 0);
+      orderCnt.add(controller.groupedOrdersByMonth[month] ?? 0);
     }
     orderMax = Get.find<AppController>()
         .appConstants
@@ -425,7 +423,7 @@ class _MyBarChartState extends State<MyBarChart> {
       DateTime day =
           DateTime(currentDate.year, currentDate.month, currentDate.day - i);
       last6Days.add(day);
-      orderCnt.add(groupedOrdersByDay[day] ?? 0);
+      orderCnt.add(controller.groupedOrdersByDay[day] ?? 0);
     }
     orderMax =
         Get.find<AppController>().appConstants.value.dailyOrdersTarget.toInt();
@@ -440,7 +438,7 @@ class _MyBarChartState extends State<MyBarChart> {
     for (int i = 5; i >= 0; i--) {
       DateTime year = DateTime(currentDate.year - i);
       last6Years.add(year);
-      orderCnt.add(groupedOrdersByYear[year] ?? 0);
+      orderCnt.add(controller.groupedOrdersByYear[year] ?? 0);
     }
     orderMax =
         Get.find<AppController>().appConstants.value.yearlyOrdersTarget.toInt();

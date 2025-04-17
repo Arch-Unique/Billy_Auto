@@ -865,8 +865,6 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
             makeId.value = a;
           }
         } catch (e) {
-          // TODO
-
           print(e);
         }
       });
