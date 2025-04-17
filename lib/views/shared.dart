@@ -1442,6 +1442,9 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
       singleSelect: widget.singleOnly,
       maxSelections: widget.singleOnly ? 1 : 0,
       dropdownItemDecoration: ddec,
+      dropdownDecoration: DropdownDecoration(
+        marginTop: 48
+      ),
       fieldDecoration: fdec,
       onSelectionChange: (selectedItems) {
         if (selectedItems.isEmpty) {

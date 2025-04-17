@@ -252,6 +252,9 @@ class AppController extends GetxController {
     filterOptions["carId"] = FilterOptionsModel(
         allCustomerCar.map((element) => element.desc).toList(),
         allCustomerCar.map((element) => element.id).toList());
+    filterOptions["carId2"] = FilterOptionsModel(
+        allCustomerCar.map((element) => element.licenseNo).toList(),
+        allCustomerCar.map((element) => element.id).toList());
 
     filterOptions["makeId"] = FilterOptionsModel(
         allCarMakes.map((element) => element.make).toList(),

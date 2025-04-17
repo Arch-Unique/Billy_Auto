@@ -766,25 +766,33 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
 
   Widget _buildField(String fieldName, dynamic value) {
     // Determine field type based on value
-    if (widget.model.runtimeType == Product &&
+    if (widget.model.runtimeType == Inventory &&
+        (fieldName == "markup" ||
+            fieldName == "sellingPrice")) {
+      return SizedBox();
+    }
+
+    if (!Get.find<AppService>().currentUser.value.isAdmin &&
+      widget.model.runtimeType == Product &&
         (fieldName == "cost" ||
             fieldName == "markup" ||
             fieldName == "sellingPrice")) {
       return SizedBox();
     }
     if (
-        // !Get.find<AppService>().currentUser.value.isAdmin &&
+        !Get.find<AppService>().currentUser.value.isAdmin &&
         (fieldName == "markup")) {
       return SizedBox();
     }
     if (
-        // !Get.find<AppService>().currentUser.value.isAdmin &&
+        !Get.find<AppService>().currentUser.value.isAdmin &&
         (fieldName == "sellingPrice") &&
             ((double.tryParse(_controllers["markup"]!.text) ?? 0) == 0 ||
                 (double.tryParse(_controllers["sellingPrice"]!.text) ?? 0) ==
                     0)) {
       return SizedBox();
     }
+
     if (fieldName.endsWith("Id") ||
         fieldName.endsWith("Type") ||
         fieldName.endsWith("status") ||
@@ -845,12 +853,13 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
           } else if (widget.model.runtimeType == Inventory &&
               fieldName == "transactionType") {
             _controllers["status"]!.text = a;
-          } else if (widget.model.runtimeType == Inventory &&
+          } else if (widget.model.runtimeType == Product &&
               fieldName == "markup") {
             final pd = double.tryParse(_controllers["cost"]!.text) ?? 0;
             _controllers["sellingPrice"]!.text = Get.find<AppController>()
                 .calcNewSellingPrice(pd, a)
                 .toCurrencyString();
+                print(_controllers["sellingPrice"]!.text);
           } else if (widget.model.runtimeType == CustomerCar &&
               fieldName == "makeId") {
             makeId.value = a;

@@ -38,6 +38,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
 
   Rx<User> technician = User().obs;
   Rx<User> serviceAdvisor = User().obs;
+  final TextEditingController licenseTec = TextEditingController();
 
   @override
   void initState() {
@@ -249,13 +250,35 @@ class _CheckList2PageState extends State<CheckList2Page> {
     );
 
     return [
+      CustomTextField2.dropdown<int>(
+          controller.filterOptions["carId2"]!.titles,
+          controller.filterOptions["carId2"]!.values as List<int>,
+          licenseTec,
+          "Select Customer/Car By License No", useOld: false,initOption: currentCustomer.value.id,onChanged: (_) {
+        if (licenseTec.text == "") {
+          currentCustomer.value = Customer(
+              email: "",
+              phone: "",
+              fullName: "",
+              signature: "",
+              customerType: "");
+              currentCar.value = CustomerCar(
+                makeId: 0, modelId: 0, year: "", licenseNo: "0", customerId: 0);
+          
+        } else {
+          currentCar.value = controller.allCustomerCar.firstWhere(
+                (optv) => optv.id == int.parse(licenseTec.text));
+          currentCustomer.value = controller.allCustomer.firstWhere(
+              (optv) => optv.id == currentCar.value.customerId);
+              
+        }
+      }),
       Builder(builder: (c) {
         return CustomTextField2.dropdown<int>(
           controller.allCustomer.map((element) => element.fullName).toList(),
           controller.allCustomer.map((element) => element.id).toList(),
           controller.tecs[5],
           "Select Customer", useOld: false,initOption: currentCustomer.value.id,onChanged: (_) {
-            print(_);
         if (controller.tecs[5].text == "") {
           currentCustomer.value = Customer(
               email: "",
@@ -263,6 +286,7 @@ class _CheckList2PageState extends State<CheckList2Page> {
               fullName: "",
               signature: "",
               customerType: "");
+              
         } else {
           currentCustomer.value = controller.allCustomer.firstWhere(
               (optv) => optv.id == int.parse(controller.tecs[5].text));
