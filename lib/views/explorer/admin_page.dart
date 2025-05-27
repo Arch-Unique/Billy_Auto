@@ -16,6 +16,7 @@ import 'package:inventory/tools/enums.dart';
 import 'package:inventory/tools/extensions.dart';
 import 'package:inventory/views/checklist/order_summary.dart';
 import 'package:inventory/views/checklist/shared2.dart';
+import 'package:inventory/views/explorer/dashboard_page.dart';
 
 import '../../models/inner_models/barrel.dart';
 import '../../tools/functions.dart';
@@ -44,11 +45,15 @@ class _CustomTableState extends State<CustomTable> {
     return Obx(() {
       print(controller.changedMode.value);
       if (controller.currentType == AppConstants) {
+        if (controller.currentAppMode == 0) {
+          return LubeDashboard();
+        }
         return MarkupTargetsPage();
       }
       if (controller.currentType == Reports) {
         return ReportsPage();
       }
+
       return LoadingWidget(
         child: CurvedContainer(
           width: Ui.width(context) < 975
@@ -404,6 +409,13 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
     ));
   }
 
+  TotalResponse<T> paginateResponse(int count, int startIndex, List data) {
+    final len = data.length;
+    final endLen = len > (startIndex + count) ? (startIndex + count) : len;
+    return TotalResponse(
+        data.length, data.sublist(startIndex, endLen).cast<T>());
+  }
+
   @override
   Future<AsyncRowsResponse> getRows(int startIndex, int count) async {
     final appRepo = Get.find<AppRepo>();
@@ -421,13 +433,17 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
 
       if (T == InventoryMetricStockBalances) {
         await Get.find<AppController>().initMetrics();
-        res = TotalResponse<T>(
-            Get.find<AppController>().allStockBalances.length,
-            Get.find<AppController>().allStockBalances.cast<T>());
+        res = paginateResponse(
+            count, startIndex, (Get.find<AppController>().allStockBalances));
+        // res = TotalResponse<T>(
+        //     Get.find<AppController>().allStockBalances.length,
+        //     Get.find<AppController>().allStockBalances.cast<T>());
       } else if (T == InventoryMetricDailyProfit) {
         await Get.find<AppController>().initMetrics();
-        res = TotalResponse<T>(Get.find<AppController>().allDailyProfit.length,
-            Get.find<AppController>().allDailyProfit.cast<T>());
+        res = paginateResponse(
+            count, startIndex, (Get.find<AppController>().allDailyProfit));
+        // res = TotalResponse<T>(Get.find<AppController>().allDailyProfit.length,
+        //     Get.find<AppController>().allDailyProfit.cast<T>());
       } else {
         res = await appRepo.getAll<T>(
             page: page,
@@ -767,29 +783,25 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
   Widget _buildField(String fieldName, dynamic value) {
     // Determine field type based on value
     if (widget.model.runtimeType == Inventory &&
-        (fieldName == "markup" ||
-            fieldName == "sellingPrice")) {
+        (fieldName == "markup" || fieldName == "sellingPrice")) {
       return SizedBox();
     }
 
     if (!Get.find<AppService>().currentUser.value.isAdmin &&
-      widget.model.runtimeType == Product &&
+        widget.model.runtimeType == Product &&
         (fieldName == "cost" ||
             fieldName == "markup" ||
             fieldName == "sellingPrice")) {
       return SizedBox();
     }
-    if (
-        !Get.find<AppService>().currentUser.value.isAdmin &&
+    if (!Get.find<AppService>().currentUser.value.isAdmin &&
         (fieldName == "markup")) {
       return SizedBox();
     }
-    if (
-        !Get.find<AppService>().currentUser.value.isAdmin &&
+    if (!Get.find<AppService>().currentUser.value.isAdmin &&
         (fieldName == "sellingPrice") &&
-            ((double.tryParse(_controllers["markup"]!.text) ?? 0) == 0 ||
-                (double.tryParse(_controllers["sellingPrice"]!.text) ?? 0) ==
-                    0)) {
+        ((double.tryParse(_controllers["markup"]!.text) ?? 0) == 0 ||
+            (double.tryParse(_controllers["sellingPrice"]!.text) ?? 0) == 0)) {
       return SizedBox();
     }
 
@@ -859,7 +871,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
             _controllers["sellingPrice"]!.text = Get.find<AppController>()
                 .calcNewSellingPrice(pd, a)
                 .toCurrencyString();
-                print(_controllers["sellingPrice"]!.text);
+            print(_controllers["sellingPrice"]!.text);
           } else if (widget.model.runtimeType == CustomerCar &&
               fieldName == "makeId") {
             makeId.value = a;
@@ -1457,7 +1469,6 @@ class _MarkupTargetsPageState extends State<MarkupTargetsPage> {
     dtrm = DateTime(dtt.year, dtt.month);
     dtry = DateTime(dtt.year);
     curMonthDayTitle.text = DateFormat("dd/MM/yyyy").format(curDateTime.value);
-    
   }
 
   @override
@@ -1499,9 +1510,7 @@ class _MarkupTargetsPageState extends State<MarkupTargetsPage> {
                         if (v == "All" || v == "None") {
                           setDateValues();
                         }
-                        setState(() {
-        
-      });
+                        setState(() {});
                       }),
                     ),
                     Ui.boxWidth(12),
@@ -1540,9 +1549,7 @@ class _MarkupTargetsPageState extends State<MarkupTargetsPage> {
                               curDateTime.value = DateTime.now();
                             }
                             setDateValues();
-                            setState(() {
-        
-      });
+                            setState(() {});
                           },
                         )),
                   ],
@@ -1557,7 +1564,8 @@ class _MarkupTargetsPageState extends State<MarkupTargetsPage> {
                           onPressed: () {
                             Get.dialog(AppDialog(
                                 title: AppText.medium("Edit Record"),
-                                content: BulkMarkup()));
+                                content: BulkMarkup(),
+                                width: Ui.width(context)*1.5,));
                           },
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -1976,6 +1984,14 @@ class _BulkMarkupState extends State<BulkMarkup> {
                       att: true, alignment: TextAlign.center)),
               Expanded(
                   flex: 1,
+                  child: AppText.thin("Selling\nPrice(exVAT)",
+                      att: true, alignment: TextAlign.center)),
+              Expanded(
+                  flex: 1,
+                  child: AppText.thin("VAT",
+                      att: true, alignment: TextAlign.center)),
+              Expanded(
+                  flex: 1,
                   child: AppText.thin("Selling\nPrice",
                       att: true, alignment: TextAlign.center)),
             ],
@@ -1985,10 +2001,18 @@ class _BulkMarkupState extends State<BulkMarkup> {
               mainAxisSize: MainAxisSize.min,
               children: List.generate(selectedProducts.length, (i) {
                 // Product e = selectedProducts[i];
+                final exvat = (100 * selectedProducts[i].sellingPrice) /
+                    (100 + controller.appConstants.value.vat);
+                final vat = (controller.appConstants.value.vat * exvat) / 100;
                 final costTec = TextEditingController(
                     text: selectedProducts[i].cost.toCurrencyString());
                 final priceTec = TextEditingController(
                     text: selectedProducts[i].sellingPrice.toCurrencyString());
+
+                final exVatTec =
+                    TextEditingController(text: exvat.floor().toString());
+                final vatTec =
+                    TextEditingController(text: vat.floor().toString());
                 final ctt = controller
                     .filterOptions[
                         pending.value == 1 ? "productId" : "productId3"]!
@@ -2005,33 +2029,8 @@ class _BulkMarkupState extends State<BulkMarkup> {
                         child: CustomTextField.dropdown(
                             ctt, vtt, TextEditingController(), "",
                             initOption: selectedProducts[i].id,
-                            isEnabled: false, onChanged: (p0) {
-                          // selectedProducts[i].id = p0;
-                          // if (p0 != 0) {
-                          //   selectedProducts[i] = pending.value == 1
-                          //       ? controller.allProducts
-                          //           .where((b) => b.id == p0)
-                          //           .first
-                          //       : controller.allPendingMarkupProducts
-                          //           .where((b) => b.id == p0)
-                          //           .first;
-                          //   if (pending.value != 1) {
-                          //     selectedProducts[i].sellingPrice =
-                          //         controller.calcNewSellingPrice(
-                          //             selectedProducts[i].cost,
-                          //             selectedProducts[i].markup);
-                          //     selectedProducts[i].markup =
-                          //         selectedProducts[i].markup;
-                          //   }
-
-                          //   priceTec.text = selectedProducts[i]
-                          //       .sellingPrice
-                          //       .toCurrencyString();
-                          //   costTec.text =
-                          //       selectedProducts[i].cost.toCurrencyString();
-                          //   selectedProducts.refresh();
-                          // }
-                        })),
+                            isEnabled: false,
+                            onChanged: (p0) {})),
                     Expanded(
                         flex: 1,
                         child: Padding(
@@ -2073,8 +2072,39 @@ class _BulkMarkupState extends State<BulkMarkup> {
                             .calcNewSellingPrice(selectedProducts[i].cost, v);
                         priceTec.text =
                             selectedProducts[i].sellingPrice.toCurrencyString();
+                        final exvatt =
+                            (100 * selectedProducts[i].sellingPrice) /
+                                (100 + controller.appConstants.value.vat);
+                        final vatt =
+                            (controller.appConstants.value.vat * exvatt) / 100;
+                        exVatTec.text = exvatt.floor().toString();
+                        vatTec.text = vatt.floor().toString();
                       }),
                     ),
+                    Expanded(
+                        flex: 1,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 12.0),
+                          child: TextField(
+                            controller: exVatTec,
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.next,
+                            textAlign: TextAlign.center,
+                            readOnly: true,
+                          ),
+                        )),
+                    Expanded(
+                        flex: 1,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 12.0),
+                          child: TextField(
+                            controller: vatTec,
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.next,
+                            textAlign: TextAlign.center,
+                            readOnly: true,
+                          ),
+                        )),
                     Expanded(
                         flex: 1,
                         child: Padding(
@@ -2087,6 +2117,14 @@ class _BulkMarkupState extends State<BulkMarkup> {
                             onChanged: (v) {
                               selectedProducts[i].sellingPrice =
                                   double.tryParse(priceTec.text) ?? 0;
+                              final exvatt =
+                                  (100 * selectedProducts[i].sellingPrice) /
+                                      (100 + controller.appConstants.value.vat);
+                              final vatt =
+                                  (controller.appConstants.value.vat * exvatt) /
+                                      100;
+                              exVatTec.text = exvatt.floor().toString();
+                              vatTec.text = vatt.floor().toString();
                             },
                           ),
                         )),
@@ -2136,6 +2174,186 @@ class _BulkMarkupState extends State<BulkMarkup> {
         ],
       ),
     );
+  }
+}
+
+class LubeDashboard extends StatelessWidget {
+  LubeDashboard({super.key});
+  final controller = Get.find<AppController>();
+
+  @override
+  Widget build(BuildContext context) {
+    final cl = Obx(() {
+      final cf = [
+        itemDataWidget(
+            "Total Products",
+            controller.allProducts
+                .where((test) => test.productTypeId == 201)
+                .length
+                .toString(),
+            Colors.lightBlue[100]!.withOpacity(0.7)),
+        itemDataWidget(
+            "Total Expenses",
+            controller.allLubeInventory
+                .where((test) => test.status.toLowerCase() == "inbound")
+                .map((e) => e.cost)
+                .fold(0.0, (a, b) => a + b)
+                .toCurrency(),
+            Colors.lightGreen[100]!.withOpacity(0.7)),
+        itemDataWidget(
+            "Total Cost Of Goods Sold",
+            controller.allLubeInventory
+                .where((test) => test.status.toLowerCase() == "outbound")
+                .map((e) => e.sellingPrice)
+                .fold(0.0, (a, b) => a + b)
+                .toCurrency(),
+            Colors.lightGreen[100]!.withOpacity(0.7)),
+      ];
+      return SmartJustifyRow(runSpacing: 16, spacing: 16, children: cf);
+    });
+    final prds = controller.allProducts
+        .where((test) => test.productTypeId == 201)
+        .toList();
+    final prdsIds = prds.map((e) => e.id);
+    final prdQty = controller.allStockBalances
+        .where((test) => prdsIds.contains(test.id))
+        .toList();
+    return CurvedContainer(
+      width:
+          Ui.width(context) < 975 ? wideUi(context) : (Ui.width(context) - 24),
+      height: Ui.width(context) < 975 ? null : double.maxFinite,
+      color: AppColors.white.withOpacity(0.6),
+      border: Border.all(color: AppColors.primaryColorLight),
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AppText.bold("Lube Dashboard",
+              fontSize: 32, fontFamily: Assets.appFontFamily2),
+          AppText.thin("Here are the current status of your lubricants."),
+          Ui.boxHeight(12),
+          cl,
+          Ui.boxHeight(12),
+          if (Ui.width(context) >= 975)
+            Expanded(
+                child: Align(
+              alignment: Alignment.topCenter,
+              child: Row(
+                children: [
+                  Expanded(
+                      child: SingleChildScrollView(
+                    child: Wrap(
+                      spacing: 24,
+                      runSpacing: 24,
+                      alignment: WrapAlignment.spaceEvenly,
+                      children: List.generate(prds.length, (i) {
+                        try {
+                          final qty = prdQty[i].quantity;
+                          return tankItem(
+                              prds[i].name, qty / 208, qty.toString());
+                        } catch (e) {
+                          return tankItem(prds[i].name, 0, 0.toString());
+                        }
+                      }),
+                    ),
+                  )),
+                  recentInventory()
+                ],
+              ),
+            )),
+          Ui.boxHeight(12),
+        ],
+      ),
+    );
+  }
+
+  Widget recentInventory() {
+    return SizedBox(
+      width: (Ui.width(Get.context!) * 0.33),
+      child: AsyncPaginatedDataTable2(
+        minWidth: (Ui.width(Get.context!) * 0.33) - 56,
+        hidePaginator: true,
+        columnSpacing: 0,
+        showCheckboxColumn: false,
+        autoRowsToHeight: true,
+        wrapInCard: false,
+        headingRowColor: MaterialStatePropertyAll<Color>(
+            Colors.lightBlue[100]!.withOpacity(0.7)),
+        rowsPerPage: 3,
+        header: AppText.medium("Recent Lube Movements",
+            fontFamily: Assets.appFontFamily2, fontSize: 14),
+        columns: ["Date", "Product", "Status", "Qty"]
+            .map((e) => DataColumn2(
+                label: AppText.bold(e,
+                    fontSize: 12, fontFamily: Assets.appFontFamily2),
+                size: ColumnSize.S))
+            .toList(),
+        source: RecentInventoryDS(),
+      ),
+    );
+  }
+
+  Widget tankItem(String name, double b, String c) {
+    return Stack(
+      alignment: AlignmentDirectional.bottomCenter,
+      children: [
+        CurvedContainer(
+          width: 200,
+          height: b * 320,
+          color: AppColors.primaryColor.withOpacity(0.2),
+          border: Border.all(color: Colors.yellow[100]!.withOpacity(0.7)),
+        ),
+        CurvedContainer(
+          width: 200,
+          height: 320,
+          color: AppColors.white.withOpacity(0.6),
+          border: Border.all(color: AppColors.primaryColorLight),
+          padding: EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppText.thin(name, fontFamily: Assets.appFontFamily2),
+              AppText.bold("${c}L", fontSize: 24, color: Colors.blue),
+              Ui.spacer(),
+              Center(
+                child: AppText.bold("${(b * 100).toStringAsPrecision(2)}%",
+                    fontSize: 48, fontFamily: Assets.appFontFamily2),
+              ),
+              Ui.boxHeight(24)
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget itemDataWidget(String title, String value, Color color,
+      {String desc = ""}) {
+    final cc = CurvedContainer(
+      height: 64,
+      padding: EdgeInsets.all(12),
+      color: color,
+      child: Row(
+        // crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          AppText.thin(title,
+              fontSize: 14, fontFamily: Assets.appFontFamily2, att: true),
+          // Ui.spacer(),
+          Ui.boxWidth(24),
+          AppText.bold(value, fontSize: 36, att: true),
+          // if (desc.isNotEmpty) AppText.thin(desc)
+        ],
+      ),
+    );
+    // return Ui.width(Get.context!) < 975
+    //     ? cc
+    //     : Expanded(
+    //         child: cc,
+    //       );
+    return cc;
   }
 }
 

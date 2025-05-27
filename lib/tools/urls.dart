@@ -21,6 +21,7 @@ abstract class AppUrls {
   static const String productCategory = "/product/category";
   static const String order = "/order$profile";
   static const String inventory = "/inventory$profile";
+  static const String lubeInventory = "/inventory$profile";
   static const String reports = "/inventory/reports";
   static const String customer = "/customer$profile";
   static const String customerCar = "/customer/car";

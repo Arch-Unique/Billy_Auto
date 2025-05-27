@@ -48,6 +48,7 @@ extension NumExtension on num {
 
   int nearest10() {
     return (this / 100).ceil() * 100;
+    // return this.toInt();
   }
 
   String toCurrencyString(){

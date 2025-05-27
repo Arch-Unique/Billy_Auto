@@ -290,14 +290,14 @@ class RecentOrderDS<Order> extends AsyncDataTableSource {
   }
 }
 
-class RecentInventoryDS<Inventory> extends AsyncDataTableSource {
+class RecentInventoryDS<LubeInventory> extends AsyncDataTableSource {
   RecentInventoryDS();
 
   @override
   Future<AsyncRowsResponse> getRows(int startIndex, int count) async {
     final tm = ["Date", "Product", "Status", "Qty"];
 // await Future.delayed(Duration(seconds: 1));
-    final bms = Get.find<AppController>().allInventory;
+    final bms = Get.find<AppController>().allLubeInventory;
     bms.sort((a, b) => b.id.compareTo(a.id));
     List<List<dynamic>> tvals = bms
         .map((element) =>

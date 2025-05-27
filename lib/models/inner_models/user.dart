@@ -99,6 +99,9 @@ class UserRole extends BaseModel {
       permsRaw = List.from(perms);
     }else{
       perms = List<List<int>>.from(permsRaw).obs;
+      if (perms.length < AllTables.tablesType.length) {
+        perms.addAll(List.generate(AllTables.tablesType.length - perms.length, (i) => [0, 0, 0, 0]).obs);
+      }
     }
   }
 

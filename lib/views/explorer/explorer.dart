@@ -68,6 +68,19 @@ class _ExplorerPageState extends State<ExplorerPage> {
       ]),
       CustomTablePage(
         [
+          
+            HeaderItem("Lube Dashboard", vb: () {
+              controller.setCurrentTypeTable<AppConstants>(v: 0);
+            }),
+            HeaderItem("Lube Inventory", vb: () {
+              controller.setCurrentTypeTable<LubeInventory>();
+            }),
+         
+
+        ],
+      ),
+      CustomTablePage(
+        [
           // if (perm?.perms[AllTables.tablesType.indexOf(Product)]
           //         [1] ==
           //     1)

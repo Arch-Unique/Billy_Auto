@@ -59,6 +59,7 @@ class AppRepo extends GetxController {
     Supplier: Supplier.fromJson,
     Order: Order.fromJson,
     Inventory: Inventory.fromJson,
+    LubeInventory: LubeInventory.fromJson,
     Product: Product.fromJson,
     ProductType: ProductType.fromJson,
     ProductCategory: ProductCategory.fromJson,
@@ -92,6 +93,7 @@ class AppRepo extends GetxController {
     Supplier: AppUrls.supplier,
     Order: AppUrls.order,
     Inventory: AppUrls.inventory,
+    LubeInventory: AppUrls.lubeInventory,
     Product: AppUrls.product,
     ProductType: AppUrls.productType,
     ProductCategory: AppUrls.productCategory,
@@ -136,6 +138,7 @@ class AppRepo extends GetxController {
   Future<String> patch<T extends BaseModel>(T data) async {
     final res = await apiService.patch("${urls[data.runtimeType]!}/${data.id}",
         data: data.toJson());
+        print(data.toJson());
     if (!res.statusCode!.isSuccess()) {
       throw res.data["error"];
     }
@@ -166,6 +169,9 @@ class AppRepo extends GetxController {
           ffm[sfm.tableTitle] = sfm.tec!.text;
         }
       }
+    }
+    if(T == LubeInventory){
+      ffm["productTypeId"] = "201";
     }
     // Construct query parameters as an object
     Map<String, dynamic> queryParams = {

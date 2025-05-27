@@ -97,6 +97,7 @@ class AppController extends GetxController {
   RxList<User> allUsers = <User>[].obs;
   // RxList<LoginHistory> allLoginHistory = <LoginHistory>[].obs;
   RxList<Inventory> allInventory = <Inventory>[].obs;
+  RxList<LubeInventory> allLubeInventory = <LubeInventory>[].obs;
   RxList<Order> allOrders = <Order>[].obs;
   RxList<Invoice> allInvoices = <Invoice>[].obs;
   RxList<UserRole> allUserRoles = <UserRole>[].obs;
@@ -138,7 +139,7 @@ class AppController extends GetxController {
   Map<DateTime, int> groupedOrdersByDay = {};
   Map<DateTime, int> groupedOrdersByYear = {};
 
-  List<int> allMarkups = [0, 20, 25, 30, 35, 40, 45, 50,55,60,65,70,75,80,85,90,95,100];
+  List<int> allMarkups = [0, 20, 25, 30, 35, 40, 45, 50,55,60,65,70,75,80,85,90,95,100,200,300,400,500];
 
   Map<String, FilterOptionsModel> filterOptions = {};
   RxBool isLoading = false.obs;
@@ -159,6 +160,7 @@ class AppController extends GetxController {
   //PROFILE
   RxBool editOn = false.obs;
   Type currentType = User;
+  int currentAppMode = 0;
 
   final appRepo = Get.find<AppRepo>();
 
@@ -381,6 +383,10 @@ class AppController extends GetxController {
         allProducts.where((optv) => optv.sellingPrice == 0 && allStockBalances.map((f) => f.productId).contains(optv.id)).toList();
     allSuppliers.value = await _getAll<Supplier>();
     allInventory.value = await _getAll<Inventory>(fm: [
+      FilterModel("stationId", "stationId", 0,
+          tec: TextEditingController(text: stt.toString()))
+    ]);
+    allLubeInventory.value = await _getAll<LubeInventory>(fm: [
       FilterModel("stationId", "stationId", 0,
           tec: TextEditingController(text: stt.toString()))
     ]);
@@ -726,7 +732,8 @@ class AppController extends GetxController {
   }
 
   //EXPLORER
-  setCurrentTypeTable<T extends BaseModel>() {
+  setCurrentTypeTable<T extends BaseModel>({int v=1}) {
+    currentAppMode = v;
     currentHeaders.value = AllTables.tablesData[T]!.headers;
     currentType = T;
     if (!currentHeaders.contains("actions")) {
@@ -865,8 +872,8 @@ class AppController extends GetxController {
   }
 
   double calcNewSellingPrice(double c, int d) {
-    final vat = (c * appConstants.value.vat) / 100;
     final markup1 = (c * d) / 100;
+    final vat = ((c+markup1) * appConstants.value.vat) / 100;
     return double.parse((c + vat + markup1).toStringAsFixed(2));
   }
 }

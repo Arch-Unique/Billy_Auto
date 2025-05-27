@@ -17,8 +17,8 @@ class Inventory extends BaseModel {
   int markup;
   // DateTime shelfLife;
 
-  int productTypeId,stationId,locationId;
-  String productType, productCategory, product,station;
+  int productTypeId, stationId, locationId;
+  String productType, productCategory, product, station;
 
   Inventory({
     super.id = 0,
@@ -33,11 +33,11 @@ class Inventory extends BaseModel {
     this.productCategory = "",
     required this.location,
     this.cost = 0,
-    this.markup=0,
+    this.markup = 0,
     this.sellingPrice = 0,
-    this.station="",
-    this.locationId=0,
-    this.stationId=0,
+    this.station = "",
+    this.locationId = 0,
+    this.stationId = 0,
     // required this.shelfLife,
     super.createdAt,
     super.updatedAt,
@@ -55,7 +55,7 @@ class Inventory extends BaseModel {
       'status': status,
       'supplierId': supplierId,
       'productCategoryId': productCategoryId,
-      
+
       'locationId': locationId,
       'cost': cost,
       "markup": markup,
@@ -68,7 +68,10 @@ class Inventory extends BaseModel {
 
   @override
   bool validate() {
-    return productId != 0 && status.isNotEmpty && stationId != 0 && locationId != 0;
+    return productId != 0 &&
+        status.isNotEmpty &&
+        stationId != 0 &&
+        locationId != 0;
   }
 
   @override
@@ -80,7 +83,7 @@ class Inventory extends BaseModel {
       status,
       // transactionType,
       cost.toCurrency(),
-      (cost*qty).toCurrency(),
+      (cost * qty).toCurrency(),
       // productType,
       // productCategory,
       createdAt
@@ -96,7 +99,7 @@ class Inventory extends BaseModel {
       status,
       // transactionType,
       cost.toCurrency(),
-      (cost*qty).toCurrency(),
+      (cost * qty).toCurrency(),
       supplier,
       markup,
       sellingPrice,
@@ -133,7 +136,62 @@ class Inventory extends BaseModel {
       station: json['station'] ?? "",
       stationId: int.tryParse(json['stationId'].toString()) ?? 0,
       locationId: int.tryParse(json['locationId'].toString()) ?? 0,
-      
+    );
+  }
+}
+
+
+class LubeInventory extends Inventory {
+  LubeInventory({
+    super.id = 0,
+    required super.productId,
+    super.product = "",
+    required super.qty,
+    required super.transactionType,
+    required super.status,
+    required super.supplierId,
+    super.supplier="",
+    required super.productCategoryId,
+    super.productCategory = "",
+    required super.location,
+    super.cost = 0,
+    super.markup = 0,
+    super.sellingPrice = 0,
+    super.station = "",
+    super.locationId = 0,
+    super.stationId = 0,
+    // required this.shelfLife,
+    required super.productTypeId,
+    super.productType = "",
+    super.createdAt,
+    super.updatedAt,
+  });
+
+  factory LubeInventory.fromJson(Map<String, dynamic> json) {
+    return LubeInventory(
+      id: json['id'] ?? 0,
+      productId: int.tryParse(json['productId'].toString()) ?? 0,
+      product: json['product'] ?? "",
+      qty: double.tryParse(json['qty'].toString()) ?? 0,
+      transactionType: json['transactionType'],
+      status: json['status'],
+      supplierId: int.tryParse(json['supplierId'].toString()) ?? 0,
+      supplier: json['supplier'] ?? "",
+      productCategoryId:
+          int.tryParse(json['productCategoryId'].toString()) ?? 0,
+      productCategory: json['productCategory'] ?? "",
+      location: json['locationName'] ?? "",
+      markup: int.tryParse(json['markup'].toString()) ?? 0,
+      cost: double.tryParse(json['cost'].toString()) ?? 0,
+      sellingPrice: double.tryParse(json['sellingPrice'].toString()) ?? 0,
+      // shelfLife: DateTime.parse(json['shelfLife']),
+      createdAt: DateTime.tryParse(json['createdAt']),
+      updatedAt: DateTime.tryParse(json['updatedAt']),
+      productTypeId: int.tryParse(json['productTypeId'].toString()) ?? 0,
+      productType: json['productType'] ?? "",
+      station: json['station'] ?? "",
+      stationId: int.tryParse(json['stationId'].toString()) ?? 0,
+      locationId: int.tryParse(json['locationId'].toString()) ?? 0,
     );
   }
 }
@@ -168,7 +226,7 @@ class InventoryMetricStockBalances extends UneditableModel {
     return [productName, quantity];
   }
 
-    @override
+  @override
   List toExcelRows() {
     return [productName, quantity];
   }
@@ -269,12 +327,24 @@ class InventoryMetricDailyProfit extends UneditableModel {
 
   @override
   List toTableRows() {
-    return [dateRaw,sales.toCurrency(),expenses.toCurrency(),productCost.toCurrency(),profit.toCurrency()];
+    return [
+      dateRaw,
+      sales.toCurrency(),
+      expenses.toCurrency(),
+      productCost.toCurrency(),
+      profit.toCurrency()
+    ];
   }
 
-    @override
+  @override
   List toExcelRows() {
-    return [dateRaw,sales.toCurrency(),expenses.toCurrency(),productCost.toCurrency(),profit.toCurrency()];
+    return [
+      dateRaw,
+      sales.toCurrency(),
+      expenses.toCurrency(),
+      productCost.toCurrency(),
+      profit.toCurrency()
+    ];
   }
 
   @override
@@ -283,7 +353,7 @@ class InventoryMetricDailyProfit extends UneditableModel {
   }
 }
 
-class InventoryMetricMonthlyProfit extends UneditableModel{
+class InventoryMetricMonthlyProfit extends UneditableModel {
   final DateTime date;
   final double productProfit,
       serviceProfit,
@@ -318,19 +388,19 @@ class InventoryMetricMonthlyProfit extends UneditableModel{
     );
   }
 
-    @override
+  @override
   Map<String, dynamic> toJson() {
     return {};
   }
 
   @override
   List toTableRows() {
-    return [dateRaw,sales,expenses,productCost,profit];
+    return [dateRaw, sales, expenses, productCost, profit];
   }
 
-    @override
+  @override
   List toExcelRows() {
-    return [dateRaw,sales,expenses,productCost,profit];
+    return [dateRaw, sales, expenses, productCost, profit];
   }
 
   @override
@@ -339,7 +409,7 @@ class InventoryMetricMonthlyProfit extends UneditableModel{
   }
 }
 
-class InventoryMetricYearlyProfit extends UneditableModel{
+class InventoryMetricYearlyProfit extends UneditableModel {
   final DateTime date;
   final double productProfit,
       serviceProfit,
@@ -374,19 +444,19 @@ class InventoryMetricYearlyProfit extends UneditableModel{
     );
   }
 
-    @override
+  @override
   Map<String, dynamic> toJson() {
     return {};
   }
 
   @override
   List toTableRows() {
-    return [dateRaw,sales,expenses,productCost,profit];
+    return [dateRaw, sales, expenses, productCost, profit];
   }
 
-    @override
+  @override
   List toExcelRows() {
-    return [dateRaw,sales,expenses,productCost,profit];
+    return [dateRaw, sales, expenses, productCost, profit];
   }
 
   @override

@@ -830,9 +830,10 @@ abstract class Ui {
 }
 
 class AppDialog extends StatelessWidget {
-  const AppDialog({required this.title, required this.content, super.key});
+  const AppDialog({required this.title, required this.content, this.width,super.key});
   final Widget title;
   final Widget content;
+  final double? width;
 
   @override
   Widget build(BuildContext context) {
@@ -860,13 +861,13 @@ class AppDialog extends StatelessWidget {
         ],
       ),
       content: SizedBox(
-          width: Ui.width(context) < 1500
+          width:width ?? ( Ui.width(context) < 1500
               ? (Ui.width(context) < 1000
                   ? (Ui.width(context) < 700
                       ? Ui.width(context) / 1.4
                       : Ui.width(context) / 2)
                   : Ui.width(context) / 2.5)
-              : Ui.width(context) / 3,
+              : Ui.width(context) / 3),
           child: content),
     );
   }

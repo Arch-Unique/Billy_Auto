@@ -62,7 +62,7 @@ class AllTables {
   static List<Type> tablesType = [
     Reports,User,Supplier,BillyServices,CarMake,CarModels,BillyConditionCategory,BillyConditions,Customer,CustomerCar,ProductCategory,ProductType,Product,
     Inventory,Order,LoginHistory,UserAttendance,Invoice,ExpensesType,Expenses,BulkExpenses,InventoryMetricStockBalances,InventoryMetricDailyProfit,AppConstants,
-    Locations,UserRole,Stations
+    Locations,UserRole,Stations,LubeInventory
   ];
   static Map<Type, TableModel> tablesData = {
     Reports: TableModel([], [], Reports()),
@@ -250,6 +250,9 @@ class AllTables {
           "location",
           "createdAt"
         ]),
+
+
+
     Order: TableModel(
         ["id", "customer", "car", "status", "createdAt"],
         [
@@ -341,6 +344,45 @@ class AllTables {
     Stations: TableModel([
       "id","name","address","email","phone","createdAt"
     ], [FilterModel("Date", "createdAt", 1),], Stations())
+  ,LubeInventory: TableModel(
+        [
+          "id",
+          "product",
+          "qty",
+          "status",
+          "unit cost",
+          "total cost",
+          // "product Type",
+          // "product Category",
+          "createdAt"
+        ],
+        [
+          FilterModel("Transaction Type", "transactionType", 0),
+          FilterModel("Date", "createdAt", 1),
+        ],
+        LubeInventory(
+            productId: 0,
+            qty: 0,
+            transactionType: "",
+            status: "",
+            supplierId: 0,
+            productCategoryId: 0,
+            location: "store 1",
+            // shelfLife: DateTime.now(),
+            productTypeId: 0),
+        excelHeaders: [
+          "id",
+          "product",
+          "qty",
+          "status",
+          "unit cost",
+          "total cost",
+          "supplier",
+          "markup",
+          "unit selling price",
+          "location",
+          "createdAt"
+        ]),
   };
   
 }

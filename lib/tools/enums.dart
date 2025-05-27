@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 enum DashboardModes {
   dashboard("Dashboard", Icons.dashboard),
   order("Orders", Icons.calendar_today_sharp),
+  lube("Lubes",Icons.oil_barrel),
   product("Products", Icons.work),
   inventory("Inventory", Icons.book),
   settings("Configs", Icons.settings),
