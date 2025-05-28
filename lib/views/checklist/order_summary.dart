@@ -39,8 +39,8 @@ class _OrderSummaryState extends State<OrderSummary> {
   bool isSaving = false;
   Rx<Invoice> invoice = Invoice(productsUsed: [], servicesUsed: []).obs;
   final ltec = TextEditingController(
-      text: "7000",
-    );
+    text: "7000",
+  );
 
   @override
   void initState() {
@@ -114,7 +114,8 @@ class _OrderSummaryState extends State<OrderSummary> {
                           widget.order.createdAt ?? DateTime.now(),
                           order: widget.order,
                           orderFinished: widget.order.dispatchedAt,
-                          invoice: widget.order.isDispatched ? invoice.value : null,
+                          invoice:
+                              widget.order.isDispatched ? invoice.value : null,
                           sigUint: widget.sig,
                         ));
                       },
@@ -239,14 +240,15 @@ class _OrderSummaryState extends State<OrderSummary> {
               })),
               Ui.boxHeight(24),
               if (widget.order.id == 0)
-              Builder(builder: (context) {
-                return SignatureView(Get.find<AppController>().userSig, "Customer Signature",
-                    size: wideUi(context));
-              }),
+                Builder(builder: (context) {
+                  return SignatureView(
+                      Get.find<AppController>().userSig, "Customer Signature",
+                      size: wideUi(context));
+                }),
               if (widget.order.id != 0)
-              LockedSignatureWidget(
-                title: "Customer Signature",
-                signature: widget.order.customerDetails!.signature),
+                LockedSignatureWidget(
+                    title: "Customer Signature",
+                    signature: widget.order.customerDetails!.signature),
               Ui.boxHeight(24),
               if (widget.order.id == 0)
                 SizedBox(
@@ -268,7 +270,7 @@ class _OrderSummaryState extends State<OrderSummary> {
                     text: "Submit",
                   ),
                 ),
-              if (widget.order.id != 0) InvoiceList(invoice,ltec),
+              if (widget.order.id != 0) InvoiceList(invoice, ltec),
               if (widget.order.id != 0 && !widget.order.isDispatched)
                 SizedBox(
                   width: wideUi(context),
@@ -901,39 +903,35 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
                                     color: PdfColor.fromInt(0xFF1E1E1E))),
                           ]),
                     ]),
-                    pw.Spacer(),
-                    pw.Align(
-                      alignment: pw.Alignment.center,
-                      child: pw.Column(
-                          mainAxisSize: pw.MainAxisSize.min,
-                          crossAxisAlignment: pw.CrossAxisAlignment.center,
-                          children: [
-                            titleText("Bank Details",
-                                hasBottomMargin: true,width: 78),
-                            
-                            pw.SizedBox(height: 4),
-                            pw.Text(
-                                "Guaranty Trust Bank (GT Bank)",
-                                style: pw.TextStyle(
-                                    font: defFontBold,
-                                    fontSize: 12,
-                                    color: PdfColor.fromInt(0xFF1E1E1E))),
-                                    pw.Text(
-                                "3000920670",
-                                style: pw.TextStyle(
-                                    font: defFontReg,
-                                    fontSize: 10,
-                                    color: PdfColor.fromInt(0xFF1E1E1E))),
-                                    pw.Text(
-                                "B A Plus Ltd",
-                                style: pw.TextStyle(
-                                    font: defFontReg,
-                                    fontSize: 10,
-                                    color: PdfColor.fromInt(0xFF1E1E1E))),
-                          ]),
-                    ),
+                pw.Spacer(),
+                pw.Align(
+                  alignment: pw.Alignment.center,
+                  child: pw.Column(
+                      mainAxisSize: pw.MainAxisSize.min,
+                      crossAxisAlignment: pw.CrossAxisAlignment.center,
+                      children: [
+                        titleText("Bank Details",
+                            hasBottomMargin: true, width: 78),
+                        pw.SizedBox(height: 4),
+                        pw.Text("Guaranty Trust Bank (GT Bank)",
+                            style: pw.TextStyle(
+                                font: defFontBold,
+                                fontSize: 12,
+                                color: PdfColor.fromInt(0xFF1E1E1E))),
+                        pw.Text("3000920670",
+                            style: pw.TextStyle(
+                                font: defFontReg,
+                                fontSize: 10,
+                                color: PdfColor.fromInt(0xFF1E1E1E))),
+                        pw.Text("B A Plus Ltd",
+                            style: pw.TextStyle(
+                                font: defFontReg,
+                                fontSize: 10,
+                                color: PdfColor.fromInt(0xFF1E1E1E))),
+                      ]),
+                ),
 
-                    pw.SizedBox(height: 24)
+                pw.SizedBox(height: 24)
               ]);
 
           return pw.Stack(
@@ -1040,9 +1038,9 @@ class _CustomOrderPDFPageState extends State<CustomOrderPDFPage> {
 }
 
 class InvoiceList extends StatelessWidget {
-  const InvoiceList(this.invoice,this.ltec, {this.isOwn = true, super.key});
+  const InvoiceList(this.invoice, this.ltec, {this.isOwn = true,this.onlyProduct=false, super.key});
   final Rx<Invoice> invoice;
-  final bool isOwn;
+  final bool isOwn,onlyProduct;
   final TextEditingController ltec;
 
   @override
@@ -1058,10 +1056,12 @@ class InvoiceList extends StatelessWidget {
           AppText.bold("BILL/CASH RECEIPT",
               fontSize: 24, fontFamily: Assets.appFontFamily2),
         if (isOwn) Ui.boxHeight(24),
+        if(!onlyProduct)
         InvoiceItemWidget(
             title: "Labour Charge",
             isEnabled: invoice.value.id == 0 || !isOwn,
             labourTec: ltec),
+            if(!onlyProduct)
         Ui.boxHeight(32),
         //Products
         AppDivider(),
@@ -1098,7 +1098,11 @@ class InvoiceList extends StatelessWidget {
 
         Ui.boxHeight(24),
         //Services
-        AppDivider(),
+        if(!onlyProduct)
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+AppDivider(),
         Ui.align(child: AppText.bold("Services")),
         Ui.boxHeight(8),
         Obx(() {
@@ -1129,6 +1133,9 @@ class InvoiceList extends StatelessWidget {
             invoice.refresh();
           }),
         Ui.boxHeight(48),
+          ],
+        ),
+        
 
         AppDivider(),
         Obx(() {
@@ -1261,14 +1268,20 @@ class InvoiceItemWidget extends StatelessWidget {
                     textAlign: TextAlign.center,
                     decoration: InputDecoration(hintText: "Qty"),
                     onChanged: (_) {
-                      final maxQty = (Get.find<AppController>().allStockBalances.where((optv) => optv.productId == item!.rawId.value).firstOrNull?.quantity ?? 0);
+                      final maxQty = (Get.find<AppController>()
+                              .allStockBalances
+                              .where(
+                                  (optv) => optv.productId == item!.rawId.value)
+                              .firstOrNull
+                              ?.quantity ??
+                          0);
                       item!.rawQty.value =
                           double.tryParse(qtyTec.text) ?? item!.qty;
-                          if(item!.rawQty.value > maxQty){
-                            item!.rawQty.value = maxQty.toDouble();
-                            qtyTec.text = maxQty.toString();
-                            Ui.showError("Qty exceeds available in store");
-                          }
+                      if (item!.rawQty.value > maxQty) {
+                        item!.rawQty.value = maxQty.toDouble();
+                        qtyTec.text = maxQty.toString();
+                        Ui.showError("Qty exceeds available in store");
+                      }
                     });
               }),
             ),

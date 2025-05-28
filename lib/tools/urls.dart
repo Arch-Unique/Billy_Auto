@@ -16,6 +16,7 @@ abstract class AppUrls {
   static const String loginHistory = "/loginhistory$profile";
   static const String userAttendance = "/loginhistory/attendance";
   static const String invoice = "/invoice$profile";
+  static const String extraOrder = "/invoice/extra";
   static const String product = "/product$profile";
   static const String productType = "/product/type";
   static const String productCategory = "/product/category";

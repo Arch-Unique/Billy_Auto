@@ -11,6 +11,7 @@ import 'package:inventory/models/table_repo.dart';
 import 'package:inventory/tools/demo.dart';
 import 'package:inventory/tools/enums.dart';
 import 'package:inventory/tools/functions.dart';
+import 'package:inventory/tools/urls.dart';
 import 'package:inventory/views/explorer/admin_page.dart';
 import 'package:inventory/views/shared.dart';
 import 'package:path_provider/path_provider.dart';
@@ -139,7 +140,30 @@ class AppController extends GetxController {
   Map<DateTime, int> groupedOrdersByDay = {};
   Map<DateTime, int> groupedOrdersByYear = {};
 
-  List<int> allMarkups = [0, 20, 25, 30, 35, 40, 45, 50,55,60,65,70,75,80,85,90,95,100,200,300,400,500];
+  List<int> allMarkups = [
+    0,
+    20,
+    25,
+    30,
+    35,
+    40,
+    45,
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95,
+    100,
+    200,
+    300,
+    400,
+    500
+  ];
 
   Map<String, FilterOptionsModel> filterOptions = {};
   RxBool isLoading = false.obs;
@@ -379,8 +403,11 @@ class AppController extends GetxController {
       FilterModel("stationId", "stationId", 0,
           tec: TextEditingController(text: stt.toString()))
     ]);
-    allPendingMarkupProducts.value =
-        allProducts.where((optv) => optv.sellingPrice == 0 && allStockBalances.map((f) => f.productId).contains(optv.id)).toList();
+    allPendingMarkupProducts.value = allProducts
+        .where((optv) =>
+            optv.sellingPrice == 0 &&
+            allStockBalances.map((f) => f.productId).contains(optv.id))
+        .toList();
     allSuppliers.value = await _getAll<Supplier>();
     allInventory.value = await _getAll<Inventory>(fm: [
       FilterModel("stationId", "stationId", 0,
@@ -573,11 +600,11 @@ class AppController extends GetxController {
         final acust = await appRepo.getAll<Customer>(fm: [
           FilterModel("fullName", "fullName", 1,
               tec: TextEditingController(
-                  text: currentOrder.value.customerDetails!.fullName))
-                  ,FilterModel("email", "email", 1,
+                  text: currentOrder.value.customerDetails!.fullName)),
+          FilterModel("email", "email", 1,
               tec: TextEditingController(
                   text: currentOrder.value.customerDetails!.email)),
-                  FilterModel("phone", "phone", 1,
+          FilterModel("phone", "phone", 1,
               tec: TextEditingController(
                   text: currentOrder.value.customerDetails!.phone))
         ]);
@@ -732,7 +759,7 @@ class AppController extends GetxController {
   }
 
   //EXPLORER
-  setCurrentTypeTable<T extends BaseModel>({int v=1}) {
+  setCurrentTypeTable<T extends BaseModel>({int v = 1}) {
     currentAppMode = v;
     currentHeaders.value = AllTables.tablesData[T]!.headers;
     currentType = T;
@@ -830,6 +857,23 @@ class AppController extends GetxController {
     }
   }
 
+  addExtraInvoice(Invoice inv) async {
+    BaseModel mp = appRepo.factories[Invoice]!(inv.toRawJson());
+    try {
+      if (mp.validate()) {
+        await appRepo.create(mp, url: AppUrls.extraOrder);
+        Ui.showInfo("Successfully Added new order");
+        await refreshModels();
+        tmds.value.refreshDatasource();
+      } else {
+        throw "Products cannot be empty";
+      }
+    } catch (e) {
+      print(e);
+      Ui.showError(e.toString());
+    }
+  }
+
   editBulkProductPrice(List<Product> products) async {
     try {
       for (Product product in products) {
@@ -873,7 +917,7 @@ class AppController extends GetxController {
 
   double calcNewSellingPrice(double c, int d) {
     final markup1 = (c * d) / 100;
-    final vat = ((c+markup1) * appConstants.value.vat) / 100;
+    final vat = ((c + markup1) * appConstants.value.vat) / 100;
     return double.parse((c + vat + markup1).toStringAsFixed(2));
   }
 }

@@ -126,8 +126,8 @@ class AppRepo extends GetxController {
     return JsonParser.parse<T>(res, factories[T]!);
   }
 
-  Future<int> create<T extends BaseModel>(T data) async {
-    final res = await apiService.post("${urls[data.runtimeType]!}/add",
+  Future<int> create<T extends BaseModel>(T data,{String? url}) async {
+    final res = await apiService.post("${url ?? urls[data.runtimeType]!}/add",
         data: data.toJson());
     if (!res.statusCode!.isSuccess()) {
       throw res.data["error"];

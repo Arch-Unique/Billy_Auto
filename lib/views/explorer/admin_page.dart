@@ -48,6 +48,9 @@ class _CustomTableState extends State<CustomTable> {
         if (controller.currentAppMode == 0) {
           return LubeDashboard();
         }
+        if (controller.currentAppMode == 2) {
+          return ExtraInvoiceWidget();
+        }
         return MarkupTargetsPage();
       }
       if (controller.currentType == Reports) {
@@ -782,7 +785,8 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
 
   Widget _buildField(String fieldName, dynamic value) {
     // Determine field type based on value
-    if (widget.model.runtimeType == Inventory &&
+    if ((widget.model.runtimeType == Inventory ||
+            widget.model.runtimeType == LubeInventory) &&
         (fieldName == "markup" || fieldName == "sellingPrice")) {
       return SizedBox();
     }
@@ -813,7 +817,8 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
               fieldName == "expensesCategoryId") ||
           (widget.model.runtimeType == Product &&
               fieldName == "productCategoryId") ||
-          (widget.model.runtimeType == Inventory &&
+          ((widget.model.runtimeType == Inventory ||
+                  widget.model.runtimeType == LubeInventory) &&
               (fieldName == "productCategoryId" ||
                   fieldName == "productTypeId" ||
                   fieldName == "status"))) {
@@ -841,7 +846,8 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
                 .first
                 .productCategoryId
                 .toString();
-          } else if (widget.model.runtimeType == Inventory &&
+          } else if ((widget.model.runtimeType == Inventory ||
+                  widget.model.runtimeType == LubeInventory) &&
               fieldName == "productId") {
             _controllers["productCategoryId"]!.text = Get.find<AppController>()
                 .allProducts
@@ -862,7 +868,8 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
                 .where((optv) => optv.id == a)
                 .first
                 .category;
-          } else if (widget.model.runtimeType == Inventory &&
+          } else if ((widget.model.runtimeType == Inventory ||
+                  widget.model.runtimeType == LubeInventory) &&
               fieldName == "transactionType") {
             _controllers["status"]!.text = a;
           } else if (widget.model.runtimeType == Product &&
@@ -1037,7 +1044,9 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
           (widget.model as Expenses).rawCost.value =
               double.tryParse(_controllers[fieldName]!.text) ?? 0;
         }
-        if (widget.model.runtimeType == Inventory && fieldName == "cost") {
+        if ((widget.model.runtimeType == Inventory ||
+                widget.model.runtimeType == LubeInventory) &&
+            fieldName == "cost") {
           final pd = int.tryParse(_controllers["markup"]!.text) ?? 0;
           final cd = double.tryParse(_controllers["cost"]!.text) ?? 0;
           if (pd == 0) {
@@ -1051,7 +1060,8 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
       },
       isCompulsory: true,
       readOnly: (!Get.find<AppService>().currentUser.value.isAdmin &&
-          widget.model.runtimeType == Inventory &&
+          (widget.model.runtimeType == Inventory ||
+              widget.model.runtimeType == LubeInventory) &&
           (fieldName == "sellingPrice") &&
           (double.tryParse(_controllers["markup"]!.text) ?? 0) > 0),
       varl: fieldName.toLowerCase().endsWith("cost") ||
@@ -1136,9 +1146,8 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
               onPressed: () async {
                 ur.name = _controllers["name"]!.text;
                 if (ur.validate()) {
-                  print(ur.perms);
                   final gh = ur.toJson();
-                  print(gh);
+                  gh["id"] = ur.id;
                   await widget.onSave(gh);
                 } else {
                   Ui.showError("User role name cannot be empty");
@@ -1563,9 +1572,10 @@ class _MarkupTargetsPageState extends State<MarkupTargetsPage> {
                         child: AppButton(
                           onPressed: () {
                             Get.dialog(AppDialog(
-                                title: AppText.medium("Edit Record"),
-                                content: BulkMarkup(),
-                                width: Ui.width(context)*1.5,));
+                              title: AppText.medium("Edit Record"),
+                              content: BulkMarkup(),
+                              width: Ui.width(context) * 1.5,
+                            ));
                           },
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -2177,6 +2187,44 @@ class _BulkMarkupState extends State<BulkMarkup> {
   }
 }
 
+class ExtraInvoiceWidget extends StatelessWidget {
+  ExtraInvoiceWidget({super.key});
+
+  final Rx<Invoice> inv = Invoice(servicesUsed: [], productsUsed: []).obs;
+  final controller = Get.find<AppController>();
+
+  @override
+  Widget build(BuildContext context) {
+    return CurvedContainer(
+      width:
+          Ui.width(context) < 975 ? wideUi(context) : (Ui.width(context) - 24),
+      height: Ui.width(context) < 975 ? null : double.maxFinite,
+      color: AppColors.white.withOpacity(0.6),
+      border: Border.all(color: AppColors.primaryColorLight),
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: SingleChildScrollView(
+        child: Column(children: [
+          InvoiceList(
+            inv,
+            TextEditingController(),
+            isOwn: false,
+            onlyProduct: true,
+          ),
+          Ui.boxHeight(24),
+          AppButton(
+            onPressed: () async {
+              inv.value.orderId = 1;
+              await controller.addExtraInvoice(inv.value);
+            },
+            text: "Save",
+          )
+        ]),
+      ),
+    );
+  }
+}
+
 class LubeDashboard extends StatelessWidget {
   LubeDashboard({super.key});
   final controller = Get.find<AppController>();
@@ -2184,6 +2232,15 @@ class LubeDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cl = Obx(() {
+      final debit = controller.allLubeInventory
+          .where((test) => test.status.toLowerCase() == "inbound")
+          .map((e) => e.cost * e.qty)
+          .fold(0.0, (a, b) => a + b);
+      final credit = controller.allLubeInventory
+          .where((test) => test.status.toLowerCase() == "outbound")
+          .map((e) => e.sellingPrice * e.qty)
+          .fold(0.0, (a, b) => a + b);
+      final prof = credit - debit;
       final cf = [
         itemDataWidget(
             "Total Products",
@@ -2192,32 +2249,22 @@ class LubeDashboard extends StatelessWidget {
                 .length
                 .toString(),
             Colors.lightBlue[100]!.withOpacity(0.7)),
-        itemDataWidget(
-            "Total Expenses",
-            controller.allLubeInventory
-                .where((test) => test.status.toLowerCase() == "inbound")
-                .map((e) => e.cost)
-                .fold(0.0, (a, b) => a + b)
-                .toCurrency(),
+        if (controller.appRepo.appService.currentUser.value.isAdmin)
+          itemDataWidget("Total Expenses", debit.toCurrency(),
+              Colors.lightGreen[100]!.withOpacity(0.7)),
+        itemDataWidget("Total Cost Of Goods Sold", credit.toCurrency(),
             Colors.lightGreen[100]!.withOpacity(0.7)),
-        itemDataWidget(
-            "Total Cost Of Goods Sold",
-            controller.allLubeInventory
-                .where((test) => test.status.toLowerCase() == "outbound")
-                .map((e) => e.sellingPrice)
-                .fold(0.0, (a, b) => a + b)
-                .toCurrency(),
-            Colors.lightGreen[100]!.withOpacity(0.7)),
+        if (controller.appRepo.appService.currentUser.value.isAdmin)
+          itemDataWidget(
+              "Total Profit/Loss",
+              prof.toCurrency(),
+              prof > 0
+                  ? Colors.lightGreen[100]!.withOpacity(0.7)
+                  : Colors.red[100]!.withOpacity(0.7)),
       ];
       return SmartJustifyRow(runSpacing: 16, spacing: 16, children: cf);
     });
-    final prds = controller.allProducts
-        .where((test) => test.productTypeId == 201)
-        .toList();
-    final prdsIds = prds.map((e) => e.id);
-    final prdQty = controller.allStockBalances
-        .where((test) => prdsIds.contains(test.id))
-        .toList();
+
     return CurvedContainer(
       width:
           Ui.width(context) < 975 ? wideUi(context) : (Ui.width(context) - 24),
@@ -2241,23 +2288,37 @@ class LubeDashboard extends StatelessWidget {
               alignment: Alignment.topCenter,
               child: Row(
                 children: [
-                  Expanded(
-                      child: SingleChildScrollView(
-                    child: Wrap(
-                      spacing: 24,
-                      runSpacing: 24,
-                      alignment: WrapAlignment.spaceEvenly,
-                      children: List.generate(prds.length, (i) {
-                        try {
-                          final qty = prdQty[i].quantity;
-                          return tankItem(
-                              prds[i].name, qty / 208, qty.toString());
-                        } catch (e) {
-                          return tankItem(prds[i].name, 0, 0.toString());
-                        }
-                      }),
-                    ),
-                  )),
+                  Obx(() {
+                    final prds = controller.allProducts
+                        .where((test) => test.productTypeId == 201)
+                        .toList();
+                    final prdsIds = prds.map((e) => e.id);
+                    final prdQty = controller.allStockBalances
+                        .where((test) => prdsIds.contains(test.productId))
+                        .toList();
+                    return Expanded(
+                        child: prds.isEmpty
+                            ? Center(
+                                child: AppText.bold("No Lube Products Found"),
+                              )
+                            : SingleChildScrollView(
+                                child: Wrap(
+                                  spacing: 24,
+                                  runSpacing: 24,
+                                  alignment: WrapAlignment.spaceEvenly,
+                                  children: List.generate(prds.length, (i) {
+                                    try {
+                                      final qty = prdQty[i].quantity;
+                                      return tankItem(prds[i].name, qty / 208,
+                                          qty.toString());
+                                    } catch (e) {
+                                      return tankItem(
+                                          prds[i].name, 0, 0.toString());
+                                    }
+                                  }),
+                                ),
+                              ));
+                  }),
                   recentInventory()
                 ],
               ),
@@ -2294,7 +2355,8 @@ class LubeDashboard extends StatelessWidget {
     );
   }
 
-  Widget tankItem(String name, double b, String c) {
+  Widget tankItem(String name, double bb, String c) {
+    final b = bb.clamp(0, 1);
     return Stack(
       alignment: AlignmentDirectional.bottomCenter,
       children: [
@@ -2317,7 +2379,7 @@ class LubeDashboard extends StatelessWidget {
               AppText.bold("${c}L", fontSize: 24, color: Colors.blue),
               Ui.spacer(),
               Center(
-                child: AppText.bold("${(b * 100).toStringAsPrecision(2)}%",
+                child: AppText.bold("${(b * 100).toInt()}%",
                     fontSize: 48, fontFamily: Assets.appFontFamily2),
               ),
               Ui.boxHeight(24)
