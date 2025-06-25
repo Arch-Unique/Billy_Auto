@@ -384,14 +384,18 @@ class BackgroundScaffold extends StatelessWidget {
     return Stack(
       alignment: AlignmentDirectional.center,
       children: [
-        Opacity(
-            opacity: 0.08,
-            child: Image.asset(
-              Assets.backg,
-              fit: BoxFit.cover,
-              width: Ui.width(context),
+        Positioned(
+          right:0,
+          width: Ui.width(context)/3,
               height: Ui.height(context),
-            )),
+child:Image.asset(
+              Assets.backn,
+              fit: BoxFit.cover,
+              width: Ui.width(context)/3,
+              height: Ui.height(context),
+            )
+        ),
+        
         Container(
           width: Ui.width(context),
           height: Ui.height(context),

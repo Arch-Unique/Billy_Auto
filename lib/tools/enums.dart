@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:icons_plus/icons_plus.dart';
 
 enum DashboardModes {
-  dashboard("Dashboard", Icons.dashboard),
-  order("Orders", Icons.calendar_today_sharp),
+  dashboard("Dashboard", Icons.dashboard_outlined),
+  order("Orders", Iconsax.shopping_cart_outline),
   lube("Lubes",Icons.oil_barrel),
-  product("Products", Icons.work),
-  inventory("Inventory", Icons.book),
-  settings("Configs", Icons.settings),
-  admin("Admin", Icons.admin_panel_settings);
+  product("Products", Iconsax.shopping_bag_outline),
+  inventory("Inventory", Icons.checklist),
+  settings("Configs", Iconsax.setting_2_outline),
+  admin("Admin", Icons.admin_panel_settings_outlined);
 
   final String title;
   final IconData icon;

@@ -40,6 +40,7 @@ class _AuthPageState extends State<AuthPage> {
                 : Ui.width(context) / 2.5
             : Ui.width(context) / 3.5;
     return Scaffold(
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: Center(
           child: SizedBox(
@@ -48,17 +49,19 @@ class _AuthPageState extends State<AuthPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 LogoWidget(w / 3),
-                Expanded(
-                  child: Image.asset(
-                    Assets.s5,
-                    width: w / 1.2,
-                  ),
-                ),
-                CustomTextField("Username", username),
+                // Expanded(
+                //   child: Image.asset(
+                //     Assets.s5,
+                //     width: w / 1.2,
+                //   ),
+                // ),
+                CustomTextField("Username", username,hint: "Enter your username",isDense: false,),
                 CustomTextField(
                   "Password",
                   password,
                   varl: FPL.password,
+                  hint: "Enter your password",
+                  isDense: false,
                 ),
                 AppButton(
                   onPressed: () async {
@@ -130,7 +133,7 @@ class _ChoosePageState extends State<ChoosePage> {
               children: [
                 Ui.boxWidth(24),
                 LogoWidget(120),
-                AppText.medium("Dashboard",
+                AppText.medium("Welcome to Billy Auto Plus",
                     fontSize: 32,
                     fontFamily: Assets.appFontFamily2,
                     alignment: TextAlign.center,
@@ -150,7 +153,7 @@ class _ChoosePageState extends State<ChoosePage> {
                     },
                     child: CircleAvatar(
                         backgroundColor: AppColors.primaryColor,
-                        radius: 24,
+                        radius: 20,
                         child: Center(child: Obx(() {
                           return isPressed.value
                               ? CircularProgressIndicator(
@@ -161,15 +164,15 @@ class _ChoosePageState extends State<ChoosePage> {
                                   color: AppColors.white,
                                 );
                         })))),
-                Ui.boxHeight(12),
+                Ui.boxHeight(24),
                 ...List.generate(
                     Get.find<AppService>().currentUser.value.isServiceAdvisor
                         ? 3
                         : 2,
                     (index) => CurvedContainer(
-                          height: 84,
-                          width: wideUi(context),
-                          radius: 16,
+                          height: 64,
+                          width: wideUi(context)/2,
+                          radius: 8,
                           onPressed: () {
                             if (index == 0) {
                               Get.to(CheckList2Page());
@@ -183,43 +186,10 @@ class _ChoosePageState extends State<ChoosePage> {
                           border: Border.all(
                               color: AppColors.primaryColor,
                               strokeAlign: BorderSide.strokeAlignOutside),
-                          margin: EdgeInsets.symmetric(vertical: 12),
-                          child: Row(
-                            children: [
-                              Stack(
-                                children: [
-                                  Container(
-                                      height: 100,
-                                      width: 100,
-                                      color: AppColors.white,
-                                      child: Image.asset(
-                                        ChoosePage.assets[index],
-                                        height: 100,
-                                        width: 100,
-                                        fit: BoxFit.cover,
-                                      )),
-                                  Container(
-                                    height: 100,
-                                    width: 100,
-                                    decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                            colors: [
-                                          AppColors.white.withOpacity(0.7),
-                                          AppColors.white.withOpacity(0.05)
-                                        ],
-                                            begin: Alignment.centerRight,
-                                            end: Alignment.centerLeft)),
-                                  ),
-                                ],
-                              ),
-                              Ui.spacer(),
-                              AppText.bold(ChoosePage.pages[index],
-                                  fontSize: 20, color: AppColors.primaryColor),
-                              Ui.spacer(),
-                              SizedBox(
-                                width: 100,
-                              )
-                            ],
+                          margin: EdgeInsets.symmetric(vertical: 8),
+                          child: Center(
+                            child: AppText.bold(ChoosePage.pages[index],
+                                fontSize: 16, color: AppColors.primaryColor),
                           ),
                         )),
                 Ui.spacer(),
@@ -335,62 +305,12 @@ class _ChoosePageState extends State<ChoosePage> {
                     //       ),
                     //     );
                     //   }),
-                  
                   ],
                 ),
                 Ui.boxHeight(24),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  actionBody(String titleA, String titleB, String assetA, String assetB,
-      VoidCallback vba, VoidCallback vbb) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        actionItem(titleA, assetA, vba),
-        Ui.boxWidth(32),
-        actionItem(titleB, assetB, vbb),
-      ],
-    );
-  }
-
-  actionItem(String title, String asset, VoidCallback vb) {
-    double w = Ui.width(Get.context!) < 500 ? 150 : 200;
-    double f = w == 200 ? 24 : 18;
-    return InkWell(
-      onTap: vb,
-      child: Container(
-        width: w,
-        height: w,
-        decoration: BoxDecoration(
-            color: AppColors.white,
-            border: Border.all(color: AppColors.primaryColor),
-            borderRadius: BorderRadius.circular(24),
-            image:
-                DecorationImage(image: AssetImage(asset), fit: BoxFit.cover)),
-        child: Stack(
-          alignment: AlignmentDirectional.center,
-          children: [
-            Positioned(
-                bottom: 0,
-                child: Container(
-                  width: w,
-                  height: w / 2,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    gradient: LinearGradient(colors: [
-                      AppColors.white.withOpacity(0.1),
-                      AppColors.white.withOpacity(0.7)
-                    ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
-                  ),
-                )),
-            Positioned(bottom: 6, child: AppText.bold(title, fontSize: f)),
-          ],
         ),
       ),
     );

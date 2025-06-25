@@ -958,7 +958,7 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color borderCol = Colors.grey;
+    Color borderCol = Color(0xFFF6F6F6);
     bool hasTouched = true;
     bool isLabel = label != "";
     String? vald;
@@ -1025,10 +1025,11 @@ class CustomTextField extends StatelessWidget {
                     }
                   : null,
               style: TextStyle(fontSize: fs, fontWeight: fw, color: col),
+              
               decoration: InputDecoration(
                 fillColor: readOnly ? Colors.grey[300] : Colors.white,
                 filled: true,
-                
+          
                 enabledBorder: customBorder(color: borderCol),
                 focusedBorder: customBorder(color: borderCol),
                 border: customBorder(color: borderCol),

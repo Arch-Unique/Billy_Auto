@@ -2292,10 +2292,9 @@ class LubeDashboard extends StatelessWidget {
                     final prds = controller.allProducts
                         .where((test) => test.productTypeId == 201)
                         .toList();
-                    final prdsIds = prds.map((e) => e.id);
-                    final prdQty = controller.allStockBalances
-                        .where((test) => prdsIds.contains(test.productId))
-                        .toList();
+                    // final prdsIds = prds.map((e) => e.id);
+                    final prdQty = prds.map((e) => controller.allStockBalances
+                        .where((test) => e.id == test.productId).first).toList();
                     return Expanded(
                         child: prds.isEmpty
                             ? Center(

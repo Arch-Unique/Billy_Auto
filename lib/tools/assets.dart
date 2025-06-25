@@ -4,6 +4,7 @@ class Assets {
   static const String logoWhiteSvg = "${images}logo_white.svg";
   static const String logoPrimary = "${images}logo_primary.jpg";
   static const String backg = "${images}backg.jpg";
+  static const String backn = "${images}backn.png";
   static const String backge = "${images}backge.png";
 
   static const String appFontFamily = "Raleway";

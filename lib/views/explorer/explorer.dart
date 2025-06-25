@@ -207,28 +207,35 @@ class _ExplorerPageState extends State<ExplorerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.white,
       body: ConnectivityWidget(
         child: Stack(
           children: [
-            Opacity(
-                opacity: 0.5,
-                child: Image.asset(
-                  Assets.backge,
-                  fit: BoxFit.cover,
-                  width: Ui.width(context),
-                  height: Ui.height(context),
-                )),
-            Container(
-              width: Ui.width(context),
+            Positioned(
+          right:0,
+          width: Ui.width(context)/3,
               height: Ui.height(context),
-              color: AppColors.white.withOpacity(0.95),
-            ),
-            Column(
+child:Image.asset(
+              Assets.backn,
+              fit: BoxFit.cover,
+              width: Ui.width(context)/3,
+              height: Ui.height(context),
+            )
+        ),
+            
+            Row(
               children: [
-                header(),
-                Expanded(child: Obx(() {
-                  return screens[controller.currentDashboardMode.value.index];
-                }))
+                sideBar(),
+                Expanded(
+                  child: Column(
+                    children: [
+                      // header(),
+                      Expanded(child: Obx(() {
+                        return screens[controller.currentDashboardMode.value.index];
+                      }))
+                    ],
+                  ),
+                ),
               ],
             ),
           ],
@@ -308,4 +315,80 @@ class _ExplorerPageState extends State<ExplorerPage> {
       ),
     );
   }
+
+sideBar(){
+  final cl = List.generate(screens.length, (i) {
+      return Obx(() {
+        return CurvedContainer(
+          radius: 6,
+          width: 200,
+          
+          onPressed: () {
+            controller.currentDashboardMode.value = DashboardModes.values[i];
+          },
+          color:
+              controller.currentDashboardMode.value == DashboardModes.values[i]
+                  ? AppColors.primaryColorLight.withOpacity(0.3)
+                  : AppColors.transparent,
+          padding: EdgeInsets.symmetric(
+            vertical: 10,
+            horizontal: (Ui.width(context) < 975 ? 8 : 32),
+          ),
+          
+          margin: EdgeInsets.symmetric(
+              vertical: (Ui.width(context) >= 975 ? 8 : 4)),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              AppIcon(DashboardModes.values[i].icon,
+                  color: controller.currentDashboardMode.value ==
+                          DashboardModes.values[i]
+                      ? AppColors.primaryColor
+                      : AppColors.lightTextColor),
+              if (Ui.width(context) >= 975) Ui.boxWidth(8),
+              if (Ui.width(context) >= 975)
+                AppText.bold(DashboardModes.values[i].title,
+                    fontSize: 14,
+                    att: false,
+                    color: controller.currentDashboardMode.value ==
+                            DashboardModes.values[i]
+                        ? AppColors.primaryColor
+                      : AppColors.lightTextColor)
+            ],
+          ),
+        );
+      });
+    });
+  return CurvedContainer(
+      color: AppColors.white,
+      width: 280,
+      height: Ui.height(context),
+      radius: 0,
+      padding: EdgeInsets.all(16),
+      border: Border.all(
+              color: AppColors.lightTextColor.withOpacity(0.2)),
+      child: Column(
+        children: [
+          
+          Ui.boxHeight(24),
+          LogoWidget(96),
+          Ui.boxHeight(24),
+          
+          ...cl,
+          Spacer(),
+          Ui.boxHeight(24),
+          CurvedContainer(
+            width: 200,
+            height: 100,
+            padding: EdgeInsets.all(24),
+            child: AppButton(onPressed: (){
+              Get.back();
+            },text: "Back Home",),
+          ),
+          Ui.boxHeight(24),
+        ],
+      ),
+    );
+}
 }
