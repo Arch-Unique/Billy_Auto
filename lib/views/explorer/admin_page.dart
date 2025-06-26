@@ -71,16 +71,17 @@ class _CustomTableState extends State<CustomTable> {
             children: [
               Row(
                 children: [
-                  SizedBox(
-                    width: Ui.width(context) / 3,
-                    child: CustomTextField(
-                      "",
-                      TextEditingController(),
-                      hint: "Search",
-                      suffix: Iconsax.search_normal_1_outline,
-                      hasBottomPadding: false,
-                    ),
-                  ),
+                  // SizedBox(
+                  //   width: Ui.width(context) / 3,
+                  //   child: CustomTextField(
+                  //     "",
+                  //     TextEditingController(),
+                  //     hint: "Search",
+                  //     suffix: Iconsax.search_normal_1_outline,
+                  //     hasBottomPadding: false,
+                  //   ),
+                  // ),
+                  AppText.bold("All Records",fontSize: 14),
                   Spacer(),
                   TableIconButton(
                     "Filter",
@@ -680,7 +681,7 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                               child: AppText.thin(tval[jindex].toString(),
                                   att: true,
                                   alignment: TextAlign.center,
-                                  fontSize: 12)),
+                                  fontSize: 13)),
                         );
                       }));
           }));
@@ -938,6 +939,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
           _controllers[fieldName]!,
           "Select ${_formatFieldName(fieldName).replaceAll(" id", "")}",
           useOld: false,
+          useDrop2: true,
           isVertical: false,
           initOption: value, onChanged: (a) {
         try {
@@ -1004,6 +1006,8 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
               _controllers[fieldName]!,
               "Select ${_formatFieldName(fieldName).replaceAll(" id", "")}",
               useOld: false,
+              useDrop2: true,
+          isVertical: false,
               initOption: value,
               onChanged: (_) {});
         });
@@ -1036,6 +1040,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
         _formatFieldName(fieldName),
         initValues: widget.isNew ? [] : (jsonDecode(value) as List),
         isEnable: true,
+        isDrop2: true,
       );
     }
 
@@ -1066,6 +1071,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
         _formatFieldName(fieldName),
         initValues: widget.isNew ? [] : newConds,
         isEnable: true,
+        isDrop2: true,
       );
     }
 
@@ -2433,7 +2439,7 @@ class LubeDashboard extends StatelessWidget {
                           fontFamily: Assets.appFontFamily2, fontSize: 14),
                       Ui.boxHeight(16),
                       CurvedContainer(
-                          height: Ui.height(context) / 1.8,
+                          height: Ui.height(context) / 2,
                           //           width: ((Ui.width(context) - 280)) - 48,
                           border: Border.all(color: AppColors.borderColor),
                           boxShadows: [

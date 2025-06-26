@@ -88,14 +88,15 @@ class CustomTextField2 extends StatelessWidget {
                       width: 100,
                       child: Row(
                         children: [
-                          Expanded(
-                            child: AppText.thin(label,
+                          Flexible(
+                            child: AppText(label,
                                 color: AppColors.textColor,
-                                att: true,
+                                shdUseATT: true,
+                                weight: isCompulsory ? FontWeight.w700 : FontWeight.w400,
                                 fontFamily: Assets.appFontFamily1),
                           ),
-                          if (isCompulsory)
-                            AppText.thin("*", color: Colors.red, fontSize: 24),
+                          // if (isCompulsory)
+                          //   AppText.thin("*", color: Colors.red, fontSize: 24,),
                         ],
                       )),
                 if (prefixController != null) prefix,
@@ -142,7 +143,7 @@ class CustomTextField2 extends StatelessWidget {
                         : null,
                     style: TextStyle(fontSize: fs, fontWeight: fw, color: col),
                     decoration: InputDecoration(
-                      fillColor: AppColors.white,
+                      fillColor: readOnly ? Colors.grey[300] : Colors.white,
                       filled: true,
                       enabledBorder: customBorder(color: borderCol),
                       focusedBorder: customBorder(color: borderCol),
@@ -226,7 +227,7 @@ class CustomTextField2 extends StatelessWidget {
 
   OutlineInputBorder customBorder({Color color = Colors.black}) {
     return OutlineInputBorder(
-      borderSide: BorderSide(color: AppColors.lightTextColor.withOpacity(0.3)),
+      borderSide: BorderSide(color: AppColors.borderColor),
       borderRadius: BorderRadius.circular(8),
       gapPadding: 8,
     );

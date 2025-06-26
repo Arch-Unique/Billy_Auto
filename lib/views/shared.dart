@@ -834,7 +834,8 @@ abstract class Ui {
 }
 
 class AppDialogHeader extends StatelessWidget {
-  const AppDialogHeader(this.title, {this.desc = "Please fill in all required fields", this.icon, super.key});
+  const AppDialogHeader(this.title,
+      {this.desc = "Please fill in all required fields", this.icon, super.key});
   final String title, desc;
   final dynamic icon;
 
@@ -855,9 +856,11 @@ class AppDialogHeader extends StatelessWidget {
         Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [AppText.bold(title),
-          Ui.boxHeight(4),
-          AppText.thin(desc, fontSize: 12,color: AppColors.lightTextColor)],
+          children: [
+            AppText.bold(title),
+            Ui.boxHeight(4),
+            AppText.thin(desc, fontSize: 12, color: AppColors.lightTextColor)
+          ],
         )
       ],
     );
@@ -1149,7 +1152,8 @@ class CustomTextField extends StatelessWidget {
       dynamic initOption,
       double? w,
       bool isEnabled = true,
-      bool isVertical=true,
+      bool isVertical = true,
+      bool useDrop2 = false,
       useOld = true}) {
     dynamic curOption;
 
@@ -1179,95 +1183,94 @@ class CustomTextField extends StatelessWidget {
         initValues: [curOption],
         singleOnly: true,
         onChanged: onChanged,
+        isDrop2: useDrop2,
         isEnable: true,
       );
     }
 
     return StatefulBuilder(builder: (context, setState) {
       final ccc = CurvedContainer(
-              color: AppColors.white,
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-              border: Border.all(color: Colors.grey),
-              child: DropdownButton<dynamic>(
-                  value: curOption,
-                  isExpanded: true,
-                  elevation: 0,
-                  hint: AppText.thin(options[!values.contains(curOption)
-                      ? 0
-                      : values.indexOf(curOption)]),
-                  underline: SizedBox(),
-                  // underline: Padding(
-                  //   padding: const EdgeInsets.only(top: 16.0),
-                  //   child: Divider(
-                  //     color: AppColors.white,
-                  //   ),
-                  // ),
-                  padding: EdgeInsets.all(6),
-                  icon: Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    color: AppColors.primaryColor,
-                  ),
-                  dropdownColor: AppColors.white,
-                  isDense: true,
-                  items: values
-                      .map((e) => DropdownMenuItem<dynamic>(
-                          value: e,
-                          child: AppText.thin(options[values.indexOf(e)],
-                              att: true)))
-                      .toList(),
-                  onChanged: !isEnabled
-                      ? null
-                      : (value) {
-                          setState(() {
-                            curOption = value!;
-                            cont.text = curOption.toString();
-                          });
-                          if (onChanged != null) {
-                            onChanged(curOption);
-                          }
-                        }),
-            );
+        color: AppColors.white,
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+        border: Border.all(color: Colors.grey),
+        child: DropdownButton<dynamic>(
+            value: curOption,
+            isExpanded: true,
+            elevation: 0,
+            hint: AppText.thin(options[
+                !values.contains(curOption) ? 0 : values.indexOf(curOption)]),
+            underline: SizedBox(),
+            // underline: Padding(
+            //   padding: const EdgeInsets.only(top: 16.0),
+            //   child: Divider(
+            //     color: AppColors.white,
+            //   ),
+            // ),
+            padding: EdgeInsets.all(6),
+            icon: Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: AppColors.primaryColor,
+            ),
+            dropdownColor: AppColors.white,
+            isDense: true,
+            items: values
+                .map((e) => DropdownMenuItem<dynamic>(
+                    value: e,
+                    child: AppText.thin(options[values.indexOf(e)], att: true)))
+                .toList(),
+            onChanged: !isEnabled
+                ? null
+                : (value) {
+                    setState(() {
+                      curOption = value!;
+                      cont.text = curOption.toString();
+                    });
+                    if (onChanged != null) {
+                      onChanged(curOption);
+                    }
+                  }),
+      );
 
       return SizedBox(
         width: w ?? Ui.width(context) - 48,
-        child: isVertical ? Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (label.isNotEmpty) AppText.thin(label),
-            if (label.isNotEmpty)
-              const SizedBox(
-                height: 4,
+        child: isVertical
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (label.isNotEmpty) AppText.thin(label),
+                  if (label.isNotEmpty)
+                    const SizedBox(
+                      height: 4,
+                    ),
+                  ccc,
+                  if (label.isNotEmpty)
+                    const SizedBox(
+                      height: 24,
+                    )
+                ],
+              )
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      SizedBox(
+                          width: 100,
+                          child: AppText.thin(label,
+                              color: AppColors.textColor,
+                              att: true,
+                              fontFamily: Assets.appFontFamily1)),
+                      Expanded(child: ccc),
+                    ],
+                  ),
+                  if (label.isNotEmpty)
+                    const SizedBox(
+                      height: 24,
+                    )
+                ],
               ),
-            ccc,
-            if (label.isNotEmpty)
-              const SizedBox(
-                height: 24,
-              )
-          ],
-        ) : Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                SizedBox(
-                    width: 100,
-                    child: AppText.thin(label,
-                        color: AppColors.textColor,
-                        att: true,
-                        fontFamily: Assets.appFontFamily1)),
-                Expanded(
-                  child: ccc
-                ),
-              ],
-            ),
-            if (label.isNotEmpty)
-              const SizedBox(
-                height: 24,
-              )
-          ],
-        ),
       );
     });
   }
@@ -1484,24 +1487,33 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
     });
 
     final ddec = DropdownItemDecoration(
-      backgroundColor: AppColors.primaryColorLight.withOpacity(0.5),
+      backgroundColor: AppColors.borderColor,
       selectedBackgroundColor: AppColors.primaryColor,
       textColor: AppColors.textColor,
       selectedTextColor: AppColors.white,
+    
     );
     final fdec = FieldDecoration(
         hintText: widget.title,
         suffixIcon: Icon(
           Icons.keyboard_arrow_down_rounded,
+          size: 16,
           color: AppColors.primaryColor,
         ),
-        border: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)));
+        hintStyle: TextStyle(fontSize: 16,color: AppColors.textColor),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+        border: OutlineInputBorder(
+            borderSide: BorderSide(color: AppColors.borderColor),
+            borderRadius: BorderRadius.circular(8)));
     return MultiDropdown<T>(
       items: widget.values
           .map((e) => DropdownItem<T>(
               label: widget.options[widget.values.indexOf(e)], value: e))
           .toList(),
       searchEnabled: true,
+      chipDecoration: ChipDecoration(
+        labelStyle: TextStyle(fontSize: 16,color: AppColors.textColor),
+      ),
       controller: mdcont,
       enabled: widget.isEnable,
       singleSelect: widget.singleOnly,
@@ -1509,6 +1521,7 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
       dropdownItemDecoration: ddec,
       dropdownDecoration: DropdownDecoration(marginTop: 48),
       fieldDecoration: fdec,
+      
       onSelectionChange: (selectedItems) {
         if (selectedItems.isEmpty) {
           widget.controller.text = "";
@@ -1558,7 +1571,7 @@ class AppDivider extends StatelessWidget {
     return const Padding(
       padding: EdgeInsets.symmetric(vertical: 16.0),
       child: Divider(
-        color: AppColors.primaryColorLight,
+        color: AppColors.borderColor,
       ),
     );
   }
