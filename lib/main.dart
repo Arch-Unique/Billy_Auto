@@ -60,6 +60,7 @@ class MyApp extends StatelessWidget {
       getPages: AppPages.getPages,
       theme: ThemeData(
           fontFamily: Assets.appFontFamily,
+          scaffoldBackgroundColor: AppColors.white,
           appBarTheme: AppBarTheme(
               systemOverlayStyle: SystemUiOverlayStyle.dark
                   .copyWith(statusBarColor: AppColors.transparent))),

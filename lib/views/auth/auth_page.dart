@@ -41,55 +41,57 @@ class _AuthPageState extends State<AuthPage> {
             : Ui.width(context) / 3.5;
     return Scaffold(
       backgroundColor: AppColors.white,
-      body: SafeArea(
-        child: Center(
-          child: SizedBox(
-            width: w,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                LogoWidget(w / 3),
-                // Expanded(
-                //   child: Image.asset(
-                //     Assets.s5,
-                //     width: w / 1.2,
-                //   ),
-                // ),
-                CustomTextField("Username", username,hint: "Enter your username",isDense: false,),
-                CustomTextField(
-                  "Password",
-                  password,
-                  varl: FPL.password,
-                  hint: "Enter your password",
-                  isDense: false,
-                ),
-                AppButton(
-                  onPressed: () async {
-                    final msgU = Validators.validate(FPL.text, username.text);
-                    final msgP =
-                        Validators.validate(FPL.password, password.text);
-                    if (msgU == null && msgP == null) {
-                      final f = await Get.find<AppController>()
-                          .loginUser(username.text, password.text);
-                      if (f) {
-                        Ui.showInfo("Login Successful. Getting you ready...");
-                        await Get.find<AppController>().initApp();
-                        Get.offAll(ChoosePage());
+      body: BackgroundScaffold(
+        child: SafeArea(
+          child: Center(
+            child: SizedBox(
+              width: w,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  LogoWidget(w / 3),
+                  // Expanded(
+                  //   child: Image.asset(
+                  //     Assets.s5,
+                  //     width: w / 1.2,
+                  //   ),
+                  // ),
+                  CustomTextField("Username", username,hint: "Enter your username",isDense: false,),
+                  CustomTextField(
+                    "Password",
+                    password,
+                    varl: FPL.password,
+                    hint: "Enter your password",
+                    isDense: false,
+                  ),
+                  AppButton(
+                    onPressed: () async {
+                      final msgU = Validators.validate(FPL.text, username.text);
+                      final msgP =
+                          Validators.validate(FPL.password, password.text);
+                      if (msgU == null && msgP == null) {
+                        final f = await Get.find<AppController>()
+                            .loginUser(username.text, password.text);
+                        if (f) {
+                          Ui.showInfo("Login Successful. Getting you ready...");
+                          await Get.find<AppController>().initApp();
+                          Get.offAll(ChoosePage());
+                        }
+                      } else {
+                        Ui.showError(msgU ?? msgP ?? "An error occured");
                       }
-                    } else {
-                      Ui.showError(msgU ?? msgP ?? "An error occured");
-                    }
-                  },
-                  text: "Log In",
-                ),
-                Ui.boxHeight(24),
-                AppText.thin("Or"),
-                Ui.boxHeight(24),
-                AppButton.outline(() {
-                  Get.to(ClockInOutPage());
-                }, "Clock In/Out"),
-                Ui.boxHeight(24),
-              ],
+                    },
+                    text: "Log In",
+                  ),
+                  Ui.boxHeight(24),
+                  AppText.thin("Or"),
+                  Ui.boxHeight(24),
+                  AppButton.outline(() {
+                    Get.to(ClockInOutPage());
+                  }, "Clock In/Out"),
+                  Ui.boxHeight(24),
+                ],
+              ),
             ),
           ),
         ),

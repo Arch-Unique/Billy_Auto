@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:inventory/tools/colors.dart';
 import 'package:inventory/views/checklist/shared2.dart';
@@ -832,6 +833,37 @@ abstract class Ui {
           url.startsWith("http") ? NetworkImage(url) : Image.asset(url).image);
 }
 
+class AppDialogHeader extends StatelessWidget {
+  const AppDialogHeader(this.title, {this.desc = "Please fill in all required fields", this.icon, super.key});
+  final String title, desc;
+  final dynamic icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CurvedContainer(
+          border: Border.all(color: AppColors.borderColor),
+          padding: EdgeInsets.all(12),
+          child: AppIcon(
+            icon ?? Iconsax.document_1_outline,
+            color: AppColors.lightTextColor,
+          ),
+        ),
+        Ui.boxWidth(24),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [AppText.bold(title),
+          Ui.boxHeight(4),
+          AppText.thin(desc, fontSize: 12,color: AppColors.lightTextColor)],
+        )
+      ],
+    );
+  }
+}
+
 class AppDialog extends StatelessWidget {
   const AppDialog(
       {required this.title, required this.content, this.width, super.key});
@@ -842,14 +874,15 @@ class AppDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      backgroundColor: AppColors.white,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          SizedBox(
-            width: 36,
-          ),
-          // Expanded(child: title),
-          title,
+          // SizedBox(
+          //   width: 36,
+          // ),
+          Expanded(child: title),
+          // title,
           SizedBox(
             width: 36,
             child: InkWell(
@@ -1116,6 +1149,7 @@ class CustomTextField extends StatelessWidget {
       dynamic initOption,
       double? w,
       bool isEnabled = true,
+      bool isVertical=true,
       useOld = true}) {
     dynamic curOption;
 
@@ -1150,18 +1184,7 @@ class CustomTextField extends StatelessWidget {
     }
 
     return StatefulBuilder(builder: (context, setState) {
-      return SizedBox(
-        width: w ?? Ui.width(context) - 48,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (label.isNotEmpty) AppText.thin(label),
-            if (label.isNotEmpty)
-              const SizedBox(
-                height: 4,
-              ),
-            CurvedContainer(
+      final ccc = CurvedContainer(
               color: AppColors.white,
               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
               border: Border.all(color: Colors.grey),
@@ -1203,6 +1226,41 @@ class CustomTextField extends StatelessWidget {
                             onChanged(curOption);
                           }
                         }),
+            );
+
+      return SizedBox(
+        width: w ?? Ui.width(context) - 48,
+        child: isVertical ? Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (label.isNotEmpty) AppText.thin(label),
+            if (label.isNotEmpty)
+              const SizedBox(
+                height: 4,
+              ),
+            ccc,
+            if (label.isNotEmpty)
+              const SizedBox(
+                height: 24,
+              )
+          ],
+        ) : Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                SizedBox(
+                    width: 100,
+                    child: AppText.thin(label,
+                        color: AppColors.textColor,
+                        att: true,
+                        fontFamily: Assets.appFontFamily1)),
+                Expanded(
+                  child: ccc
+                ),
+              ],
             ),
             if (label.isNotEmpty)
               const SizedBox(

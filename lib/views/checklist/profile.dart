@@ -151,6 +151,7 @@ class ProfilePage extends StatelessWidget {
                     child: AppButton.outline(
                       () async {
                         await controller.appRepo.appService.logout();
+                        controller.currentDashboardMode.value = DashboardModes.dashboard;
                         Get.offAll(AuthPage());
                       },
                       "Log Out",

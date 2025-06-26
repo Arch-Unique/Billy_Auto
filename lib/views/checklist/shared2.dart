@@ -28,7 +28,7 @@ class CustomTextField2 extends StatelessWidget {
   final VoidCallback? onTap, customOnChanged;
   final TextInputAction tia;
   final dynamic suffix, prefix;
-  final bool autofocus, hasBottomPadding, isDense;
+  final bool autofocus, hasBottomPadding, isDense, isCompulsory;
   final double fs;
   final FontWeight fw;
   final bool readOnly, isWide, shdValidate;
@@ -50,6 +50,7 @@ class CustomTextField2 extends StatelessWidget {
       this.onTap,
       this.isWide = true,
       this.autofocus = false,
+      this.isCompulsory = false,
       this.customOnChanged,
       this.prefixController,
       this.readOnly = false,
@@ -85,9 +86,18 @@ class CustomTextField2 extends StatelessWidget {
                 if (isLabel && varl != FPL.multi)
                   SizedBox(
                       width: 100,
-                      child: AppText.thin(label,
-                          color: AppColors.textColor,
-                          fontFamily: Assets.appFontFamily1)),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: AppText.thin(label,
+                                color: AppColors.textColor,
+                                att: true,
+                                fontFamily: Assets.appFontFamily1),
+                          ),
+                          if (isCompulsory)
+                            AppText.thin("*", color: Colors.red, fontSize: 24),
+                        ],
+                      )),
                 if (prefixController != null) prefix,
                 Expanded(
                   child: TextFormField(
@@ -241,9 +251,8 @@ class CustomTextField2 extends StatelessWidget {
       }
 
       if (initOption.runtimeType == String) {
-        curOption = (initOption == null && initOption.isEmpty)
-            ? values[0]
-            : initOption;
+        curOption =
+            (initOption == null && initOption.isEmpty) ? values[0] : initOption;
       } else {
         curOption = (initOption == null) ? values[0] : initOption;
       }
@@ -385,21 +394,19 @@ class BackgroundScaffold extends StatelessWidget {
       alignment: AlignmentDirectional.center,
       children: [
         Positioned(
-          right:0,
-          width: Ui.width(context)/3,
-              height: Ui.height(context),
-child:Image.asset(
+            right: 0,
+            width: Ui.width(context) / 3,
+            height: Ui.height(context),
+            child: Image.asset(
               Assets.backn,
               fit: BoxFit.cover,
-              width: Ui.width(context)/3,
+              width: Ui.width(context) / 3,
               height: Ui.height(context),
-            )
-        ),
-        
+            )),
         Container(
           width: Ui.width(context),
           height: Ui.height(context),
-          color: AppColors.white.withOpacity(0.7),
+          color: AppColors.transparent,
         ),
         SafeArea(child: child),
         if (hasBack)

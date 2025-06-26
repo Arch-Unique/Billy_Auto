@@ -62,68 +62,61 @@ class _ExplorerPageState extends State<ExplorerPage> {
         HeaderItem("Extra Order", vb: () {
           controller.setCurrentTypeTable<AppConstants>(v: 2);
         })
-      ],"Order Management"),
-      CustomTablePage(
-        [
-          HeaderItem("Lube Dashboard", vb: () {
-            controller.setCurrentTypeTable<AppConstants>(v: 0);
+      ], "Order Management"),
+      CustomTablePage([
+        HeaderItem("Lube Dashboard", vb: () {
+          controller.setCurrentTypeTable<AppConstants>(v: 0);
+        }),
+        HeaderItem("Lube Inventory", vb: () {
+          controller.setCurrentTypeTable<LubeInventory>();
+        }),
+      ], "Lube Management"),
+      CustomTablePage([
+        // if (perm?.perms[AllTables.tablesType.indexOf(Product)]
+        //         [1] ==
+        //     1)
+        HeaderItem("Products", vb: () {
+          controller.setCurrentTypeTable<Product>();
+        }),
+        if (perm?.perms[AllTables.tablesType.indexOf(ProductCategory)][1] == 1)
+          HeaderItem("Categories", vb: () {
+            controller.setCurrentTypeTable<ProductCategory>();
           }),
-          HeaderItem("Lube Inventory", vb: () {
-            controller.setCurrentTypeTable<LubeInventory>();
+        if (perm?.perms[AllTables.tablesType.indexOf(ProductType)][1] == 1)
+          HeaderItem("Types", vb: () {
+            controller.setCurrentTypeTable<ProductType>();
           }),
-        ],"Lube Management"
-      ),
-      CustomTablePage(
-        [
-          // if (perm?.perms[AllTables.tablesType.indexOf(Product)]
-          //         [1] ==
-          //     1)
-          HeaderItem("Products", vb: () {
-            controller.setCurrentTypeTable<Product>();
+        if (perm?.perms[AllTables.tablesType.indexOf(Supplier)][1] == 1)
+          HeaderItem("Supplier", vb: () {
+            controller.setCurrentTypeTable<Supplier>();
+          })
+      ], "Product Management"),
+      CustomTablePage([
+        // if (perm?.perms[AllTables.tablesType.indexOf(Inventory)]
+        //         [1] ==
+        //     1)
+        HeaderItem("Inventory", vb: () {
+          controller.setCurrentTypeTable<Inventory>();
+        }),
+        // if (perm?.perms[AllTables.tablesType.indexOf(Expenses)]
+        //         [1] ==
+        //     1)
+        //   HeaderItem("Bulk Expenses", vb: () {
+        //     controller.setCurrentTypeTable<BulkExpenses>();
+        //   }),
+        if (perm?.perms[AllTables.tablesType.indexOf(Inventory)][1] == 1)
+          HeaderItem("Stock Balances", vb: () {
+            controller.setCurrentTypeTable<InventoryMetricStockBalances>();
           }),
-          if (perm?.perms[AllTables.tablesType.indexOf(ProductCategory)][1] ==
-              1)
-            HeaderItem("Categories", vb: () {
-              controller.setCurrentTypeTable<ProductCategory>();
-            }),
-          if (perm?.perms[AllTables.tablesType.indexOf(ProductType)][1] == 1)
-            HeaderItem("Types", vb: () {
-              controller.setCurrentTypeTable<ProductType>();
-            }),
-          if (perm?.perms[AllTables.tablesType.indexOf(Supplier)][1] == 1)
-            HeaderItem("Supplier", vb: () {
-              controller.setCurrentTypeTable<Supplier>();
-            })
-        ],"Product Management"
-      ),
-      CustomTablePage(
-        [
-          // if (perm?.perms[AllTables.tablesType.indexOf(Inventory)]
-          //         [1] ==
-          //     1)
-          HeaderItem("Inventory", vb: () {
-            controller.setCurrentTypeTable<Inventory>();
+        if (perm?.perms[AllTables.tablesType.indexOf(Inventory)][1] == 1)
+          HeaderItem("Finances", vb: () {
+            controller.setCurrentTypeTable<InventoryMetricDailyProfit>();
           }),
-          // if (perm?.perms[AllTables.tablesType.indexOf(Expenses)]
-          //         [1] ==
-          //     1)
-          //   HeaderItem("Bulk Expenses", vb: () {
-          //     controller.setCurrentTypeTable<BulkExpenses>();
-          //   }),
-          if (perm?.perms[AllTables.tablesType.indexOf(Inventory)][1] == 1)
-            HeaderItem("Stock Balances", vb: () {
-              controller.setCurrentTypeTable<InventoryMetricStockBalances>();
-            }),
-          if (perm?.perms[AllTables.tablesType.indexOf(Inventory)][1] == 1)
-            HeaderItem("Finances", vb: () {
-              controller.setCurrentTypeTable<InventoryMetricDailyProfit>();
-            }),
 
-          // HeaderItem("Location", vb: () {
-          //   // controller.setCurrentTypeTable<Inventory>();
-          // }),
-        ],"Inventory Management"
-      ),
+        // HeaderItem("Location", vb: () {
+        //   // controller.setCurrentTypeTable<Inventory>();
+        // }),
+      ], "Inventory Management"),
       CustomTablePage([
         // if (perm?.perms[AllTables.tablesType.indexOf(CarMake)]
         //         [1] ==
@@ -156,7 +149,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
           HeaderItem("Inspection Category", vb: () {
             controller.setCurrentTypeTable<BillyConditionCategory>();
           }),
-      ],"Configurations"),
+      ], "Configurations"),
       if (controller.appRepo.appService.currentUser.value.isAdmin)
         CustomTablePage([
           if (perm?.perms[AllTables.tablesType.indexOf(AppConstants)][1] == 1)
@@ -198,7 +191,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
             HeaderItem("Attendance History", vb: () {
               controller.setCurrentTypeTable<UserAttendance>();
             })
-        ],"Admin Management"),
+        ], "Admin Management"),
     ];
     controller.refreshModels();
     super.initState();
@@ -212,17 +205,15 @@ class _ExplorerPageState extends State<ExplorerPage> {
         child: Stack(
           children: [
             Positioned(
-          right:0,
-          width: Ui.width(context)/3,
-              height: Ui.height(context),
-child:Image.asset(
-              Assets.backn,
-              fit: BoxFit.cover,
-              width: Ui.width(context)/3,
-              height: Ui.height(context),
-            )
-        ),
-            
+                right: 0,
+                width: Ui.width(context) / 3,
+                height: Ui.height(context),
+                child: Image.asset(
+                  Assets.backn,
+                  fit: BoxFit.cover,
+                  width: Ui.width(context) / 3,
+                  height: Ui.height(context),
+                )),
             Row(
               children: [
                 sideBar(),
@@ -231,7 +222,8 @@ child:Image.asset(
                     children: [
                       // header(),
                       Expanded(child: Obx(() {
-                        return screens[controller.currentDashboardMode.value.index];
+                        return screens[
+                            controller.currentDashboardMode.value.index];
                       }))
                     ],
                   ),
@@ -316,13 +308,12 @@ child:Image.asset(
     );
   }
 
-sideBar(){
-  final cl = List.generate(screens.length, (i) {
+  sideBar() {
+    final cl = List.generate(screens.length, (i) {
       return Obx(() {
         return CurvedContainer(
           radius: 6,
           width: 200,
-          
           onPressed: () {
             controller.currentDashboardMode.value = DashboardModes.values[i];
           },
@@ -331,10 +322,9 @@ sideBar(){
                   ? AppColors.primaryColorLight.withOpacity(0.3)
                   : AppColors.transparent,
           padding: EdgeInsets.symmetric(
-            vertical: 10,
-            horizontal: (Ui.width(context) < 975 ? 8 : 32),
+            vertical: 8,
+            horizontal: (Ui.width(context) < 975 ? 8 : 24),
           ),
-          
           margin: EdgeInsets.symmetric(
               vertical: (Ui.width(context) >= 975 ? 8 : 4)),
           child: Row(
@@ -342,6 +332,7 @@ sideBar(){
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               AppIcon(DashboardModes.values[i].icon,
+              size: 16,
                   color: controller.currentDashboardMode.value ==
                           DashboardModes.values[i]
                       ? AppColors.primaryColor
@@ -353,38 +344,38 @@ sideBar(){
                     color: controller.currentDashboardMode.value ==
                             DashboardModes.values[i]
                         ? AppColors.primaryColor
-                      : AppColors.lightTextColor)
+                        : AppColors.lightTextColor)
             ],
           ),
         );
       });
     });
-  return CurvedContainer(
+    return CurvedContainer(
       color: AppColors.white,
       width: 280,
       height: Ui.height(context),
       radius: 0,
       padding: EdgeInsets.all(16),
-      border: Border.all(
-              color: AppColors.lightTextColor.withOpacity(0.2)),
+      border: Border.all(color: AppColors.lightTextColor.withOpacity(0.2)),
       child: Column(
         children: [
-          
           LogoWidget(96),
           Ui.boxHeight(12),
-          
           ...cl,
           Spacer(),
           CurvedContainer(
             width: 200,
             height: 48,
-            child: AppButton(onPressed: (){
-              Get.back();
-            },text: "Back Home",),
+            child: AppButton(
+              onPressed: () {
+                Get.back();
+              },
+              text: "Back Home",
+            ),
           ),
           Ui.boxHeight(24),
         ],
       ),
     );
-}
+  }
 }

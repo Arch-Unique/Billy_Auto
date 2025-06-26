@@ -179,7 +179,7 @@ class _CustomTableState extends State<CustomTable> {
                         if (controller.currentBaseModel.value.runtimeType ==
                             BulkExpenses) {
                           Get.dialog(AppDialog(
-                              title: AppText.medium("Add/Edit New Record"),
+                              title: AppDialogHeader("Add/Edit Record"),
                               content: Obx(() {
                                 return DynamicFormGenerator(
                                     model: controller.currentBaseModel.value,
@@ -196,7 +196,7 @@ class _CustomTableState extends State<CustomTable> {
                               })));
                         } else {
                           Get.dialog(AppDialog(
-                              title: AppText.medium("Add New Record"),
+                              title: AppDialogHeader("Create Record"),
                               content: Obx(() {
                                 return DynamicFormGenerator(
                                     model: controller.currentBaseModel.value,
@@ -454,7 +454,7 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
     Get.find<AppController>().stopLoading();
     Get.find<AppController>().currentBaseModel = bm.obs;
     Get.dialog(AppDialog(
-        title: AppText.medium("Edit Record"),
+        title: AppDialogHeader("Edit Record"),
         content: Obx(() {
           return DynamicFormGenerator(
               model: Get.find<AppController>().currentBaseModel.value,
@@ -622,20 +622,22 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                                         [1] ==
                                     1)
                                   AppIcon(
-                                    Icons.edit,
+                                    Iconsax.edit_2_outline,
+                                    size: 20,
                                     color: AppColors.green,
                                     onTap: () async {
                                       await editRecord(bm);
                                     },
                                   ),
-                                Ui.boxWidth(12),
+                                Ui.boxWidth(24),
                                 if (T != BulkExpenses &&
                                     (perm?.perms[AllTables.tablesType
                                             .indexOf(T)][3] ==
                                         1))
                                   AppIcon(
-                                    Icons.delete,
+                                    Icons.delete_outline_rounded,
                                     color: Colors.red,
+                                    size: 20,
                                     onTap: () {
                                       deleteRecord(bm);
                                     },
@@ -645,26 +647,40 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                           ));
                         }
                         if (T == Order && jindex == 3) {
+                          final cl =
+                              tval[jindex] ? AppColors.green : AppColors.orange;
                           return DataCell(Center(
-                            child: Chip(
-                              label: AppText.thin(
-                                  tval[jindex] ? "Dispatched" : "In Progress",
-                                  color: tval[jindex]
-                                      ? Colors.green
-                                      : Colors.orange[700]!),
-                              shape: RoundedRectangleBorder(
-                                  side: BorderSide(
-                                      color: tval[jindex]
-                                          ? Colors.green
-                                          : Colors.orange[700]!),
-                                  borderRadius: BorderRadius.circular(8)),
+                            child: CurvedContainer(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 4, horizontal: 8),
+                              color: cl.withOpacity(0.1),
+                              radius: 8,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  AppIcon(
+                                    Icons.circle,
+                                    size: 8,
+                                    color: cl,
+                                  ),
+                                  Ui.boxWidth(4),
+                                  AppText.thin(
+                                      tval[jindex]
+                                          ? "Dispatched"
+                                          : "In Progress",
+                                      fontSize: 12,
+                                      color: cl),
+                                ],
+                              ),
                             ),
                           ));
                         }
                         return DataCell(
                           Center(
                               child: AppText.thin(tval[jindex].toString(),
-                                  att: true, alignment: TextAlign.center)),
+                                  att: true,
+                                  alignment: TextAlign.center,
+                                  fontSize: 12)),
                         );
                       }));
           }));
@@ -774,8 +790,10 @@ class _CustomTablePageState extends State<CustomTablePage> {
 }
 
 class HeaderChooser extends StatelessWidget {
-  const HeaderChooser(this.hi, {this.i = 0, super.key});
+  const HeaderChooser(this.hi,
+      {this.i = 0, this.shdChangeMode = true, super.key});
   final List<HeaderItem> hi;
+  final bool shdChangeMode;
   final int i;
 
   @override
@@ -788,7 +806,9 @@ class HeaderChooser extends StatelessWidget {
           onTap: () {
             curHeader.value = i;
             if (hi[i].vb != null) hi[i].vb!();
-            Get.find<AppController>().changedMode.value++;
+            if (shdChangeMode) {
+              Get.find<AppController>().changedMode.value++;
+            }
           },
           child: Obx(() {
             return CurvedContainer(
@@ -918,6 +938,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
           _controllers[fieldName]!,
           "Select ${_formatFieldName(fieldName).replaceAll(" id", "")}",
           useOld: false,
+          isVertical: false,
           initOption: value, onChanged: (a) {
         try {
           if (widget.model.runtimeType == Product &&
@@ -1117,7 +1138,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
     //Products ,Name,PPL,Spec,CostPrice,SellingPrice
     //Transaction ,Product,AmtInltr,Order
 
-    return CustomTextField(
+    return CustomTextField2(
       _formatFieldName(fieldName),
       _controllers[fieldName]!,
       customOnChanged: () {
@@ -1154,7 +1175,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
   }
 
   Widget _buildDateTimePicker(String fieldName) {
-    return CustomTextField(
+    return CustomTextField2(
       _formatFieldName(fieldName),
       _controllers[fieldName]!,
       readOnly: true,
@@ -1201,15 +1222,16 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
       return SingleChildScrollView(
         child: Column(
           children: [
+            
             if (!widget.isNew)
-              CustomTextField(_formatFieldName("id"),
+              CustomTextField2(_formatFieldName("id"),
                   TextEditingController(text: _formData['id'].toString()),
                   readOnly: true),
             _buildField("name", jsonMap["name"]),
             UserRolesList(ur),
             Ui.boxHeight(24),
             if (!widget.isNew)
-              CustomTextField(
+              CustomTextField2(
                 _formatFieldName("createdAt"),
                 TextEditingController(
                     text: DateFormat("dd/MM/yyyy hh:mm:ss")
@@ -1217,7 +1239,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
                 readOnly: true,
               ),
             if (!widget.isNew)
-              CustomTextField(
+              CustomTextField2(
                 _formatFieldName("updatedAt"),
                 TextEditingController(
                     text: DateFormat("dd/MM/yyyy hh:mm:ss")
@@ -1254,7 +1276,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
         child: Column(
           children: [
             if (!widget.isNew)
-              CustomTextField(_formatFieldName("id"),
+              CustomTextField2(_formatFieldName("id"),
                   TextEditingController(text: _formData['id'].toString()),
                   readOnly: true),
             _buildField("orderId", jsonMap["orderId"]),
@@ -1264,7 +1286,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
               isOwn: false,
             ),
             if (!widget.isNew)
-              CustomTextField(
+              CustomTextField2(
                 _formatFieldName("createdAt"),
                 TextEditingController(
                     text: DateFormat("dd/MM/yyyy hh:mm:ss")
@@ -1272,7 +1294,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
                 readOnly: true,
               ),
             if (!widget.isNew)
-              CustomTextField(
+              CustomTextField2(
                 _formatFieldName("updatedAt"),
                 TextEditingController(
                     text: DateFormat("dd/MM/yyyy hh:mm:ss")
@@ -1317,11 +1339,11 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
         child: Column(
           children: [
             if (inv.value.expenses.isNotEmpty)
-              CustomTextField(_formatFieldName("id"),
+              CustomTextField2(_formatFieldName("id"),
                   TextEditingController(text: _formData['id'].toString()),
                   readOnly: true),
             if (inv.value.expenses.isNotEmpty)
-              CustomTextField(
+              CustomTextField2(
                 _formatFieldName("createdAt"),
                 TextEditingController(
                     text: DateFormat("dd/MM/yyyy hh:mm:ss")
@@ -1350,8 +1372,9 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
         key: _formKey,
         child: Column(
           children: [
+            Divider(color: AppColors.borderColor,),
             if (!widget.isNew)
-              CustomTextField(_formatFieldName("id"),
+              CustomTextField2(_formatFieldName("id"),
                   TextEditingController(text: _formData['id'].toString()),
                   readOnly: true),
             ...jsonMap.entries
@@ -1359,7 +1382,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
                     !['id', 'createdAt', 'updatedAt'].contains(entry.key))
                 .map((entry) => _buildField(entry.key, entry.value)),
             if (!widget.isNew)
-              CustomTextField(
+              CustomTextField2(
                 _formatFieldName("createdAt"),
                 TextEditingController(
                     text: DateFormat("dd/MM/yyyy hh:mm:ss")
@@ -1367,7 +1390,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
                 readOnly: true,
               ),
             if (!widget.isNew)
-              CustomTextField(
+              CustomTextField2(
                 _formatFieldName("updatedAt"),
                 TextEditingController(
                     text: DateFormat("dd/MM/yyyy hh:mm:ss")
@@ -1572,7 +1595,7 @@ class _MarkupTargetsPageState extends State<MarkupTargetsPage> {
   @override
   Widget build(BuildContext context) {
     return CurvedContainer(
-       width:
+      width:
           Ui.width(context) < 975 ? wideUi(context) : (Ui.width(context) - 280),
       height: Ui.width(context) < 975 ? null : double.maxFinite,
       color: AppColors.transparent,
@@ -1772,7 +1795,7 @@ class _MarkupTargetsPageState extends State<MarkupTargetsPage> {
       onPressed: () {
         controller.currentBaseModel.value = controller.appConstants.value;
         Get.dialog(AppDialog(
-            title: AppText.medium("Edit Record"),
+            title: AppDialogHeader("Edit Record"),
             content: Obx(() {
               return DynamicFormGenerator(
                   model: controller.currentBaseModel.value,
@@ -1874,7 +1897,7 @@ class ReportsPage extends StatelessWidget {
     tec.text =
         "${DateFormat("dd/MM/yyyy").format(dtr.value.start)} - ${DateFormat("dd/MM/yyyy").format(dtr.value.end)}";
     return CurvedContainer(
-       width:
+      width:
           Ui.width(context) < 975 ? wideUi(context) : (Ui.width(context) - 280),
       height: Ui.width(context) < 975 ? null : double.maxFinite,
       color: AppColors.transparent,
@@ -2327,25 +2350,29 @@ class LubeDashboard extends StatelessWidget {
                 .where((test) => test.productTypeId == 201)
                 .length
                 .toString(),
-            Colors.lightBlue[100]!.withOpacity(0.7)),
-        if (controller.appRepo.appService.currentUser.value.isAdmin)
-          itemDataWidget("Total Expenses", debit.toCurrency(),
-              Colors.lightGreen[100]!.withOpacity(0.7)),
-        itemDataWidget("Total Cost Of Goods Sold", credit.toCurrency(),
-            Colors.lightGreen[100]!.withOpacity(0.7)),
+            vals: getMonthCounts<Product>(controller.allProducts
+                .where((test) => test.productTypeId == 201)
+                .toList())),
         if (controller.appRepo.appService.currentUser.value.isAdmin)
           itemDataWidget(
-              "Total Profit/Loss",
-              prof.toCurrency(),
-              prof > 0
-                  ? Colors.lightGreen[100]!.withOpacity(0.7)
-                  : Colors.red[100]!.withOpacity(0.7)),
+            "Total Expenses",
+            debit.toCurrency(),
+          ),
+        itemDataWidget(
+          "Total Cost Of Goods Sold",
+          credit.toCurrency(),
+        ),
+        if (controller.appRepo.appService.currentUser.value.isAdmin)
+          itemDataWidget(
+            "Total Profit/Loss",
+            prof.toCurrency(),
+          ),
       ];
       return SmartJustifyRow(runSpacing: 16, spacing: 16, children: cf);
     });
 
     return CurvedContainer(
-       width:
+      width:
           Ui.width(context) < 975 ? wideUi(context) : (Ui.width(context) - 280),
       height: Ui.width(context) < 975 ? null : double.maxFinite,
       color: AppColors.transparent,
@@ -2399,7 +2426,31 @@ class LubeDashboard extends StatelessWidget {
                                 ),
                               ));
                   }),
-                  recentInventory()
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AppText.bold("Recent Lube Movement",
+                          fontFamily: Assets.appFontFamily2, fontSize: 14),
+                      Ui.boxHeight(16),
+                      CurvedContainer(
+                          height: Ui.height(context) / 1.8,
+                          //           width: ((Ui.width(context) - 280)) - 48,
+                          border: Border.all(color: AppColors.borderColor),
+                          boxShadows: [
+                            BoxShadow(
+                                offset: Offset(0, 1),
+                                blurRadius: 2,
+                                spreadRadius: 0,
+                                color: AppColors.shadowColor.withOpacity(0.06)),
+                            BoxShadow(
+                                offset: Offset(0, 1),
+                                blurRadius: 3,
+                                spreadRadius: 0,
+                                color: AppColors.shadowColor.withOpacity(0.1)),
+                          ],
+                          child: recentInventory()),
+                    ],
+                  )
                 ],
               ),
             )),
@@ -2411,23 +2462,27 @@ class LubeDashboard extends StatelessWidget {
 
   Widget recentInventory() {
     return SizedBox(
-      width: (Ui.width(Get.context!) * 0.33),
+      width: (Ui.width(Get.context!) * 0.25),
       child: AsyncPaginatedDataTable2(
-        minWidth: (Ui.width(Get.context!) * 0.33) - 56,
+        minWidth: (Ui.width(Get.context!) * 0.25),
         hidePaginator: true,
         columnSpacing: 0,
         showCheckboxColumn: false,
         autoRowsToHeight: true,
+        horizontalMargin: 0,
         wrapInCard: false,
-        headingRowColor: MaterialStatePropertyAll<Color>(
-            Colors.lightBlue[100]!.withOpacity(0.7)),
+        headingRowHeight: 44,
+        dataRowHeight: 72,
         rowsPerPage: 3,
-        header: AppText.medium("Recent Lube Movements",
-            fontFamily: Assets.appFontFamily2, fontSize: 14),
         columns: ["Date", "Product", "Status", "Qty"]
             .map((e) => DataColumn2(
-                label: AppText.bold(e,
-                    fontSize: 12, fontFamily: Assets.appFontFamily2),
+                label: ColoredBox(
+                  color: AppColors.borderColor,
+                  child: Center(
+                    child: AppText.bold(e,
+                        fontSize: 12, fontFamily: Assets.appFontFamily2),
+                  ),
+                ),
                 size: ColumnSize.S))
             .toList(),
         source: RecentInventoryDS(),
@@ -2441,16 +2496,16 @@ class LubeDashboard extends StatelessWidget {
       alignment: AlignmentDirectional.bottomCenter,
       children: [
         CurvedContainer(
-          width: 200,
+          width: 180,
           height: b * 320,
-          color: AppColors.primaryColor.withOpacity(0.2),
-          border: Border.all(color: Colors.yellow[100]!.withOpacity(0.7)),
+          color: AppColors.borderColor,
+          border: Border.all(color: AppColors.borderColor),
         ),
         CurvedContainer(
-          width: 200,
+          width: 180,
           height: 320,
-          color: AppColors.white.withOpacity(0.6),
-          border: Border.all(color: AppColors.primaryColorLight),
+          color: AppColors.transparent,
+          border: Border.all(color: AppColors.borderColor),
           padding: EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -2470,31 +2525,84 @@ class LubeDashboard extends StatelessWidget {
     );
   }
 
-  Widget itemDataWidget(String title, String value, Color color,
-      {String desc = ""}) {
-    final cc = CurvedContainer(
-      height: 64,
-      padding: EdgeInsets.all(12),
-      color: color,
-      child: Row(
-        // crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget itemDataWidget(String title, String value,
+      {String desc = "", List<num> vals = const [1, 1]}) {
+    num presentValue = vals[0] == 0 ? 1 : vals[0];
+    num oldValue = vals[1] == 0 ? presentValue : vals[1];
+    final chg = ((presentValue - oldValue) / oldValue) * 100;
+    final cc = Container(
+      height: 86,
+      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      width: 185,
+      decoration: BoxDecoration(
+          border: Border.all(color: AppColors.borderColor),
+          borderRadius: BorderRadius.circular(8),
+          color: AppColors.white,
+          boxShadow: [
+            BoxShadow(
+                offset: Offset(0, 1),
+                blurRadius: 2,
+                spreadRadius: 0,
+                color: AppColors.shadowColor.withOpacity(0.06)),
+            BoxShadow(
+                offset: Offset(0, 1),
+                blurRadius: 3,
+                spreadRadius: 0,
+                color: AppColors.shadowColor.withOpacity(0.08)),
+          ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AppText.thin(title,
-              fontSize: 14, fontFamily: Assets.appFontFamily2, att: true),
-          // Ui.spacer(),
-          Ui.boxWidth(24),
-          AppText.bold(value, fontSize: 36, att: true),
+              fontSize: 12,
+              fontFamily: Assets.appFontFamily2,
+              att: true,
+              color: AppColors.lightTextColor),
+
+          AppText.bold(value, fontSize: 20, att: true),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              AppIcon(
+                  chg > 0
+                      ? Iconsax.arrow_up_3_outline
+                      : chg == 0
+                          ? Icons.compare_arrows_outlined
+                          : Iconsax.arrow_down_outline,
+                  // ,
+                  size: 16,
+                  color: chg > 0
+                      ? AppColors.green
+                      : chg == 0
+                          ? AppColors.lightTextColor
+                          : AppColors.primaryColor),
+              Ui.boxWidth(4),
+              AppText.thin("${(chg).ceil()}%",
+                  fontSize: 12,
+                  att: true,
+                  color: chg > 0
+                      ? AppColors.green
+                      : chg == 0
+                          ? AppColors.lightTextColor
+                          : AppColors.primaryColor),
+              AppText.thin("  vs last month",
+                  fontSize: 12, att: true, color: AppColors.lightTextColor),
+              Spacer(),
+              AppIcon(
+                chg > 0
+                    ? Assets.c1
+                    : chg == 0
+                        ? Assets.c3
+                        : Assets.c2,
+                size: 36,
+              )
+            ],
+          )
           // if (desc.isNotEmpty) AppText.thin(desc)
         ],
       ),
     );
-    // return Ui.width(Get.context!) < 975
-    //     ? cc
-    //     : Expanded(
-    //         child: cc,
-    //       );
+
     return cc;
   }
 }

@@ -188,6 +188,10 @@ class AppController extends GetxController {
 
   final appRepo = Get.find<AppRepo>();
 
+  resetApp(){
+    
+  }
+
   startLoading() {
     isLoading.value = true;
   }
