@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:inventory/controllers/app_controller.dart';
 import 'package:inventory/models/inner_models/base_model.dart';
@@ -61,108 +62,97 @@ class _CustomTableState extends State<CustomTable> {
         child: CurvedContainer(
           width: Ui.width(context) < 975
               ? wideUi(context)
-              : ((Ui.width(context) * 0.75) - 24),
+              : (Ui.width(context) - 280),
           height: Ui.width(context) < 975 ? null : double.maxFinite,
-          border: Border.all(color: AppColors.primaryColorLight),
-          color: AppColors.white.withOpacity(0.6),
+          color: AppColors.transparent,
           padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
           margin: const EdgeInsets.symmetric(vertical: 8),
-          child: Obx(() {
-            return AsyncPaginatedDataTable2(
-              minWidth: Ui.width(context) < 975
-                  ? wideUi(context)
-                  : ((Ui.width(context) * 0.75) - 56),
-              // border: TableBorder.all(),
-
-              onRowsPerPageChanged: (value) {
-                print('Row per page changed to $value');
-              },
-              // autoRowsToHeight: true,
-              columnSpacing: 0,
-              showCheckboxColumn: false,
-              // onSelectAll: (v) {
-              //   print(v);
-              // },
-              // controller: controller.paginatorController.value,
-              headingRowHeight: Ui.width(context) < 975 ? 8 : 56,
-              dataRowHeight:
-                  Ui.width(context) < 975 ? 156 : kMinInteractiveDimension,
-
-              header: AppText.medium("Records",
-                  fontFamily: Assets.appFontFamily2, fontSize: 16),
-              headingRowColor: WidgetStatePropertyAll<Color>(
-                  AppColors.primaryColorLight.withOpacity(0.5)),
-              actions: [
-                SizedBox(
-                  width: 100,
-                  height: 46,
-                  child: AppButton(
-                      onPressed: () async {
-                        final mvals =
-                            controller.currentTotalResponse.value.data;
-                        if (mvals.isEmpty) {
-                          return Ui.showError("Data cannot be empty");
-                        }
-                        List mval = [];
-                        for (var element in mvals) {
-                          final f = (element as BaseModel).toExcelRows();
-                          Map<String, dynamic> mv = {};
-                          for (var i = 0; i < f.length; i++) {
-                            mv[controller.currentExcelHeaders[i]] = f[i];
-                          }
-                          mval.add(mv);
-                        }
-                        Map<String, String> hds = {};
-                        for (var element in mval[0].keys) {
-                          hds[element] = element
-                              .replaceAll("_", " ")
-                              .replaceAllMapped(
-                                RegExp(r'([A-Z])'),
-                                (match) => ' ${match.group(1)}',
-                              )
-                              .toString()
-                              .capitalize!;
-                        }
-
-                        final filePath = await generateExcelReport(
-                          reportTitle: controller
-                              .currentBaseModel.value.runtimeType
-                              .toString(),
-                          data: mval,
-                          startDate: controller.currentFilters
-                                  .where((optv) => optv.filterType == 1)
-                                  .firstOrNull
-                                  ?.dtr
-                                  ?.start ??
-                              DateTime(2025),
-                          endDate: controller.currentFilters
-                                  .where((optv) => optv.filterType == 1)
-                                  .firstOrNull
-                                  ?.dtr
-                                  ?.end ??
-                              DateTime.now(),
-                          columnsToTotal: [],
-                          columnHeaders: hds,
-                        );
-                        if (filePath == null) {
-                          return Ui.showError("Failed to generate report");
-                        }
-                        return Ui.showInfo("Export saved to:\n$filePath");
-                      },
-                      text: "Export"),
-                ),
-                if (perm?.perms[AllTables.tablesType.indexOf(
-                        controller.currentBaseModel.value.runtimeType)][0] ==
-                    1)
-                  Material(
-                    color: AppColors.green,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  SizedBox(
+                    width: Ui.width(context) / 3,
+                    child: CustomTextField(
+                      "",
+                      TextEditingController(),
+                      hint: "Search",
+                      suffix: Iconsax.search_normal_1_outline,
+                      hasBottomPadding: false,
                     ),
-                    child: AppIcon(
-                      Icons.add,
-                      color: AppColors.white,
-                      onTap: () async {
+                  ),
+                  Spacer(),
+                  TableIconButton(
+                    "Filter",
+                    Iconsax.filter_outline,
+                    onPressed: () {},
+                  ),
+                  Ui.boxWidth(16),
+                  TableIconButton(
+                    "Export",
+                    Iconsax.logout_1_outline,
+                    onPressed: () async {
+                      final mvals = controller.currentTotalResponse.value.data;
+                      if (mvals.isEmpty) {
+                        return Ui.showError("Data cannot be empty");
+                      }
+                      List mval = [];
+                      for (var element in mvals) {
+                        final f = (element as BaseModel).toExcelRows();
+                        Map<String, dynamic> mv = {};
+                        for (var i = 0; i < f.length; i++) {
+                          mv[controller.currentExcelHeaders[i]] = f[i];
+                        }
+                        mval.add(mv);
+                      }
+                      Map<String, String> hds = {};
+                      for (var element in mval[0].keys) {
+                        hds[element] = element
+                            .replaceAll("_", " ")
+                            .replaceAllMapped(
+                              RegExp(r'([A-Z])'),
+                              (match) => ' ${match.group(1)}',
+                            )
+                            .toString()
+                            .capitalize!;
+                      }
+
+                      final filePath = await generateExcelReport(
+                        reportTitle: controller
+                            .currentBaseModel.value.runtimeType
+                            .toString(),
+                        data: mval,
+                        startDate: controller.currentFilters
+                                .where((optv) => optv.filterType == 1)
+                                .firstOrNull
+                                ?.dtr
+                                ?.start ??
+                            DateTime(2025),
+                        endDate: controller.currentFilters
+                                .where((optv) => optv.filterType == 1)
+                                .firstOrNull
+                                ?.dtr
+                                ?.end ??
+                            DateTime.now(),
+                        columnsToTotal: [],
+                        columnHeaders: hds,
+                      );
+                      if (filePath == null) {
+                        return Ui.showError("Failed to generate report");
+                      }
+                      return Ui.showInfo("Export saved to:\n$filePath");
+                    },
+                  ),
+                  Ui.boxWidth(16),
+                  if (perm?.perms[AllTables.tablesType.indexOf(
+                          controller.currentBaseModel.value.runtimeType)][0] ==
+                      1)
+                    TableIconButton(
+                      "Add Record",
+                      Iconsax.add_outline,
+                      color: AppColors.primaryColor,
+                      hasBorder: false,
+                      onPressed: () async {
                         if (controller.noActionModel()) return;
                         if (!Get.find<AppService>()
                             .currentUser
@@ -217,34 +207,122 @@ class _CustomTableState extends State<CustomTable> {
                               })));
                         }
                       },
-                      size: 40,
                     ),
-                  ), //add new
-              ],
-              columns: Ui.width(context) < 975
-                  ? [
-                      DataColumn2(
-                          label: Center(
-                            child: AppText.bold("",
-                                fontSize: 8, fontFamily: Assets.appFontFamily2),
-                          ),
-                          size: ColumnSize.S)
-                    ]
-                  : controller.currentHeaders
-                      .map((e) => DataColumn2(
-                          label: Center(
-                            child: AppText.bold(e,
-                                fontSize: 14,
-                                fontFamily: Assets.appFontFamily2),
-                          ),
-                          size: ColumnSize.S))
-                      .toList(),
-              source: controller.tmds.value,
-            );
-          }),
+                ],
+              ),
+              Ui.boxHeight(12),
+              Expanded(
+                child: CurvedContainer(
+                  border: Border.all(color: AppColors.borderColor),
+                  boxShadows: [
+                    BoxShadow(
+                        offset: Offset(0, 1),
+                        blurRadius: 2,
+                        spreadRadius: 0,
+                        color: AppColors.shadowColor.withOpacity(0.06)),
+                    BoxShadow(
+                        offset: Offset(0, 1),
+                        blurRadius: 3,
+                        spreadRadius: 0,
+                        color: AppColors.shadowColor.withOpacity(0.1)),
+                  ],
+                  child: Obx(() {
+                    return AsyncPaginatedDataTable2(
+                      minWidth: Ui.width(context) < 975
+                          ? wideUi(context)
+                          : ((Ui.width(context) - 280 - 24)),
+                      // border: TableBorder.all(),
+                      horizontalMargin: 0,
+
+                      onRowsPerPageChanged: (value) {
+                        print('Row per page changed to $value');
+                      },
+                      // autoRowsToHeight: true,
+                      columnSpacing: 0,
+                      showCheckboxColumn: false,
+                      // onSelectAll: (v) {
+                      //   print(v);
+                      // },
+                      // controller: controller.paginatorController.value,
+                      dataRowHeight: Ui.width(context) < 975
+                          ? 156
+                          : kMinInteractiveDimension,
+
+                      // ],
+                      wrapInCard: false,
+                      headingRowHeight: 44,
+                      columns: Ui.width(context) < 975
+                          ? [
+                              DataColumn2(
+                                  label: Center(
+                                    child: AppText.bold("",
+                                        fontSize: 8,
+                                        fontFamily: Assets.appFontFamily2),
+                                  ),
+                                  size: ColumnSize.S)
+                            ]
+                          : controller.currentHeaders
+                              .map((e) => DataColumn2(
+                                  label: ColoredBox(
+                                    color: AppColors.borderColor,
+                                    child: Center(
+                                      child: AppText.bold(e,
+                                          fontSize: 12,
+                                          fontFamily: Assets.appFontFamily2),
+                                    ),
+                                  ),
+                                  size: ColumnSize.S))
+                              .toList(),
+                      source: controller.tmds.value,
+                    );
+                  }),
+                ),
+              ),
+            ],
+          ),
         ),
       );
     });
+  }
+}
+
+class TableIconButton extends StatelessWidget {
+  const TableIconButton(this.text, this.icon,
+      {this.color = AppColors.transparent,
+      this.onPressed,
+      this.hasBorder = true,
+      super.key});
+  final IconData icon;
+  final String text;
+  final bool hasBorder;
+  final VoidCallback? onPressed;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final tcolor =
+        color == AppColors.transparent ? AppColors.textColor : AppColors.white;
+    return CurvedContainer(
+      border: hasBorder ? Border.all(color: AppColors.borderColor) : null,
+      height: 40,
+      color: color,
+      onPressed: onPressed,
+      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppIcon(
+              icon,
+              size: 16,
+              color: tcolor,
+            ),
+            Ui.boxWidth(8),
+            AppText.medium(text, color: tcolor, fontSize: 14)
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -477,6 +555,7 @@ class TableModelDataSource<T extends BaseModel> extends AsyncDataTableSource {
                 onTap: () async {
                   await editRecord(bm);
                 },
+                color: WidgetStatePropertyAll(AppColors.white),
                 cells: Ui.width(Get.context!) < 975
                     ? [
                         DataCell(CurvedContainer(
@@ -607,10 +686,10 @@ class CustomTableTitle extends StatelessWidget {
         width: Ui.width(context) < 975
             ? wideUi(context)
             : (Ui.width(context) - 24),
-        color: AppColors.white.withOpacity(0.6),
+        color: AppColors.transparent,
         padding: const EdgeInsets.all(0),
-        radius: 16,
-        border: Border.all(color: AppColors.primaryColorLight),
+        radius: 0,
+        border: Border(bottom: BorderSide(color: AppColors.borderColor)),
         margin: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: [
@@ -634,8 +713,9 @@ class CustomTableTitle extends StatelessWidget {
 }
 
 class CustomTablePage extends StatefulWidget {
-  const CustomTablePage(this.hi, {super.key});
+  const CustomTablePage(this.hi, this.title, {super.key});
   final List<HeaderItem> hi;
+  final String title;
 
   @override
   State<CustomTablePage> createState() => _CustomTablePageState();
@@ -662,7 +742,13 @@ class _CustomTablePageState extends State<CustomTablePage> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 16.0, right: 16, left: 16),
+          child: AppText.bold(widget.title,
+              fontSize: 30, fontFamily: Assets.appFontFamily2),
+        ),
         CustomTableTitle(
           widget.hi,
         ),
@@ -677,7 +763,10 @@ class _CustomTablePageState extends State<CustomTablePage> {
           Expanded(
               child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [CustomTableFilter(), CustomTable()],
+            children: [
+              // CustomTableFilter(),
+              CustomTable()
+            ],
           ))
       ],
     );
@@ -693,7 +782,6 @@ class HeaderChooser extends StatelessWidget {
   Widget build(BuildContext context) {
     RxInt curHeader = i.obs;
     final cl = List.generate(hi.length, (i) {
-      const rd = Radius.circular(12);
       return MouseRegion(
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
@@ -703,27 +791,21 @@ class HeaderChooser extends StatelessWidget {
             Get.find<AppController>().changedMode.value++;
           },
           child: Obx(() {
-            return Container(
+            return CurvedContainer(
+              radius: 0,
+              color: AppColors.transparent,
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              decoration: BoxDecoration(
-                borderRadius: Ui.width(context) < 975
-                    ? BorderRadius.all(rd)
-                    : BorderRadius.only(
-                        topLeft: i == 0 ? rd : Radius.zero,
-                        topRight: i == hi.length - 1 ? rd : Radius.zero,
-                        bottomLeft: i == 0 ? rd : Radius.zero,
-                        bottomRight: i == hi.length - 1 ? rd : Radius.zero,
-                      ),
-                color: curHeader.value == i
-                    ? AppColors.primaryColor
-                    : AppColors.white,
-              ),
+              border: Border(
+                  bottom: BorderSide(
+                      color: curHeader.value == i
+                          ? AppColors.primaryColor
+                          : AppColors.transparent)),
               child: AppText.medium(
                 hi[i].title,
-                fontSize: 16,
+                fontSize: 14,
                 color: curHeader.value == i
-                    ? AppColors.white
-                    : AppColors.primaryColor,
+                    ? AppColors.primaryColor
+                    : AppColors.lightTextColor,
               ),
             );
           }),
@@ -1490,11 +1572,10 @@ class _MarkupTargetsPageState extends State<MarkupTargetsPage> {
   @override
   Widget build(BuildContext context) {
     return CurvedContainer(
-      width:
-          Ui.width(context) < 975 ? wideUi(context) : (Ui.width(context) - 24),
+       width:
+          Ui.width(context) < 975 ? wideUi(context) : (Ui.width(context) - 280),
       height: Ui.width(context) < 975 ? null : double.maxFinite,
-      color: AppColors.white.withOpacity(0.6),
-      border: Border.all(color: AppColors.primaryColorLight),
+      color: AppColors.transparent,
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: SingleChildScrollView(
@@ -1793,11 +1874,10 @@ class ReportsPage extends StatelessWidget {
     tec.text =
         "${DateFormat("dd/MM/yyyy").format(dtr.value.start)} - ${DateFormat("dd/MM/yyyy").format(dtr.value.end)}";
     return CurvedContainer(
-      width:
-          Ui.width(context) < 975 ? wideUi(context) : (Ui.width(context) - 24),
+       width:
+          Ui.width(context) < 975 ? wideUi(context) : (Ui.width(context) - 280),
       height: Ui.width(context) < 975 ? null : double.maxFinite,
-      color: AppColors.white.withOpacity(0.6),
-      border: Border.all(color: AppColors.primaryColorLight),
+      color: AppColors.transparent,
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
@@ -2197,10 +2277,9 @@ class ExtraInvoiceWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return CurvedContainer(
       width:
-          Ui.width(context) < 975 ? wideUi(context) : (Ui.width(context) - 24),
+          Ui.width(context) < 975 ? wideUi(context) : (Ui.width(context) - 280),
       height: Ui.width(context) < 975 ? null : double.maxFinite,
-      color: AppColors.white.withOpacity(0.6),
-      border: Border.all(color: AppColors.primaryColorLight),
+      color: AppColors.transparent,
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: SingleChildScrollView(
@@ -2266,19 +2345,18 @@ class LubeDashboard extends StatelessWidget {
     });
 
     return CurvedContainer(
-      width:
-          Ui.width(context) < 975 ? wideUi(context) : (Ui.width(context) - 24),
+       width:
+          Ui.width(context) < 975 ? wideUi(context) : (Ui.width(context) - 280),
       height: Ui.width(context) < 975 ? null : double.maxFinite,
-      color: AppColors.white.withOpacity(0.6),
-      border: Border.all(color: AppColors.primaryColorLight),
+      color: AppColors.transparent,
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText.bold("Lube Dashboard",
-              fontSize: 32, fontFamily: Assets.appFontFamily2),
-          AppText.thin("Here are the current status of your lubricants."),
+          // AppText.bold("Lube Dashboard",
+          //     fontSize: 32, fontFamily: Assets.appFontFamily2),
+          // AppText.thin("Here are the current status of your lubricants."),
           Ui.boxHeight(12),
           cl,
           Ui.boxHeight(12),
@@ -2293,8 +2371,11 @@ class LubeDashboard extends StatelessWidget {
                         .where((test) => test.productTypeId == 201)
                         .toList();
                     // final prdsIds = prds.map((e) => e.id);
-                    final prdQty = prds.map((e) => controller.allStockBalances
-                        .where((test) => e.id == test.productId).first).toList();
+                    final prdQty = prds
+                        .map((e) => controller.allStockBalances
+                            .where((test) => e.id == test.productId)
+                            .first)
+                        .toList();
                     return Expanded(
                         child: prds.isEmpty
                             ? Center(

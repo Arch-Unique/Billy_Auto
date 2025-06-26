@@ -29,6 +29,7 @@ class CurvedContainer extends StatefulWidget {
   final String? image;
   final Color color;
   final Border? border;
+  final List<BoxShadow>? boxShadows;
   final BorderRadius? brad;
   final bool shouldClip;
   final VoidCallback? onPressed;
@@ -44,6 +45,7 @@ class CurvedContainer extends StatefulWidget {
       this.padding,
       this.border,
       this.image,
+      this.boxShadows,
       this.shouldClip = true,
       this.color = Colors.white,
       super.key});
@@ -143,6 +145,7 @@ class _CurvedContainerState extends State<CurvedContainer>
                       widget.brad ?? BorderRadius.circular(widget.radius),
                   color: widget.color,
                   border: widget.border,
+                  boxShadow: widget.boxShadows,
                   image: widget.image == null
                       ? null
                       : DecorationImage(
@@ -830,7 +833,8 @@ abstract class Ui {
 }
 
 class AppDialog extends StatelessWidget {
-  const AppDialog({required this.title, required this.content, this.width,super.key});
+  const AppDialog(
+      {required this.title, required this.content, this.width, super.key});
   final Widget title;
   final Widget content;
   final double? width;
@@ -861,13 +865,14 @@ class AppDialog extends StatelessWidget {
         ],
       ),
       content: SizedBox(
-          width:width ?? ( Ui.width(context) < 1500
-              ? (Ui.width(context) < 1000
-                  ? (Ui.width(context) < 700
-                      ? Ui.width(context) / 1.4
-                      : Ui.width(context) / 2)
-                  : Ui.width(context) / 2.5)
-              : Ui.width(context) / 3),
+          width: width ??
+              (Ui.width(context) < 1500
+                  ? (Ui.width(context) < 1000
+                      ? (Ui.width(context) < 700
+                          ? Ui.width(context) / 1.4
+                          : Ui.width(context) / 2)
+                      : Ui.width(context) / 2.5)
+                  : Ui.width(context) / 3),
           child: content),
     );
   }
@@ -925,13 +930,13 @@ class CustomTextField extends StatelessWidget {
   final VoidCallback? onTap, customOnChanged;
   final TextInputAction tia;
   final dynamic suffix, prefix;
-  final bool autofocus, hasBottomPadding, isDense,isCompulsory;
+  final bool autofocus, hasBottomPadding, isDense, isCompulsory;
   final double fs;
   final FontWeight fw;
   final bool readOnly, isWide, shdValidate;
   final TextAlign textAlign;
   final String? hint;
-  
+
   final TextEditingController? oldPass;
   const CustomTextField(this.label, this.controller,
       {this.fs = 16,
@@ -946,7 +951,7 @@ class CustomTextField extends StatelessWidget {
       this.prefix,
       this.oldPass,
       this.onTap,
-      this.isCompulsory=false,
+      this.isCompulsory = false,
       this.isWide = true,
       this.autofocus = false,
       this.customOnChanged,
@@ -971,14 +976,15 @@ class CustomTextField extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (isLabel) Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                AppText.thin(label, color: Colors.black),
-                if(isCompulsory)
-                AppText.thin("*", color: Colors.red,fontSize: 24),
-              ],
-            ),
+            if (isLabel)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppText.thin(label, color: Colors.black),
+                  if (isCompulsory)
+                    AppText.thin("*", color: Colors.red, fontSize: 24),
+                ],
+              ),
             if (isLabel)
               const SizedBox(
                 height: 4,
@@ -988,7 +994,6 @@ class CustomTextField extends StatelessWidget {
               readOnly: readOnly,
               textAlign: textAlign,
               autofocus: autofocus,
-              
               onChanged: (s) async {
                 // if (s.isNotEmpty) {
                 //   setState(() {
@@ -1025,11 +1030,9 @@ class CustomTextField extends StatelessWidget {
                     }
                   : null,
               style: TextStyle(fontSize: fs, fontWeight: fw, color: col),
-              
               decoration: InputDecoration(
                 fillColor: readOnly ? Colors.grey[300] : Colors.white,
                 filled: true,
-          
                 enabledBorder: customBorder(color: borderCol),
                 focusedBorder: customBorder(color: borderCol),
                 border: customBorder(color: borderCol),
@@ -1186,7 +1189,8 @@ class CustomTextField extends StatelessWidget {
                   items: values
                       .map((e) => DropdownMenuItem<dynamic>(
                           value: e,
-                          child: AppText.thin(options[values.indexOf(e)],att: true)))
+                          child: AppText.thin(options[values.indexOf(e)],
+                              att: true)))
                       .toList(),
                   onChanged: !isEnabled
                       ? null
@@ -1338,7 +1342,7 @@ class CustomMultiDropdown extends StatefulWidget {
   final List<dynamic> initValues;
   final TextEditingController controller;
   final String title;
-  final bool isEnable, singleOnly,isDrop2;
+  final bool isEnable, singleOnly, isDrop2;
   final Function(dynamic)? onChanged;
   const CustomMultiDropdown(
       this.options, this.values, this.controller, this.title,
@@ -1346,7 +1350,7 @@ class CustomMultiDropdown extends StatefulWidget {
       this.isEnable = true,
       this.onChanged,
       this.singleOnly = false,
-      this.isDrop2=false,
+      this.isDrop2 = false,
       super.key});
 
   @override
@@ -1362,32 +1366,33 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
     } else {
       md = getMultiDropDown<int>();
     }
-    if(widget.isDrop2){
+    if (widget.isDrop2) {
       return StatefulBuilder(
-      builder: (context, setState) {
-        return SizedBox(
-          width: MediaQuery.of(context).size.width - 48,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        builder: (context, setState) {
+          return SizedBox(
+            width: MediaQuery.of(context).size.width - 48,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (widget.title.isNotEmpty) 
-                SizedBox(
-                    width: 100,
-                    child: AppText.thin(widget.title),),
-                Expanded(
-                  child: md,
+                Row(
+                  children: [
+                    if (widget.title.isNotEmpty)
+                      SizedBox(
+                        width: 100,
+                        child: AppText.thin(widget.title),
+                      ),
+                    Expanded(
+                      child: md,
+                    ),
+                  ],
                 ),
+                if (widget.title.isNotEmpty) const SizedBox(height: 32),
               ],
             ),
-              if (widget.title.isNotEmpty) const SizedBox(height: 32),
-            ],
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
     }
 
     return StatefulBuilder(
@@ -1444,9 +1449,7 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
       singleSelect: widget.singleOnly,
       maxSelections: widget.singleOnly ? 1 : 0,
       dropdownItemDecoration: ddec,
-      dropdownDecoration: DropdownDecoration(
-        marginTop: 48
-      ),
+      dropdownDecoration: DropdownDecoration(marginTop: 48),
       fieldDecoration: fdec,
       onSelectionChange: (selectedItems) {
         if (selectedItems.isEmpty) {
@@ -1832,7 +1835,6 @@ class LoadingWidget extends StatelessWidget {
   }
 }
 
-
 class SmartJustifyRow extends MultiChildRenderObjectWidget {
   final double spacing;
   final double runSpacing;
@@ -1892,74 +1894,74 @@ class RenderSmartJustifyRow extends RenderBox
       child.parentData = SmartJustifyParentData();
     }
   }
-  
-@override
-void performLayout() {
-  final BoxConstraints constraints = this.constraints;
-  double width = constraints.maxWidth;
-  double height = 0;
-  double x = 0;
-  double rowHeight = 0;
-  List<RenderBox> rowChildren = [];
-  RenderBox? child = firstChild;
 
-  while (child != null) {
-    final SmartJustifyParentData childParentData =
-        child.parentData! as SmartJustifyParentData;
-    child.layout(BoxConstraints(maxWidth: width), parentUsesSize: true);
-    final double childWidth = child.size.width;
-    final double childHeight = child.size.height;
+  @override
+  void performLayout() {
+    final BoxConstraints constraints = this.constraints;
+    double width = constraints.maxWidth;
+    double height = 0;
+    double x = 0;
+    double rowHeight = 0;
+    List<RenderBox> rowChildren = [];
+    RenderBox? child = firstChild;
 
-    if (x + childWidth > width && rowChildren.isNotEmpty) {
-      // Expand children in the current row
+    while (child != null) {
+      final SmartJustifyParentData childParentData =
+          child.parentData! as SmartJustifyParentData;
+      child.layout(BoxConstraints(maxWidth: width), parentUsesSize: true);
+      final double childWidth = child.size.width;
+      final double childHeight = child.size.height;
+
+      if (x + childWidth > width && rowChildren.isNotEmpty) {
+        // Expand children in the current row
+        _expandRowChildren(rowChildren, width);
+        // Move to next row
+        x = 0;
+        height += rowHeight + runSpacing;
+        rowHeight = 0;
+        rowChildren.clear();
+      }
+
+      rowChildren.add(child);
+      x += childWidth + spacing;
+      rowHeight = max(rowHeight, childHeight);
+
+      child = childParentData.nextSibling;
+    }
+
+    // Handle last row
+    if (rowChildren.isNotEmpty) {
       _expandRowChildren(rowChildren, width);
-      // Move to next row
-      x = 0;
-      height += rowHeight + runSpacing;
-      rowHeight = 0;
-      rowChildren.clear();
+      height += rowHeight; // Add height of the last row
     }
 
-    rowChildren.add(child);
-    x += childWidth + spacing;
-    rowHeight = max(rowHeight, childHeight);
+    // Set final positions
+    x = 0;
+    double y = 0;
+    rowHeight = 0;
+    rowChildren.clear();
 
-    child = childParentData.nextSibling;
-  }
+    child = firstChild;
+    while (child != null) {
+      final SmartJustifyParentData childParentData =
+          child.parentData! as SmartJustifyParentData;
 
-  // Handle last row
-  if (rowChildren.isNotEmpty) {
-    _expandRowChildren(rowChildren, width);
-    height += rowHeight; // Add height of the last row
-  }
+      // Check if this child would start a new row
+      if (x + child.size.width > width && x > 0) {
+        x = 0;
+        y += rowHeight + runSpacing;
+        rowHeight = 0;
+      }
 
-  // Set final positions
-  x = 0;
-  double y = 0;
-  rowHeight = 0;
-  rowChildren.clear();
-  
-  child = firstChild;
-  while (child != null) {
-    final SmartJustifyParentData childParentData =
-        child.parentData! as SmartJustifyParentData;
-    
-    // Check if this child would start a new row
-    if (x + child.size.width > width && x > 0) {
-      x = 0;
-      y += rowHeight + runSpacing;
-      rowHeight = 0;
+      childParentData.offset = Offset(x, y);
+      x += child.size.width + spacing;
+      rowHeight = max(rowHeight, child.size.height);
+
+      child = childParentData.nextSibling;
     }
-    
-    childParentData.offset = Offset(x, y);
-    x += child.size.width + spacing;
-    rowHeight = max(rowHeight, child.size.height);
-    
-    child = childParentData.nextSibling;
-  }
 
-  size = Size(width, height);
-}
+    size = Size(width, height);
+  }
   // @override
   // void performLayout() {
   //   final BoxConstraints constraints = this.constraints;
@@ -2046,7 +2048,6 @@ void performLayout() {
 
 class SmartJustifyParentData extends ContainerBoxParentData<RenderBox> {}
 
-
 Future<DateTime?> showMonthPicker({
   required BuildContext context,
   required DateTime initialDate,
@@ -2126,7 +2127,8 @@ class _MonthPickerDialogState extends State<_MonthPickerDialog> {
       final isSelected =
           _selectedDate.year == year && _selectedDate.month == month;
       final isEnabled = (widget.firstDate == null ||
-              date.isAfter(widget.firstDate!.subtract(const Duration(days: 1)))) &&
+              date.isAfter(
+                  widget.firstDate!.subtract(const Duration(days: 1)))) &&
           (widget.lastDate == null ||
               date.isBefore(widget.lastDate!.add(const Duration(days: 1))));
 

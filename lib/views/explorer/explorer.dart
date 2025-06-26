@@ -62,7 +62,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
         HeaderItem("Extra Order", vb: () {
           controller.setCurrentTypeTable<AppConstants>(v: 2);
         })
-      ]),
+      ],"Order Management"),
       CustomTablePage(
         [
           HeaderItem("Lube Dashboard", vb: () {
@@ -71,7 +71,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
           HeaderItem("Lube Inventory", vb: () {
             controller.setCurrentTypeTable<LubeInventory>();
           }),
-        ],
+        ],"Lube Management"
       ),
       CustomTablePage(
         [
@@ -94,7 +94,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
             HeaderItem("Supplier", vb: () {
               controller.setCurrentTypeTable<Supplier>();
             })
-        ],
+        ],"Product Management"
       ),
       CustomTablePage(
         [
@@ -122,7 +122,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
           // HeaderItem("Location", vb: () {
           //   // controller.setCurrentTypeTable<Inventory>();
           // }),
-        ],
+        ],"Inventory Management"
       ),
       CustomTablePage([
         // if (perm?.perms[AllTables.tablesType.indexOf(CarMake)]
@@ -156,7 +156,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
           HeaderItem("Inspection Category", vb: () {
             controller.setCurrentTypeTable<BillyConditionCategory>();
           }),
-      ]),
+      ],"Configurations"),
       if (controller.appRepo.appService.currentUser.value.isAdmin)
         CustomTablePage([
           if (perm?.perms[AllTables.tablesType.indexOf(AppConstants)][1] == 1)
@@ -198,7 +198,7 @@ class _ExplorerPageState extends State<ExplorerPage> {
             HeaderItem("Attendance History", vb: () {
               controller.setCurrentTypeTable<UserAttendance>();
             })
-        ]),
+        ],"Admin Management"),
     ];
     controller.refreshModels();
     super.initState();
@@ -348,9 +348,8 @@ sideBar(){
                       : AppColors.lightTextColor),
               if (Ui.width(context) >= 975) Ui.boxWidth(8),
               if (Ui.width(context) >= 975)
-                AppText.bold(DashboardModes.values[i].title,
+                AppText.thin(DashboardModes.values[i].title,
                     fontSize: 14,
-                    att: false,
                     color: controller.currentDashboardMode.value ==
                             DashboardModes.values[i]
                         ? AppColors.primaryColor
@@ -371,17 +370,14 @@ sideBar(){
       child: Column(
         children: [
           
-          Ui.boxHeight(24),
           LogoWidget(96),
-          Ui.boxHeight(24),
+          Ui.boxHeight(12),
           
           ...cl,
           Spacer(),
-          Ui.boxHeight(24),
           CurvedContainer(
             width: 200,
-            height: 100,
-            padding: EdgeInsets.all(24),
+            height: 48,
             child: AppButton(onPressed: (){
               Get.back();
             },text: "Back Home",),

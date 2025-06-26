@@ -23,4 +23,7 @@ class Assets {
   static const String s3 = "assets/images/inventory.png";
   static const String s4 = "assets/images/home.jpg";
   static const String s5 = "assets/images/home2.png";
+
+  static const String c1 = "assets/images/c1.png";
+  static const String c2 = "assets/images/c2.png";
 }

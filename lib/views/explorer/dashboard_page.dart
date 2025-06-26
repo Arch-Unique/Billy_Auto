@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:inventory/controllers/app_controller.dart';
 import 'package:inventory/models/inner_models/barrel.dart';
@@ -99,13 +100,30 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AppText.bold(
+                    AppText.medium(
                         "Welcome back, ${controller.appRepo.appService.currentUser.value.fullName} 👋",
-                        fontSize: 32,
+                        fontSize: 30,
                         fontFamily: Assets.appFontFamily2),
                     AppText.thin(
-                        "Here are the current status of your inventory and orders.")
+                        "Quickly access everything you need to keep your shop running smoothly:")
                   ],
+                ),
+                Ui.boxWidth(24),
+                Expanded(
+                    child: CustomTextField(
+                  "",
+                  TextEditingController(),
+                  hint: "Search",
+                  suffix: Iconsax.search_normal_1_outline,
+                  hasBottomPadding: false,
+                )),
+                Ui.boxWidth(24),
+                ProfileLogo(
+                  size: 16,
+                ),
+                Ui.boxWidth(8),
+                AppText.thin(
+                  controller.appRepo.appService.currentUser.value.username,
                 ),
               ],
             ),
@@ -126,6 +144,7 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
                   )
                 ],
               ),
+              Ui.boxHeight(24),
             if (Ui.width(context) >= 975)
               SizedBox(
                   height: Ui.height(context),
@@ -135,14 +154,45 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
                       children: [
                         Column(
                           children: [
-                            SizedBox(
+                            CurvedContainer(
                               height: Ui.height(context) / 2,
-                              width: (Ui.width(context) * 0.6) - 48,
+                              width: ((Ui.width(context)-200) * 0.6) - 48,
+                              border: Border.all(color: AppColors.borderColor),
+                              boxShadows: [
+                                BoxShadow(
+                                    offset: Offset(0, 1),
+                                    blurRadius: 2,
+                                    spreadRadius: 0,
+                                    color: AppColors.shadowColor
+                                        .withOpacity(0.06)),
+                                BoxShadow(
+                                    offset: Offset(0, 1),
+                                    blurRadius: 3,
+                                    spreadRadius: 0,
+                                    color:
+                                        AppColors.shadowColor.withOpacity(0.1)),
+                              ],
                               child: MyBarChart(),
                             ),
-                            SizedBox(
+                            Ui.boxHeight(24),
+                            CurvedContainer(
                               height: Ui.height(context) / 2,
-                              width: (Ui.width(context) * 0.6) - 48,
+                              width: ((Ui.width(context)-200) * 0.6) - 48,
+                              border: Border.all(color: AppColors.borderColor),
+                              boxShadows: [
+                                BoxShadow(
+                                    offset: Offset(0, 1),
+                                    blurRadius: 2,
+                                    spreadRadius: 0,
+                                    color: AppColors.shadowColor
+                                        .withOpacity(0.06)),
+                                BoxShadow(
+                                    offset: Offset(0, 1),
+                                    blurRadius: 3,
+                                    spreadRadius: 0,
+                                    color:
+                                        AppColors.shadowColor.withOpacity(0.1)),
+                              ],
                               child: ProfitChart(),
                             )
                           ],
@@ -164,29 +214,61 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
 
   Widget itemDataWidget(String title, String value, Color color,
       {String desc = ""}) {
-    final cc = CurvedContainer(
-      height: 64,
+    final cc = Container(
+      height: 100,
       padding: EdgeInsets.all(12),
-      color: color,
-      child: Row(
-        // crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      width: 180,
+      decoration: BoxDecoration(
+          border: Border.all(color: AppColors.borderColor),
+          borderRadius: BorderRadius.circular(8),
+          color: AppColors.white,
+          boxShadow: [
+            BoxShadow(
+                offset: Offset(0, 1),
+                blurRadius: 2,
+                spreadRadius: 0,
+                color: AppColors.shadowColor.withOpacity(0.06)),
+            BoxShadow(
+                offset: Offset(0, 1),
+                blurRadius: 3,
+                spreadRadius: 0,
+                color: AppColors.shadowColor.withOpacity(0.08)),
+          ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AppText.thin(title,
-              fontSize: 14, fontFamily: Assets.appFontFamily2, att: true),
-          // Ui.spacer(),
-          Ui.boxWidth(24),
-          AppText.bold(value, fontSize: 36, att: true),
+              fontSize: 12,
+              fontFamily: Assets.appFontFamily2,
+              att: true,
+              color: AppColors.lightTextColor),
+
+          AppText.bold(value, fontSize: 20, att: true),
+          Ui.boxHeight(8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              AppIcon(
+                Iconsax.arrow_down_outline,
+                size: 16,
+              ),
+              Ui.boxWidth(4),
+              AppText.thin("80%",
+                  fontSize: 12, att: true, color: AppColors.green),
+              AppText.thin("  vs last month",
+                  fontSize: 12, att: true, color: AppColors.lightTextColor),
+              Spacer(),
+              AppIcon(
+                Assets.c1,
+                size: 48,
+              )
+            ],
+          )
           // if (desc.isNotEmpty) AppText.thin(desc)
         ],
       ),
     );
-    // return Ui.width(Get.context!) < 975
-    //     ? cc
-    //     : Expanded(
-    //         child: cc,
-    //       );
+
     return cc;
   }
 
@@ -466,21 +548,20 @@ class _MyBarChartState extends State<MyBarChart> {
           tooltipBgColor: Colors.transparent,
           tooltipPadding: const EdgeInsets.only(bottom: 0),
           tooltipMargin: 4,
-          
           getTooltipItem: (
             BarChartGroupData group,
             int groupIndex,
             BarChartRodData rod,
             int rodIndex,
           ) {
-            if(groupIndex >= datePoints.length) return BarTooltipItem("",TextStyle());
+            if (groupIndex >= datePoints.length)
+              return BarTooltipItem("", TextStyle());
             return BarTooltipItem(
               rod.toY.round().toString(),
               const TextStyle(
-                color: AppColors.primaryColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 12
-              ),
+                  color: AppColors.primaryColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12),
             );
           },
         ),
@@ -509,8 +590,8 @@ class _MyBarChartState extends State<MyBarChart> {
     return SideTitleWidget(
       axisSide: AxisSide.bottom,
       space: 4,
-      angle: pi/4,
-      child: AppText.bold(text,fontSize: 12),
+      angle: pi / 4,
+      child: AppText.bold(text, fontSize: 12),
     );
   }
 
@@ -533,15 +614,23 @@ class _MyBarChartState extends State<MyBarChart> {
         ),
         topTitles: AxisTitles(
           drawBelowEverything: false,
-          axisNameSize: 100,
-          axisNameWidget: Padding(
-            padding: const EdgeInsets.all(12.0),
+          axisNameSize: 50,
+          axisNameWidget: CurvedContainer(
+            padding: const EdgeInsets.symmetric(vertical: 6,horizontal: 12),
+            color: Color(0xFFF8F8F8),
+            brad: BorderRadius.only(
+              topLeft: Radius.circular(8),
+              topRight: Radius.circular(8),
+              bottomLeft: Radius.circular(0),
+              bottomRight: Radius.circular(0),
+            ),
+
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ChartHeaderChooser("Service Order Metrics"),
+                AppText.thin("Service Order Metrics",color: AppColors.lightTextColor),
                 Container(
-                  width: 150,
+                  width: 100,
                   child: CustomTextField.dropdown(["Month", "Day", "Year"],
                       ["Month", "Day", "Year"], filterTec, "",
                       initOption: currentFilter, onChanged: (value) {
@@ -588,7 +677,8 @@ class _MyBarChartState extends State<MyBarChart> {
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                 ),
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(8),topRight: Radius.circular(8)),
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(8), topRight: Radius.circular(8)),
                 width: 12)
           ],
           showingTooltipIndicators: [0],
@@ -781,22 +871,43 @@ class _ProfitChartState extends State<ProfitChart> {
           topTitles: AxisTitles(
             sideTitles: SideTitles(showTitles: false),
             drawBelowEverything: true,
-            axisNameSize: 100,
-            axisNameWidget: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ChartHeaderChooser("Finance Metrics"),
+            axisNameSize: 50,
+          axisNameWidget: CurvedContainer(
+            padding: const EdgeInsets.symmetric(vertical: 6,horizontal: 12),
+            color: Color(0xFFF8F8F8),
+            brad: BorderRadius.only(
+              topLeft: Radius.circular(8),
+              topRight: Radius.circular(8),
+              bottomLeft: Radius.circular(0),
+              bottomRight: Radius.circular(0),
+            ),
+
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                AppText.thin("Finance Metrics",color: AppColors.lightTextColor),
                   Row(
                     children: [
                       Container(
                         width: 150,
                         margin: const EdgeInsets.only(right: 8),
                         child: CustomTextField.dropdown(
-                            (Get.find<AppController>().appRepo.appService.currentUser.value.isAdmin) ? ["Sales", "Profit", "Expenses"] : ["Sales"],
-                            (Get.find<AppController>().appRepo.appService.currentUser.value.isAdmin) ? ["Sales", "Profit", "Expenses"] : ["Sales"],
-                            
+                            (Get.find<AppController>()
+                                    .appRepo
+                                    .appService
+                                    .currentUser
+                                    .value
+                                    .isAdmin)
+                                ? ["Sales", "Profit", "Expenses"]
+                                : ["Sales"],
+                            (Get.find<AppController>()
+                                    .appRepo
+                                    .appService
+                                    .currentUser
+                                    .value
+                                    .isAdmin)
+                                ? ["Sales", "Profit", "Expenses"]
+                                : ["Sales"],
                             profitTypeTec,
                             "",
                             initOption: profitType, onChanged: (value) {
@@ -843,8 +954,8 @@ class _ProfitChartState extends State<ProfitChart> {
                 String text;
                 switch (currentFilter) {
                   case "Month":
-                    text = DateFormat("MM/yyyy")
-                        .format(datePoints[value.toInt()]);
+                    text =
+                        DateFormat("MM/yyyy").format(datePoints[value.toInt()]);
                     break;
                   case "Day":
                     text =
@@ -860,7 +971,7 @@ class _ProfitChartState extends State<ProfitChart> {
                 return SideTitleWidget(
                   axisSide: meta.axisSide,
                   space: 8,
-                  angle:-56,
+                  angle: -56,
                   child: AppText.bold(text, fontSize: 12),
                 );
               },
@@ -911,7 +1022,7 @@ class _ProfitChartState extends State<ProfitChart> {
             dotData: FlDotData(
               show: true,
               getDotPainter: (spot, percent, barData, index) {
-                if(index >= datePoints.length) return FlDotCirclePainter();
+                if (index >= datePoints.length) return FlDotCirclePainter();
                 final lp = getProfitForDate(datePoints[index]) < profitMax;
                 return FlDotCirclePainter(
                   radius: 4,
@@ -942,7 +1053,6 @@ class _ProfitChartState extends State<ProfitChart> {
           touchTooltipData: LineTouchTooltipData(
             tooltipBgColor: Colors.blueGrey,
             tooltipRoundedRadius: 8,
-            
             getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
               return touchedBarSpots.map((barSpot) {
                 final date = datePoints[barSpot.x.toInt()];
@@ -973,7 +1083,6 @@ class _ProfitChartState extends State<ProfitChart> {
             },
           ),
           handleBuiltInTouches: true,
-          
         ),
       ),
     );
