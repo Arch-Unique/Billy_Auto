@@ -12,7 +12,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:inventory/models/inner_models/expenses.dart';
 import 'package:inventory/tools/colors.dart';
+import 'package:inventory/tools/extensions.dart';
 import 'package:inventory/views/checklist/shared2.dart';
 import 'package:multi_dropdown/multi_dropdown.dart';
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
@@ -22,6 +24,7 @@ import '../tools/assets.dart';
 import '../tools/enums.dart';
 import '../tools/service.dart';
 import '../tools/validators.dart';
+import 'explorer/admin_page.dart';
 
 class CurvedContainer extends StatefulWidget {
   final Widget? child;
@@ -694,44 +697,54 @@ abstract class Ui {
 
   static showInfo(String message) {
     Get.closeAllSnackbars();
-    Get.showSnackbar(GetSnackBar(
-      messageText: AppText.thin(message,
-          fontSize: 14, color: Colors.white, alignment: TextAlign.center),
-      boxShadows: [
-        BoxShadow(offset: Offset(0, -4), blurRadius: 40, color: Colors.white)
-      ],
-      backgroundColor: Colors.green,
-      borderRadius: 16,
-      forwardAnimationCurve: Curves.elasticInOut,
-      snackPosition: SnackPosition.TOP,
-      maxWidth: 700,
-      animationDuration: Duration(milliseconds: 1500),
-      duration: Duration(seconds: 3),
-      padding: EdgeInsets.all(24),
-      isDismissible: true,
-      margin: EdgeInsets.only(left: 24, right: 24, top: 24),
-    ));
+    Get.snackbar("Info", message,
+        maxWidth: 700,
+        borderRadius: 0,
+        leftBarIndicatorColor: AppColors.green,
+        margin: EdgeInsets.only(left: 24, right: 24, top: 24));
+    // Get.showSnackbar(GetSnackBar(
+    //   messageText: AppText.thin(message,
+    //       fontSize: 14, color: Colors.white, alignment: TextAlign.center),
+    //   boxShadows: [
+    //     BoxShadow(offset: Offset(0, -4), blurRadius: 40, color: Colors.white)
+    //   ],
+    //   backgroundColor: Colors.green,
+    //   borderRadius: 16,
+    //   forwardAnimationCurve: Curves.elasticInOut,
+    //   snackPosition: SnackPosition.TOP,
+    //   maxWidth: 700,
+    //   animationDuration: Duration(milliseconds: 1500),
+    //   duration: Duration(seconds: 3),
+    //   padding: EdgeInsets.all(24),
+    //   isDismissible: true,
+    //   margin: EdgeInsets.only(left: 24, right: 24, top: 24),
+    // ));
   }
 
   static showError(String message) {
     Get.closeAllSnackbars();
-    Get.showSnackbar(GetSnackBar(
-      snackPosition: SnackPosition.TOP,
-      messageText: AppText.thin(message, fontSize: 14, color: Colors.white),
-      boxShadows: [
-        BoxShadow(offset: Offset(0, -4), blurRadius: 40, color: Colors.white)
-      ],
-      shouldIconPulse: true,
-      maxWidth: 700,
-      icon: AppIcon(
-        Icons.dangerous_outlined,
-        color: Colors.white,
-      ),
-      backgroundColor: Colors.red,
-      borderRadius: 16,
-      duration: Duration(seconds: 3),
-      margin: EdgeInsets.only(left: 24, right: 24, top: 24),
-    ));
+    Get.snackbar("Error", message,
+        maxWidth: 700,
+        borderRadius: 0,
+        leftBarIndicatorColor: AppColors.primaryColor,
+        margin: EdgeInsets.only(left: 24, right: 24, top: 24));
+    // Get.showSnackbar(GetSnackBar(
+    //   snackPosition: SnackPosition.TOP,
+    //   messageText: AppText.thin(message, fontSize: 14, color: Colors.white),
+    //   boxShadows: [
+    //     BoxShadow(offset: Offset(0, -4), blurRadius: 40, color: Colors.white)
+    //   ],
+    //   shouldIconPulse: true,
+    //   maxWidth: 700,
+    //   icon: AppIcon(
+    //     Icons.dangerous_outlined,
+    //     color: Colors.white,
+    //   ),
+    //   backgroundColor: Colors.red,
+    //   borderRadius: 16,
+    //   duration: Duration(seconds: 3),
+    //   margin: EdgeInsets.only(left: 24, right: 24, top: 24),
+    // ));
   }
 
   static showBottomSheet(String title, String message, Widget backWidget,
@@ -1330,7 +1343,7 @@ class MultiSelectDropdownState extends State<MultiSelectDropdown> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (widget.label.isNotEmpty) AppText.thin(widget.label),
-              if (widget.label.isNotEmpty) const SizedBox(height: 8),
+              if (widget.label.isNotEmpty) Ui.boxHeight(8),
               CurvedContainer(
                 color: AppColors.primaryColorLight,
                 padding: EdgeInsets.symmetric(horizontal: 16),
@@ -1388,7 +1401,7 @@ class MultiSelectDropdownState extends State<MultiSelectDropdown> {
                   },
                 ),
               ),
-              if (widget.label.isNotEmpty) const SizedBox(height: 32),
+              if (widget.label.isNotEmpty) Ui.boxHeight(32),
             ],
           ),
         );
@@ -1448,7 +1461,7 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
                     ),
                   ],
                 ),
-                if (widget.title.isNotEmpty) const SizedBox(height: 32),
+                if (widget.title.isNotEmpty) Ui.boxHeight(32),
               ],
             ),
           );
@@ -1465,9 +1478,9 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (widget.title.isNotEmpty) AppText.thin(widget.title),
-              if (widget.title.isNotEmpty) const SizedBox(height: 8),
+              if (widget.title.isNotEmpty) Ui.boxHeight(8),
               md,
-              if (widget.title.isNotEmpty) const SizedBox(height: 32),
+              if (widget.title.isNotEmpty) Ui.boxHeight(32),
             ],
           ),
         );
@@ -1491,7 +1504,6 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
       selectedBackgroundColor: AppColors.primaryColor,
       textColor: AppColors.textColor,
       selectedTextColor: AppColors.white,
-    
     );
     final fdec = FieldDecoration(
         hintText: widget.title,
@@ -1500,7 +1512,7 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
           size: 16,
           color: AppColors.primaryColor,
         ),
-        hintStyle: TextStyle(fontSize: 16,color: AppColors.textColor),
+        hintStyle: TextStyle(fontSize: 16, color: AppColors.textColor),
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 0),
         border: OutlineInputBorder(
             borderSide: BorderSide(color: AppColors.borderColor),
@@ -1512,7 +1524,7 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
           .toList(),
       searchEnabled: true,
       chipDecoration: ChipDecoration(
-        labelStyle: TextStyle(fontSize: 16,color: AppColors.textColor),
+        labelStyle: TextStyle(fontSize: 16, color: AppColors.textColor),
       ),
       controller: mdcont,
       enabled: widget.isEnable,
@@ -1521,7 +1533,6 @@ class _CustomMultiDropdownState extends State<CustomMultiDropdown> {
       dropdownItemDecoration: ddec,
       dropdownDecoration: DropdownDecoration(marginTop: 48),
       fieldDecoration: fdec,
-      
       onSelectionChange: (selectedItems) {
         if (selectedItems.isEmpty) {
           widget.controller.text = "";
@@ -2420,6 +2431,313 @@ class _YearPickerDialogState extends State<_YearPickerDialog> {
           child: Text('OK'),
         ),
       ],
+    );
+  }
+}
+
+class ProfitMarkupCard extends StatelessWidget {
+  const ProfitMarkupCard(this.title, this.currentn, this.targetn, {super.key});
+  final String title;
+  final num currentn, targetn;
+
+  @override
+  Widget build(BuildContext context) {
+    final current = currentn.toCurrency();
+    final target = targetn.toCurrency();
+    final double percentage = (currentn / targetn) * 100;
+    // Color cp = Color.lerp(AppColors.primaryColor, AppColors.green,
+    //     (currentn / targetn).toDouble())!;
+    return InkWell(
+      onTap: () {
+        final controller = Get.find<AppController>();
+        controller.currentBaseModel.value = controller.appConstants.value;
+        Get.dialog(AppDialog(
+            title: AppDialogHeader("Edit Record"),
+            content: Obx(() {
+              return DynamicFormGenerator(
+                  model: controller.currentBaseModel.value,
+                  isNew: false,
+                  onSave: (v) async {
+                    await controller.editExisitingRecord(v);
+                  });
+            })));
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: const Border(
+            top: BorderSide(color: AppColors.borderColor, width: 4),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 32,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        width: 200,
+        child: Stack(
+          children: [
+            Positioned(
+              top: -50,
+              right: -50,
+              child: Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      Colors.white.withOpacity(0.1),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                title.toUpperCase(),
+                style: const TextStyle(
+                  color: Color(0xFF2c3e50),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
+              ),
+                  // Ui.boxHeight(20),
+                  AppText.bold(
+                    current,
+                    fontSize: 44,
+                  ),
+                  AppText.medium(
+                    'of $target target',
+                    color: AppColors.lightTextColor,
+                    fontSize: 16,
+                  ),
+                  Ui.boxHeight(16),
+                  _buildProgressBar(percentage),
+                  Ui.boxHeight(8),
+                  Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+              Text(
+                '${percentage.toStringAsFixed(0)}%',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF3498db),
+                  fontSize: 16,
+                ),
+              ),
+              Text(
+                percentage >= 50 ? 'ON TRACK' : 'BELOW TARGET',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: percentage >= 50
+                      ? const Color(0xFF27ae60)
+                      : const Color(0xFFe74c3c),
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
+              ),
+                            ],
+                          ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProgressBar(double percentage) {
+    return Container(
+      width: 152,
+      height: 8,
+      decoration: BoxDecoration(
+        color: const Color(0xFFecf0f1),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: FractionallySizedBox(
+        alignment: Alignment.centerLeft,
+        widthFactor: (percentage / 100).clamp(0, 1),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF3498db), Color(0xFF2980b9)],
+            ),
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class OrderMarkupCard extends StatelessWidget {
+  const OrderMarkupCard(this.title, this.target, this.current, this.period,
+      {super.key});
+  final String title;
+  final int current, target;
+  final String period;
+
+  @override
+  Widget build(BuildContext context) {
+    final double percentage = (current / target) * 100;
+    return _buildOrderCard(title, current, target, percentage, period);
+  }
+
+  Widget _buildOrderCard(
+      String title, int current, int target, double percentage, String period) {
+    return InkWell(
+      onTap: () {
+        final controller = Get.find<AppController>();
+        controller.currentBaseModel.value = controller.appConstants.value;
+        Get.dialog(AppDialog(
+            title: AppDialogHeader("Edit Record"),
+            content: Obx(() {
+              return DynamicFormGenerator(
+                  model: controller.currentBaseModel.value,
+                  isNew: false,
+                  onSave: (v) async {
+                    await controller.editExisitingRecord(v);
+                  });
+            })));
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: const Border(
+            top: BorderSide(color: AppColors.borderColor, width: 4),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 32,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        width: 200,
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    title.toUpperCase(),
+                    style: const TextStyle(
+                      color: Color(0xFF2c3e50),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFecf0f1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      period,
+                      style: const TextStyle(
+                        color: Color(0xFF7f8c8d),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+      
+              // Ui.boxHeight(20),
+              Row(
+                children: [
+                  AppText.bold(
+                    current.toString(),
+                    fontSize: 44,
+                    color: Color(0xFF2c3e50),
+                  ),
+                  Ui.boxWidth(8),
+                  AppText.thin(
+                    'of $target target',
+                    color: Color(0xFF7f8c8d),
+                    fontSize: 18,
+                  ),
+                ],
+              ),
+      
+              Ui.boxHeight(12),
+              _buildProgressBar(percentage),
+              Ui.boxHeight(8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${percentage.toStringAsFixed(0)}%',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF3498db),
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    percentage >= 50 ? 'ON TRACK' : 'BELOW TARGET',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: percentage >= 50
+                          ? const Color(0xFF27ae60)
+                          : const Color(0xFFe74c3c),
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProgressBar(double percentage) {
+    return Container(
+      width: 152,
+      height: 8,
+      decoration: BoxDecoration(
+        color: const Color(0xFFecf0f1),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: FractionallySizedBox(
+        alignment: Alignment.centerLeft,
+        widthFactor: (percentage / 100).clamp(0, 1),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF3498db), Color(0xFF2980b9)],
+            ),
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      ),
     );
   }
 }

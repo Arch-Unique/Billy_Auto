@@ -81,7 +81,7 @@ class _CustomTableState extends State<CustomTable> {
                   //     hasBottomPadding: false,
                   //   ),
                   // ),
-                  AppText.bold("All Records",fontSize: 14),
+                  AppText.bold("All Records", fontSize: 14),
                   Spacer(),
                   TableIconButton(
                     "Filter",
@@ -305,7 +305,7 @@ class TableIconButton extends StatelessWidget {
         color == AppColors.transparent ? AppColors.textColor : AppColors.white;
     return CurvedContainer(
       border: hasBorder ? Border.all(color: AppColors.borderColor) : null,
-      height: 40,
+      // height: 40,
       color: color,
       onPressed: onPressed,
       padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -937,7 +937,7 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
           titles,
           values,
           _controllers[fieldName]!,
-          "Select ${_formatFieldName(fieldName).replaceAll(" id", "")}",
+          "${_formatFieldName(fieldName).replaceAll(" id", "")}",
           useOld: false,
           useDrop2: true,
           isVertical: false,
@@ -1004,10 +1004,10 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
               titles,
               values,
               _controllers[fieldName]!,
-              "Select ${_formatFieldName(fieldName).replaceAll(" id", "")}",
+              "${_formatFieldName(fieldName).replaceAll(" id", "")}",
               useOld: false,
               useDrop2: true,
-          isVertical: false,
+              isVertical: false,
               initOption: value,
               onChanged: (_) {});
         });
@@ -1228,7 +1228,6 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
       return SingleChildScrollView(
         child: Column(
           children: [
-            
             if (!widget.isNew)
               CustomTextField2(_formatFieldName("id"),
                   TextEditingController(text: _formData['id'].toString()),
@@ -1378,7 +1377,9 @@ class _DynamicFormGeneratorState extends State<DynamicFormGenerator> {
         key: _formKey,
         child: Column(
           children: [
-            Divider(color: AppColors.borderColor,),
+            Divider(
+              color: AppColors.borderColor,
+            ),
             if (!widget.isNew)
               CustomTextField2(_formatFieldName("id"),
                   TextEditingController(text: _formData['id'].toString()),
@@ -1605,7 +1606,7 @@ class _MarkupTargetsPageState extends State<MarkupTargetsPage> {
           Ui.width(context) < 975 ? wideUi(context) : (Ui.width(context) - 280),
       height: Ui.width(context) < 975 ? null : double.maxFinite,
       color: AppColors.transparent,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: SingleChildScrollView(
           child: Column(
@@ -1676,34 +1677,17 @@ class _MarkupTargetsPageState extends State<MarkupTargetsPage> {
               ),
               Obx(() {
                 if (controller.allPendingMarkupProducts.isNotEmpty) {
-                  return Center(
-                    child: SizedBox(
-                        width: 240,
-                        child: AppButton(
-                          onPressed: () {
-                            Get.dialog(AppDialog(
-                              title: AppText.medium("Edit Record"),
-                              content: BulkMarkup(),
-                              width: Ui.width(context) * 1.5,
-                            ));
-                          },
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              AppIcon(
-                                Icons.info,
-                                color: AppColors.white,
-                              ),
-                              AppText.bold(
-                                  "   ${controller.allPendingMarkupProducts.length} ",
-                                  color: AppColors.white,
-                                  fontSize: 20),
-                              AppText.bold("Pending Markups",
-                                  color: AppColors.white, fontSize: 16),
-                            ],
-                          ),
-                        )),
+                  return TableIconButton(
+                    "${controller.allPendingMarkupProducts.length} Pending Markups",
+                    Icons.info,
+                    color: AppColors.primaryColor,
+                    onPressed: () {
+                      Get.dialog(AppDialog(
+                        title: AppText.medium("Edit Record"),
+                        content: BulkMarkup(),
+                        width: Ui.width(context) * 1.5,
+                      ));
+                    },
                   );
                 }
                 return SizedBox();
@@ -1715,136 +1699,90 @@ class _MarkupTargetsPageState extends State<MarkupTargetsPage> {
             if (curMonthDay.text == "Day" ||
                 curMonthDay.text == "None" ||
                 curMonthDay.text == "All")
-              itemDataWidget(
+              OrderMarkupCard(
                   "Daily Orders",
-                  controller.appConstants.value.dailyOrdersTarget,
-                  (controller.groupedOrdersByDay[dtrd] ?? 0).toDouble()),
+                  controller.appConstants.value.dailyOrdersTarget.toInt(),
+                  (controller.groupedOrdersByDay[dtrd] ?? 0).toDouble().toInt(),
+                  ""),
             // itemDataWidget("Weekly Orders", controller.appConstants.value.weeklyOrdersTarget, (controller.groupedOrdersByDay[dtrd] ?? 0).toDouble()),
             if (curMonthDay.text == "Month" ||
                 curMonthDay.text == "None" ||
                 curMonthDay.text == "All")
-              itemDataWidget(
+              OrderMarkupCard(
                   "Monthly Orders",
-                  controller.appConstants.value.monthlyOrdersTarget,
-                  (controller.groupedOrdersByMonth[dtrm] ?? 0).toDouble()),
+                  controller.appConstants.value.monthlyOrdersTarget.toInt(),
+                  (controller.groupedOrdersByMonth[dtrm] ?? 0)
+                      .toDouble()
+                      .toInt(),
+                  ""),
             if (curMonthDay.text == "Year" ||
                 curMonthDay.text == "None" ||
                 curMonthDay.text == "All")
-              itemDataWidget(
+              OrderMarkupCard(
                   "Yearly Orders",
-                  controller.appConstants.value.yearlyOrdersTarget,
-                  (controller.groupedOrdersByYear[dtry] ?? 0).toDouble()),
+                  controller.appConstants.value.yearlyOrdersTarget.toInt(),
+                  (controller.groupedOrdersByYear[dtry] ?? 0)
+                      .toDouble()
+                      .toInt(),
+                  ""),
           ]),
           Ui.boxHeight(12),
           SmartJustifyRow(runSpacing: 12, spacing: 12, children: [
             if (curMonthDay.text == "Day" ||
                 curMonthDay.text == "None" ||
                 curMonthDay.text == "All")
-              itemDataWidget(
-                  "Daily Profit",
-                  controller.appConstants.value.dailyProfitTarget,
-                  (controller.allDailyProfit
-                          .where((optv) =>
-                              optv.date.year == curDateTime.value.year &&
-                              optv.date.month == curDateTime.value.month &&
-                              optv.date.day == curDateTime.value.day)
-                          .firstOrNull
-                          ?.profit ??
-                      0),
-                  isCost: true),
+              ProfitMarkupCard(
+                "Daily Profit",
+                (controller.allDailyProfit
+                        .where((optv) =>
+                            optv.date.year == curDateTime.value.year &&
+                            optv.date.month == curDateTime.value.month &&
+                            optv.date.day == curDateTime.value.day)
+                        .firstOrNull
+                        ?.profit ??
+                    0),
+                controller.appConstants.value.dailyProfitTarget,
+              ),
+
             // itemDataWidget("Weekly Profit", controller.appConstants.value.weeklyProfitTarget, (controller.allDailyProfit.where((optv) => optv.date.year ==curDateTime.value.year && optv.date.month == curDateTime.value.month).firstOrNull?.profit ?? 0),isCost: true),
             if (curMonthDay.text == "Month" ||
                 curMonthDay.text == "None" ||
                 curMonthDay.text == "All")
-              itemDataWidget(
-                  "Monthly Profit",
-                  controller.appConstants.value.monthlyProfitTarget,
-                  (controller.allMonthlyProfit
-                          .where((optv) =>
-                              optv.date.year == curDateTime.value.year &&
-                              optv.date.month == curDateTime.value.month)
-                          .firstOrNull
-                          ?.profit ??
-                      0),
-                  isCost: true),
+              ProfitMarkupCard(
+                "Monthly Profit",
+                (controller.allMonthlyProfit
+                        .where((optv) =>
+                            optv.date.year == curDateTime.value.year &&
+                            optv.date.month == curDateTime.value.month)
+                        .firstOrNull
+                        ?.profit ??
+                    0),
+                controller.appConstants.value.monthlyProfitTarget,
+              ),
             if (curMonthDay.text == "Year" ||
                 curMonthDay.text == "None" ||
                 curMonthDay.text == "All")
-              itemDataWidget(
-                  "Yearly Profit",
-                  controller.appConstants.value.yearlyProfitTarget,
-                  (controller.allYearlyProfit
-                          .where((optv) =>
-                              optv.date.year == curDateTime.value.year)
-                          .firstOrNull
-                          ?.profit ??
-                      0),
-                  isCost: true)
+              ProfitMarkupCard(
+                "Yearly Profit",
+                (controller.allYearlyProfit
+                        .where(
+                            (optv) => optv.date.year == curDateTime.value.year)
+                        .firstOrNull
+                        ?.profit ??
+                    0),
+                controller.appConstants.value.yearlyProfitTarget,
+              )
           ]),
           Ui.boxHeight(12),
-          SmartJustifyRow(children: [
-            itemDataWidget("VAT (%)", controller.appConstants.value.vat,
-                controller.appConstants.value.vat,
-                isMarkup: true),
-          ]),
-          Ui.boxHeight(12),
+          // SmartJustifyRow(children: [
+          //   itemDataWidget("VAT (%)", controller.appConstants.value.vat,
+          //       controller.appConstants.value.vat,
+          //       isMarkup: true),
+          // ]),
+          // Ui.boxHeight(12),
         ],
       )),
     );
-  }
-
-  Widget itemDataWidget(String title, double targetValue, double value,
-      {bool isCost = false, isMarkup = false}) {
-    final cc = CurvedContainer(
-      height: isMarkup ? 100 : 108,
-      padding: EdgeInsets.all(12),
-      onPressed: () {
-        controller.currentBaseModel.value = controller.appConstants.value;
-        Get.dialog(AppDialog(
-            title: AppDialogHeader("Edit Record"),
-            content: Obx(() {
-              return DynamicFormGenerator(
-                  model: controller.currentBaseModel.value,
-                  isNew: false,
-                  onSave: (v) async {
-                    await controller.editExisitingRecord(v);
-                  });
-            })));
-      },
-      color: value >= targetValue || isMarkup
-          ? Colors.lightGreen[100]!.withOpacity(0.7)
-          : Colors.red[100]!.withOpacity(0.7),
-      child: Row(
-        // crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          AppText.thin(title,
-              fontSize: 16, fontFamily: Assets.appFontFamily2, att: true),
-          // Ui.spacer(),
-          Ui.boxWidth(24),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              AppText.bold(
-                  isMarkup
-                      ? "${value.toStringAsFixed(2)}%"
-                      : isCost
-                          ? "${value.toCurrency()}/${targetValue.toCurrency()}"
-                          : "${value.toInt()}/${targetValue.toInt()}",
-                  fontSize: 40,
-                  att: true),
-              if (!isMarkup)
-                AppText.thin(
-                    "${(value * 100 / targetValue).toStringAsFixed(2)}%")
-            ],
-          ),
-          // if (desc.isNotEmpty) AppText.thin(desc)
-        ],
-      ),
-    );
-    return cc;
   }
 }
 
@@ -1913,8 +1851,8 @@ class ReportsPage extends StatelessWidget {
         children: [
           Center(
             child: Container(
-              padding: EdgeInsets.all(24),
-              constraints: BoxConstraints(maxWidth: 850),
+              // padding: EdgeInsets.sy(24),
+              // constraints: BoxConstraints(maxWidth: 850),
               width: wideUi(context),
               child: Column(
                 children: [
@@ -1960,65 +1898,91 @@ class ReportsPage extends StatelessWidget {
                             reportDs.value.refreshDatasource();
                           }
                         }),
+                      ),
+                      Ui.boxWidth(24),
+                      Expanded(
+                        child: AppButton(
+                          onPressed: () async {
+                            if (mval.isEmpty) {
+                              return Ui.showError("Data cannot be empty");
+                            }
+                            Map<String, String> hds = {};
+                            for (var element in mval[0].keys) {
+                              hds[element] = element
+                                  .replaceAll("_", " ")
+                                  .toString()
+                                  .capitalize!;
+                            }
+
+                            final filePath = await generateExcelReport(
+                              reportTitle: allReports[rep.value - 1],
+                              data: mval,
+                              startDate: dtr.value.start,
+                              endDate: dtr.value.end,
+                              columnsToTotal: allReportsTotal[rep.value - 1],
+                              columnHeaders: hds,
+                            );
+                            if (filePath == null) {
+                              return Ui.showError("Failed to generate report");
+                            }
+                            return Ui.showInfo("Export saved to:\n$filePath");
+                          },
+                          text: "Export Report as Excel",
+                        ),
                       )
                     ],
-                  ),
-                  AppButton(
-                    onPressed: () async {
-                      if (mval.isEmpty) {
-                        return Ui.showError("Data cannot be empty");
-                      }
-                      Map<String, String> hds = {};
-                      for (var element in mval[0].keys) {
-                        hds[element] =
-                            element.replaceAll("_", " ").toString().capitalize!;
-                      }
-
-                      final filePath = await generateExcelReport(
-                        reportTitle: allReports[rep.value - 1],
-                        data: mval,
-                        startDate: dtr.value.start,
-                        endDate: dtr.value.end,
-                        columnsToTotal: allReportsTotal[rep.value - 1],
-                        columnHeaders: hds,
-                      );
-                      if (filePath == null) {
-                        return Ui.showError("Failed to generate report");
-                      }
-                      return Ui.showInfo("Export saved to:\n$filePath");
-                    },
-                    text: "Export Report as Excel",
                   ),
                 ],
               ),
             ),
           ),
           Ui.align(child: AppText.thin("Showing the last 100 records")),
+          Ui.boxHeight(16),
           Expanded(
-            child: Obx(() {
-              return AsyncPaginatedDataTable2(
-                minWidth: 800,
+            child: CurvedContainer(
+              border: Border.all(color: AppColors.borderColor),
+              boxShadows: [
+                BoxShadow(
+                    offset: Offset(0, 1),
+                    blurRadius: 2,
+                    spreadRadius: 0,
+                    color: AppColors.shadowColor.withOpacity(0.06)),
+                BoxShadow(
+                    offset: Offset(0, 1),
+                    blurRadius: 3,
+                    spreadRadius: 0,
+                    color: AppColors.shadowColor.withOpacity(0.1)),
+              ],
+              child: Obx(() {
+                return AsyncPaginatedDataTable2(
+                  minWidth: 800,
 
-                hidePaginator: true,
-                columnSpacing: 0,
-                showCheckboxColumn: false,
-                // autoRowsToHeight: true,
-                rowsPerPage: 100,
-                headingRowHeight: 32,
-                headingRowColor: MaterialStatePropertyAll<Color>(
-                    Colors.lightGreen[100]!.withOpacity(0.7)),
-                columns: headers.map((e) {
-                  final hd = e.replaceAll("_", " ").capitalize!;
-                  return DataColumn2(
-                      label: Center(
-                        child: AppText.bold(hd,
-                            fontSize: 12, fontFamily: Assets.appFontFamily2),
-                      ),
-                      size: ColumnSize.S);
-                }).toList(),
-                source: reportDs.value,
-              );
-            }),
+                  hidePaginator: true,
+                  columnSpacing: 0,
+                  showCheckboxColumn: false,
+                  // autoRowsToHeight: true,
+                  horizontalMargin: 0,
+                  wrapInCard: false,
+                  rowsPerPage: 100,
+                  headingRowHeight: 44,
+
+                  columns: headers.map((e) {
+                    final hd = e.replaceAll("_", " ").capitalize!;
+                    return DataColumn2(
+                        label: ColoredBox(
+                          color: AppColors.borderColor,
+                          child: Center(
+                            child: AppText.bold(hd,
+                                fontSize: 12,
+                                fontFamily: Assets.appFontFamily2),
+                          ),
+                        ),
+                        size: ColumnSize.S);
+                  }).toList(),
+                  source: reportDs.value,
+                );
+              }),
+            ),
           ),
         ],
       ),
@@ -2646,7 +2610,7 @@ class UserRolesList extends StatelessWidget {
           modelKeys.map((e) => e.toString()).toList(),
           modelKeys.map((e) => e.toString()).toList(),
           tec,
-          "Multi Select Models",
+          "Models",
         ),
         Row(
           children: [

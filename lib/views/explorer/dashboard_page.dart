@@ -245,7 +245,7 @@ class _ExpDashboardPageState extends State<ExpDashboardPage> {
             Ui.boxHeight(6),
             if (Ui.width(context) >= 975)
               SizedBox(
-                  height: Ui.height(context),
+                  height: Ui.height(context)/2,
                   child: Align(
                     alignment: Alignment.topCenter,
                     child: Row(

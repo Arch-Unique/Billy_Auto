@@ -170,35 +170,105 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                                   return ListView.builder(
                                     itemBuilder: (_, i) {
                                       final order = suggestions[i];
-                                      return Material(
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 12, horizontal: 24),
-                                          child: ListTile(
-                                            selectedTileColor:
-                                                order.isDispatched
-                                                    ? AppColors.green
-                                                        .withOpacity(0.2)
-                                                    : AppColors.primaryColor
-                                                        .withOpacity(0.2),
-                                            selected: true,
-                                            leading: AppIcon(
-                                              Icons.widgets_rounded,
-                                              color: AppColors.primaryColor,
-                                            ),
-                                            title: Row(
-                                              children: [
-                                                AppText.bold(order.title),
-                                                Ui.spacer(),
-                                                AppText.thin(order.createdAtRaw)
-                                              ],
-                                            ),
-                                            subtitle: AppText.thin(order.desc),
-                                            onTap: () {
-                                              Get.to(OrderSummary(order));
-                                            },
+                                      final cl = order.isDispatched
+                                          ? AppColors.green
+                                          : AppColors.orange;
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 12, horizontal: 24),
+                                        child: CurvedContainer(
+                                          border: Border.all(
+                                              color: AppColors.borderColor),
+                                          onPressed: () {
+                                            Get.to(OrderSummary(order));
+                                          },
+                                          boxShadows: [
+                                            BoxShadow(
+                                                offset: Offset(0, 1),
+                                                blurRadius: 2,
+                                                spreadRadius: 0,
+                                                color: AppColors.shadowColor
+                                                    .withOpacity(0.06)),
+                                            BoxShadow(
+                                                offset: Offset(0, 1),
+                                                blurRadius: 3,
+                                                spreadRadius: 0,
+                                                color: AppColors.shadowColor
+                                                    .withOpacity(0.1)),
+                                          ],
+                                          padding: EdgeInsets.all(16),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  AppText.bold(order.title),
+                                                  Ui.spacer(),
+                                                  AppText.thin(
+                                                      order.createdAtRaw)
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  AppText.thin(order.desc),
+                                                  Ui.spacer(),
+                                                  CurvedContainer(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            vertical: 4,
+                                                            horizontal: 8),
+                                                    color: cl.withOpacity(0.1),
+                                                    radius: 8,
+                                                    child: Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        AppIcon(
+                                                          Icons.circle,
+                                                          size: 8,
+                                                          color: cl,
+                                                        ),
+                                                        Ui.boxWidth(4),
+                                                        AppText.thin(
+                                                            order.isDispatched
+                                                                ? "Dispatched"
+                                                                : "In Progress",
+                                                            fontSize: 12,
+                                                            color: cl),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              )
+                                            ],
                                           ),
                                         ),
+                                        // ListTile(
+                                        //   selectedTileColor:
+                                        //       order.isDispatched
+                                        //           ? AppColors.green
+                                        //               .withOpacity(0.2)
+                                        //           : AppColors.primaryColor
+                                        //               .withOpacity(0.2),
+                                        //   selected: true,
+                                        //   leading: AppIcon(
+                                        //     Icons.widgets_rounded,
+                                        //     color: AppColors.primaryColor,
+                                        //   ),
+                                        //   title: Row(
+                                        //     children: [
+                                        //       AppText.bold(order.title),
+                                        //       Ui.spacer(),
+                                        //       AppText.thin(order.createdAtRaw)
+                                        //     ],
+                                        //   ),
+                                        //   subtitle: AppText.thin(order.desc),
+                                        //   onTap: () {
+                                        //     Get.to(OrderSummary(order));
+                                        //   },
+                                        // ),
                                       );
                                     },
                                     itemCount: suggestions.length,
